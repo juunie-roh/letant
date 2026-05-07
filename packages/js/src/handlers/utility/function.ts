@@ -1,18 +1,18 @@
-import TSParser from "tree-sitter";
+import Parser from "tree-sitter";
 
 type FunctionFields = {
   is_async: boolean;
-  params: TSParser.SyntaxNode | null;
-  body: TSParser.SyntaxNode;
+  params: Parser.SyntaxNode | null;
+  body: Parser.SyntaxNode;
 };
 
-const getFields = (n: TSParser.SyntaxNode): FunctionFields => ({
+const getFields = (n: Parser.SyntaxNode): FunctionFields => ({
   is_async: n.children.some((c) => c.type === "async"),
   params: n.childForFieldName("parameters"),
   body: n.childForFieldName("body")!,
 });
 
-const dispatcher: Record<string, (n: TSParser.SyntaxNode) => FunctionFields> = {
+const dispatcher: Record<string, (n: Parser.SyntaxNode) => FunctionFields> = {
   function_declaration: getFields,
   generator_function_declaration: getFields,
   function_expression: getFields,
@@ -27,7 +27,7 @@ const dispatcher: Record<string, (n: TSParser.SyntaxNode) => FunctionFields> = {
 };
 
 export default function getFunctionFields(
-  node: TSParser.SyntaxNode,
+  node: Parser.SyntaxNode,
 ): FunctionFields {
   return dispatcher[node.type]!(node);
 }
