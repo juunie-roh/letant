@@ -80,6 +80,10 @@ class Graph {
 
   /**
    * Adds a node to the graph.
+   *
+   * Deduplicates by `path`: when two nodes share the same path, a `scope` node
+   * replaces a non-`scope` node; otherwise the first-added node is kept.
+   *
    * @returns `this` for chaining.
    */
   addNode(node: N): this {
@@ -87,7 +91,8 @@ class Graph {
     const id = this._registry.encode(path);
     if (path.length === 1) this._root = id;
 
-    if (!this._nodes.has(id)) {
+    const existing = this._nodes.get(id);
+    if (!existing || (node.type === "scope" && existing.type !== "scope")) {
       this._nodes.set(id, {
         ...node,
         id,

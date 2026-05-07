@@ -134,7 +134,7 @@ class Plugin {
     // add root file node once
     result.nodes.push({
       path: [filePath] as NodePath,
-      kind: "file",
+      kind: "module",
       type: "scope",
       at: { name: filePath },
       blockStartIndex: 0,

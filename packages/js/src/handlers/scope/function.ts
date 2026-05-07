@@ -2,6 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
+import getFunctionFields from "../utility/function";
 import flatPattern from "../utility/pattern";
 
 const functionHandler: ConvertHandler<"function"> = (
@@ -12,8 +13,10 @@ const functionHandler: ConvertHandler<"function"> = (
   const result = createConvertResult<Node, Edge>();
 
   for (const c of captures) {
-    const { name, node, params, body, is_async } = c;
-    const path = createChildPath(parent, name.text);
+    const { is_async, params, body } = getFunctionFields(
+      c["definition.function"],
+    );
+    const path = createChildPath(parent, c.name.text);
 
     result.edges.push({
       from: parent,
@@ -25,43 +28,45 @@ const functionHandler: ConvertHandler<"function"> = (
       path,
       type: "scope",
       kind: "function",
-      at: getRange(node),
+      at: getRange(c.node),
       blockStartIndex: body.startIndex,
       props: { is_async: !!is_async },
     });
 
-    if (params.type === "identifier") {
-      const paramPath = createChildPath(path, params.text);
-      result.edges.push({
-        from: path,
-        to: paramPath,
-        kind: "defines",
-      });
+    if (params) {
+      if (params.type === "identifier") {
+        const paramPath = createChildPath(path, params.text);
+        result.edges.push({
+          from: path,
+          to: paramPath,
+          kind: "defines",
+        });
 
-      result.nodes.push({
-        path: paramPath,
-        type: "binding",
-        kind: "parameter",
-        at: getRange(params),
-      });
-    } else {
-      c.params.namedChildren.forEach((child) => {
-        flatPattern(child).forEach(({ name, node, has_default }) => {
-          const parameterPath = createChildPath(path, name);
-          result.edges.push({
-            from: path,
-            to: parameterPath,
-            kind: "defines",
-          });
-          result.nodes.push({
-            path: parameterPath,
-            type: "binding",
-            kind: "parameter",
-            at: getRange(node),
-            props: { has_default },
+        result.nodes.push({
+          path: paramPath,
+          type: "binding",
+          kind: "parameter",
+          at: getRange(params),
+        });
+      } else {
+        params.namedChildren.forEach((child) => {
+          flatPattern(child).forEach(({ name, node, has_default }) => {
+            const parameterPath = createChildPath(path, name);
+            result.edges.push({
+              from: path,
+              to: parameterPath,
+              kind: "defines",
+            });
+            result.nodes.push({
+              path: parameterPath,
+              type: "binding",
+              kind: "parameter",
+              at: getRange(node),
+              props: { has_default },
+            });
           });
         });
-      });
+      }
     }
 
     result.push(convert(capture(body), path));

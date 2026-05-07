@@ -1,6 +1,6 @@
 import { captureConfig } from "./capture";
 import { convertConfig } from "./convert";
-import flatExpression from "./handlers/utility/expression";
+import referenceHandler from "./handlers/utility/reference";
 import { language, query } from "./query";
 import type { Descriptor } from "./types";
 
@@ -9,9 +9,7 @@ export const descriptor: Descriptor = {
   query,
   captureConfig,
   convertConfig,
-  references(node) {
-    return node ? node.namedChildren.flatMap((c) => flatExpression(c)) : [];
-  },
+  references: referenceHandler,
 };
 
 export default descriptor;

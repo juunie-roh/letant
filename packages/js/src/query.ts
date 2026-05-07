@@ -5,10 +5,9 @@ import JavaScript from "tree-sitter-javascript";
 // anonymous
 import ifQueryString from "@/queries/anonymous/if.scm";
 import iifeAnonymousQueryString from "@/queries/anonymous/iife.scm";
+import whileQueryString from "@/queries/anonymous/while.scm";
 // binding
-import cjsBindingQueryString from "@/queries/binding/cjs.scm";
 import esmBindingQueryString from "@/queries/binding/esm.scm";
-import iifeBindingQueryString from "@/queries/binding/iife.scm";
 import memberQueryString from "@/queries/binding/member.scm";
 import variableQueryString from "@/queries/binding/variable.scm";
 // bypass
@@ -16,10 +15,13 @@ import exportBypassString from "@/queries/bypass/export.scm";
 // scope
 import classQueryString from "@/queries/scope/class.scm";
 import functionQueryString from "@/queries/scope/function.scm";
+import iifeScopeQueryString from "@/queries/scope/iife.scm";
 import methodQueryString from "@/queries/scope/method.scm";
+// utility
+import referenceQueryString from "@/queries/utility/reference.scm";
 
 // utility
-import { BypassQueryKey, QueryConfig } from "./types";
+import { BypassQueryKey, QueryConfig, UtilityQueryKey } from "./types";
 
 export const language = JavaScript as Parser.Language;
 
@@ -27,18 +29,23 @@ export const query = new QueryMap<keyof QueryConfig>(language)
   // anonymous
   .set("if", ifQueryString)
   .set("iife.anonymous", iifeAnonymousQueryString)
+  .set("while", whileQueryString)
   // binding
-  .set("cjs.binding", cjsBindingQueryString)
   .set("esm.binding", esmBindingQueryString)
-  .set("iife.binding", iifeBindingQueryString)
   .set("member", memberQueryString)
   .set("variable", variableQueryString)
   // scope
   .set("class", classQueryString)
   .set("function", functionQueryString)
+  .set("iife.scope", iifeScopeQueryString)
   .set("method", methodQueryString);
 
 export const bypass = new QueryMap<BypassQueryKey>(language).set(
   "export",
   exportBypassString,
+);
+
+export const utility = new QueryMap<UtilityQueryKey>(language).set(
+  "reference",
+  referenceQueryString,
 );
