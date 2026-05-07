@@ -38,14 +38,14 @@ const validLangShape = {
   nodeTypeInfo: [],
 } as unknown as import("tree-sitter").Language;
 
-function fakeQueryMap(): QueryMap<string> {
+function mockQueryMap(): QueryMap<string> {
   return new QueryMap<string>(validLangShape);
 }
 
-function fakeDescriptor() {
+function mockDescriptor() {
   return {
     language: validLangShape,
-    query: fakeQueryMap(),
+    query: mockQueryMap(),
     captureConfig: {},
     convertConfig: {},
     references: vi.fn(),
@@ -71,7 +71,7 @@ describe("Plugin.load()", () => {
     });
 
     it("uses m.default to resolve the descriptor", async () => {
-      const descriptor = fakeDescriptor();
+      const descriptor = mockDescriptor();
       vi.doMock("plugin-esm", () => ({ default: descriptor }));
       const result = await Plugin.load("plugin-esm");
       expect(result).toBe(descriptor);
@@ -81,7 +81,7 @@ describe("Plugin.load()", () => {
   describe("with a valid plugin", () => {
     it("returns a Plugin.Descriptor with the expected shape", async () => {
       vi.spyOn(Plugin, "load").mockResolvedValue(
-        fakeDescriptor() as Plugin.Descriptor,
+        mockDescriptor() as Plugin.Descriptor,
       );
 
       const descriptor = await Plugin.load(VALID_PLUGIN);
@@ -104,7 +104,7 @@ describe("Plugin", () => {
 
   beforeEach(async () => {
     vi.spyOn(Plugin, "load").mockResolvedValue(
-      fakeDescriptor() as Plugin.Descriptor,
+      mockDescriptor() as Plugin.Descriptor,
     );
     plugin = await Plugin.create(VALID_PLUGIN);
   });
@@ -145,7 +145,7 @@ describe("Plugin", () => {
 
   describe("references()", () => {
     it("delegates to _module.references", async () => {
-      const descriptor = fakeDescriptor();
+      const descriptor = mockDescriptor();
       vi.spyOn(Plugin, "load").mockResolvedValue(
         descriptor as Plugin.Descriptor,
       );
