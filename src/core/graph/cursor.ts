@@ -1,5 +1,4 @@
 import { defined } from "@/common/defined";
-import Logger from "@/common/logger";
 import type { NodeId, NodePath, Offset } from "@/models";
 
 import GraphError from "./error";
@@ -19,6 +18,10 @@ class GraphCursor {
 
   /**
    * Get graph cursor instance at given {@link Offset | offset}.
+   *
+   * @param graph A graph where to find cursor instance in.
+   * @param offset An offset to locate cursor within the given graph.
+   * @returns The innermost graph cursor containing the given offset.
    */
   static at(graph: Graph, offset: Offset): GraphCursor {
     let cursor = graph.walk();
@@ -28,10 +31,6 @@ class GraphCursor {
         .children()
         .find((cursor) => GraphCursor.contains(cursor, offset)))
     ) {
-      Logger.get().debug(
-        `Given offset: ${JSON.stringify(offset)}\n`,
-        `       Next: ${next.name} at ${JSON.stringify(next.node.at)}`,
-      );
       cursor = next;
     }
 
