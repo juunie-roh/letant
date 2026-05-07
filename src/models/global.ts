@@ -90,4 +90,7 @@ export type QueryConfig = Record<
   { required: string; optional: string }
 >;
 
+/**
+ * Byte index or {@link Parser.Point} that is compatible with {@link Parser.Range}.
+ */
 export type Offset = Parser.Point | number;
