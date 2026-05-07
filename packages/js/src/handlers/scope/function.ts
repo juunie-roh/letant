@@ -2,7 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import getFunctionFields from "../utility/definition.function";
+import getFunctionFields from "../utility/function";
 import flatPattern from "../utility/pattern";
 
 const functionHandler: ConvertHandler<"function"> = (
