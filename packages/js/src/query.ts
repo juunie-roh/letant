@@ -17,9 +17,11 @@ import classQueryString from "@/queries/scope/class.scm";
 import functionQueryString from "@/queries/scope/function.scm";
 import iifeScopeQueryString from "@/queries/scope/iife.scm";
 import methodQueryString from "@/queries/scope/method.scm";
+// utility
+import referenceQueryString from "@/queries/utility/reference.scm";
 
 // utility
-import { BypassQueryKey, QueryConfig } from "./types";
+import { BypassQueryKey, QueryConfig, UtilityQueryKey } from "./types";
 
 export const language = JavaScript as Parser.Language;
 
@@ -41,4 +43,9 @@ export const query = new QueryMap<keyof QueryConfig>(language)
 export const bypass = new QueryMap<BypassQueryKey>(language).set(
   "export",
   exportBypassString,
+);
+
+export const utility = new QueryMap<UtilityQueryKey>(language).set(
+  "reference",
+  referenceQueryString,
 );
