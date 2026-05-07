@@ -1,6 +1,5 @@
-import type Parser from "tree-sitter";
-
 import { defined } from "@/common/defined";
+import Logger from "@/common/logger";
 import type { NodeId, NodePath, Offset } from "@/models";
 
 import GraphError from "./error";
@@ -19,16 +18,50 @@ class GraphCursor {
   }
 
   /**
-   * Get graph cursor instance at given {@link Offset}.
+   * Get graph cursor instance at given {@link Offset | offset}.
    */
   static at(graph: Graph, offset: Offset): GraphCursor {
     let cursor = graph.walk();
     let next: GraphCursor | undefined;
-    while ((next = cursor.children().find(GraphCursor._contains(offset)))) {
+    while ((next = cursor.children().find(GraphCursor.contains(offset)))) {
+      Logger.get().debug(
+        `Given offset: ${JSON.stringify(offset)}\n`,
+        `       Next: ${next.name} at ${JSON.stringify(next.node.at)}`,
+      );
       cursor = next;
     }
 
     return cursor;
+  }
+
+  /**
+   * Build a predicate that tests whether a child cursor's range contains the given {@link Offset | offset}.
+   *
+   * @param offset An offset to test for containment.
+   * @returns A predicate function suitable for `Array.prototype.find` / `filter`.
+   */
+  static contains(offset: Offset) {
+    return (child: GraphCursor) => {
+      // if the node is an imported module:
+      if ("name" in child.node.at) return false;
+      // if the target is byte offset:
+      if (typeof offset === "number") {
+        const { startIndex, endIndex } = child.node.at;
+        return startIndex <= offset && endIndex >= offset;
+      }
+
+      const { startPosition, endPosition } = child.node.at;
+      const startsBeforeOrAt =
+        startPosition.row < offset.row ||
+        (startPosition.row === offset.row &&
+          startPosition.column <= offset.column);
+
+      const endsAfterOrAt =
+        endPosition.row > offset.row ||
+        (endPosition.row === offset.row && endPosition.column >= offset.column);
+
+      return startsBeforeOrAt && endsAfterOrAt;
+    };
   }
 
   get node(): Graph.Node {
@@ -96,28 +129,6 @@ class GraphCursor {
     );
     // scope is the parent — you probably want the child
     return scope?.children().find((child) => child.name === symbol);
-  }
-
-  private static _contains(target: Parser.Point | number) {
-    return (child: GraphCursor) => {
-      if ("name" in child.node.at) return false;
-      if (typeof target === "number") {
-        const { startIndex, endIndex } = child.node.at;
-        return startIndex <= target && endIndex >= target;
-      }
-
-      const { startPosition, endPosition } = child.node.at;
-      const startsBeforeOrAt =
-        startPosition.row < target.row ||
-        (startPosition.row === target.row &&
-          startPosition.column <= target.column);
-
-      const endsAfterOrAt =
-        endPosition.row > target.row ||
-        (endPosition.row === target.row && endPosition.column >= target.column);
-
-      return startsBeforeOrAt && endsAfterOrAt;
-    };
   }
 }
 
