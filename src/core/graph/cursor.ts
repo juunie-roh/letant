@@ -19,7 +19,7 @@ class GraphCursor {
   /**
    * Get graph cursor instance at given {@link Offset | offset}.
    *
-   * @param graph A graph where to find cursor instance in.
+   * @param graph A graph where to find cursor instance.
    * @param offset An offset to locate cursor within the given graph.
    * @returns The innermost graph cursor containing the given offset.
    */
