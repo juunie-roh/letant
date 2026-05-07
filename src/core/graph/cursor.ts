@@ -23,7 +23,11 @@ class GraphCursor {
   static at(graph: Graph, offset: Offset): GraphCursor {
     let cursor = graph.walk();
     let next: GraphCursor | undefined;
-    while ((next = cursor.children().find(GraphCursor.contains(offset)))) {
+    while (
+      (next = cursor
+        .children()
+        .find((cursor) => GraphCursor.contains(cursor, offset)))
+    ) {
       Logger.get().debug(
         `Given offset: ${JSON.stringify(offset)}\n`,
         `       Next: ${next.name} at ${JSON.stringify(next.node.at)}`,
@@ -35,33 +39,32 @@ class GraphCursor {
   }
 
   /**
-   * Build a predicate that tests whether a child cursor's range contains the given {@link Offset | offset}.
+   * Test whether a {@link GraphCursor | cursor}'s range contains the given {@link Offset | offset}.
    *
+   * @param cursor A cursor to test for containment.
    * @param offset An offset to test for containment.
-   * @returns A predicate function suitable for `Array.prototype.find` / `filter`.
+   * @returns Whether the cursor contains the given offset.
    */
-  static contains(offset: Offset) {
-    return (child: GraphCursor) => {
-      // if the node is an imported module:
-      if ("name" in child.node.at) return false;
-      // if the target is byte offset:
-      if (typeof offset === "number") {
-        const { startIndex, endIndex } = child.node.at;
-        return startIndex <= offset && endIndex >= offset;
-      }
+  static contains(cursor: GraphCursor, offset: Offset): boolean {
+    // if the cursor is at an imported module:
+    if ("name" in cursor.node.at) return false;
+    // if the offset is byte offset:
+    if (typeof offset === "number") {
+      const { startIndex, endIndex } = cursor.node.at;
+      return startIndex <= offset && endIndex >= offset;
+    }
 
-      const { startPosition, endPosition } = child.node.at;
-      const startsBeforeOrAt =
-        startPosition.row < offset.row ||
-        (startPosition.row === offset.row &&
-          startPosition.column <= offset.column);
+    const { startPosition, endPosition } = cursor.node.at;
+    const startsBeforeOrAt =
+      startPosition.row < offset.row ||
+      (startPosition.row === offset.row &&
+        startPosition.column <= offset.column);
 
-      const endsAfterOrAt =
-        endPosition.row > offset.row ||
-        (endPosition.row === offset.row && endPosition.column >= offset.column);
+    const endsAfterOrAt =
+      endPosition.row > offset.row ||
+      (endPosition.row === offset.row && endPosition.column >= offset.column);
 
-      return startsBeforeOrAt && endsAfterOrAt;
-    };
+    return startsBeforeOrAt && endsAfterOrAt;
   }
 
   get node(): Graph.Node {
