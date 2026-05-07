@@ -45,6 +45,8 @@ export type QueryConfig = {
 
 export type BypassQueryKey = "export";
 
+export type UtilityQueryKey = "reference";
+
 export type NodeKind =
   | letant.Head<keyof QueryConfig>
   | "parameter"
