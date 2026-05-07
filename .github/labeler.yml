@@ -40,3 +40,7 @@ core:
 "plugin: javascript":
   - changed-files:
     - any-glob-to-any-file: "packages/js/**"
+      
+"plugin: python":
+  - changed-files:
+    - any-glob-to-any-file: "packages/python/**"
