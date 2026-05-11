@@ -1,48 +1,20 @@
 import { defined } from "@/common/defined";
-import type {
-  Edge as E,
-  Node as N,
-  NodeId,
-  NodePath,
-  UnionOmit,
-} from "@/models";
+import type { Edge, Node, NodePath } from "@/models";
 
 import GraphCursor from "./cursor";
 import GraphError from "./error";
-import HashRegistry from "./hash-registry";
-
-declare namespace Graph {
-  type GraphNode = UnionOmit<N, "path"> & {
-    id: NodeId;
-    /**
-     * Last element of path segments representing the node.
-     */
-    name: string;
-  };
-
-  type GraphEdge = Pick<E, "kind"> & {
-    from: NodeId;
-    to: NodeId;
-  };
-
-  export { GraphEdge as Edge, GraphNode as Node };
-}
 
 class Graph {
-  private _registry: HashRegistry;
-  private _nodes: Map<NodeId, Graph.Node>;
-  private _edges: Map<NodeId, Map<NodeId, Set<Graph.Edge["kind"]>>>;
-  private _edgeProps: Map<
-    NodeId,
-    Map<NodeId, Map<Graph.Edge["kind"], E["props"]>>
-  >;
-  private _root: NodeId | undefined;
+  private readonly _root: string;
+  private _nodes: Map<string, Node>;
+  private _edges: Map<string, Map<string, Set<string>>>;
+  private _edgeProps: Map<string, Map<string, Map<string, Edge["props"]>>>;
 
-  constructor(nodes: N[], edges: E[]) {
-    this._registry = new HashRegistry();
+  constructor(nodes: Node[], edges: Edge[], filePath: string) {
     this._nodes = new Map();
     this._edges = new Map();
     this._edgeProps = new Map();
+    this._root = filePath;
 
     for (const node of nodes) {
       this.addNode(node);
@@ -53,29 +25,15 @@ class Graph {
     }
   }
 
-  /**
-   * @returns All the nodes added to the graph.
-   */
-  get nodes(): ReadonlyMap<NodeId, Graph.Node> {
-    return this._nodes;
+  get root(): string {
+    return this._root;
   }
+
   /**
-   * @returns The adjacency list of the graph.
+   * @returns The node at the given path, or `undefined` if not found.
    */
-  get edges(): ReadonlyMap<
-    NodeId,
-    ReadonlyMap<NodeId, ReadonlySet<Graph.Edge["kind"]>>
-  > {
-    return this._edges;
-  }
-  /**
-   * @returns Language specific metadata for each edges.
-   */
-  get edgeProps(): ReadonlyMap<
-    NodeId,
-    ReadonlyMap<NodeId, ReadonlyMap<Graph.Edge["kind"], E["props"]>>
-  > {
-    return this._edgeProps;
+  getNode(path: NodePath): Node | undefined {
+    return this._nodes.get(Graph.encode(path));
   }
 
   /**
@@ -86,18 +44,13 @@ class Graph {
    *
    * @returns `this` for chaining.
    */
-  addNode(node: N): this {
+  addNode(node: Node): this {
     const { path } = node;
-    const id = this._registry.encode(path);
-    if (path.length === 1) this._root = id;
+    const id = Graph.encode(path);
 
     const existing = this._nodes.get(id);
     if (!existing || (node.type === "scope" && existing.type !== "scope")) {
-      this._nodes.set(id, {
-        ...node,
-        id,
-        name: path[path.length - 1],
-      });
+      this._nodes.set(id, node);
     }
 
     if (!this._edges.has(id)) {
@@ -111,48 +64,54 @@ class Graph {
    * Removes a node from the graph.
    * @returns `this` for chaining.
    */
-  removeNode(node: N): this {
-    const id = this._registry.encode(node.path);
+  removeNode(node: Node): this {
+    const id = Graph.encode(node.path);
     this._edges.delete(id);
     this._nodes.delete(id);
-    this._edgeProps.delete(id); // outgoing props
+    this._edgeProps.delete(id);
 
     for (const adjacentNodes of this._edges.values()) {
       adjacentNodes.delete(id);
     }
 
     for (const toMap of this._edgeProps.values()) {
-      toMap.delete(id); // incoming props
+      toMap.delete(id);
     }
 
     return this;
   }
 
   /**
-   * @returns The adjacent node ids set for the given node id.
+   * @returns The adjacent nodes and their edge kinds for the given path.
    */
   adjacent(
-    id: NodeId,
-  ): ReadonlyMap<NodeId, ReadonlySet<Graph.Edge["kind"]>> | undefined {
-    return this._edges.get(id);
+    path: NodePath,
+  ): ReadonlyMap<NodePath, ReadonlySet<string>> | undefined {
+    const inner = this._edges.get(Graph.encode(path));
+    if (!inner) return undefined;
+
+    const result = new Map<NodePath, Set<string>>();
+    for (const [toKey, kinds] of inner) {
+      result.set(Graph.decode(toKey), kinds);
+    }
+    return result;
   }
 
-  getEdgeProperties(
-    from: NodeId,
-    to: NodeId,
-    kind: Graph.Edge["kind"],
-  ): E["props"] {
-    return this._edgeProps.get(from)?.get(to)?.get(kind);
+  getEdgeProperties(from: NodePath, to: NodePath, kind: string): Edge["props"] {
+    return this._edgeProps
+      .get(Graph.encode(from))
+      ?.get(Graph.encode(to))
+      ?.get(kind);
   }
 
   /**
    * Adds an edge to the graph.
    * @returns `this` for chaining.
    */
-  addEdge(edge: E): this {
-    const { from, to, kind, props } = edge;
-    const fromId = this._registry.encode(from);
-    const toId = this._registry.encode(to);
+  addEdge(edge: Edge): this {
+    const fromId = Graph.encode(edge.from);
+    const toId = Graph.encode(edge.to);
+    const { kind, props } = edge;
 
     if (!this._edges.has(fromId)) {
       throw new GraphError(
@@ -186,47 +145,42 @@ class Graph {
   /**
    * @returns `this` for chaining.
    */
-  removeEdge(from: NodeId, to: NodeId, kind: Graph.Edge["kind"]): this {
-    this._edges.get(from)?.get(to)?.delete(kind);
-    this._edgeProps.get(from)?.get(to)?.delete(kind);
+  removeEdge(from: NodePath, to: NodePath, kind: string): this {
+    const fromId = Graph.encode(from);
+    const toId = Graph.encode(to);
+    this._edges.get(fromId)?.get(toId)?.delete(kind);
+    this._edgeProps.get(fromId)?.get(toId)?.delete(kind);
     return this;
   }
 
   /**
-   * @returns True if there is an edge from the `source` node to `target` node.
+   * @returns True if there is an edge from `from` to `to` with the given kind.
    */
-  hasEdge(from: NodeId, to: NodeId, kind: Graph.Edge["kind"]): boolean {
-    return this._edges.get(from)?.get(to)?.has(kind) ?? false;
+  hasEdge(from: NodePath, to: NodePath, kind: string): boolean {
+    return (
+      this._edges.get(Graph.encode(from))?.get(Graph.encode(to))?.has(kind) ??
+      false
+    );
   }
 
   /**
-   * @param id - The `NodeId` of the node whose parent to look up.
-   * @returns The {@link NodeId | `NodeId`} of the direct parent node in the scope chain, or `undefined` if the node has no registered parent.
+   * @returns The path of the direct parent, or `undefined` for the root.
    */
-  parent(id: NodeId): NodeId | undefined {
-    const path = this._registry.decode(id).slice(0, -1) as NodePath;
-
-    if (!this._registry.has(path)) return;
-
-    return this._registry.encode(path);
+  parent(path: NodePath): NodePath | undefined {
+    if (path.length <= 1) return undefined;
+    const parentKey = Graph.encode(path.slice(0, -1) as NodePath);
+    return this._edges.has(parentKey) ? Graph.decode(parentKey) : undefined;
   }
 
   /**
    * @returns 0-based depth relative to root module.
    */
-  depth(id: NodeId): number {
-    return this._registry.decode(id).length - 1;
-  }
-
-  /**
-   * @returns Path segments matching {@link NodeId | id} registered in the graph.
-   */
-  path(id: NodeId): NodePath {
-    return this._registry.decode(id);
+  depth(path: NodePath): number {
+    return path.length - 1;
   }
 
   walk(): GraphCursor {
-    return new GraphCursor(this, this._root!);
+    return new GraphCursor(this, Graph.decode(this._root!));
   }
 
   /**
@@ -236,7 +190,6 @@ class Graph {
     const nodes = Array.from(
       this._nodes.values().map((n) => ({
         ...n,
-        path: this.path(n.id),
         at:
           "name" in n.at
             ? {
@@ -251,15 +204,13 @@ class Graph {
     );
     const edges = [];
 
-    for (const [from, toMap] of this._edges) {
-      for (const [to, kinds] of toMap) {
+    for (const [fromKey, toMap] of this._edges) {
+      for (const [toKey, kinds] of toMap) {
         for (const kind of kinds) {
-          const props = this._edgeProps.get(from)?.get(to)?.get(kind);
+          const props = this._edgeProps.get(fromKey)?.get(toKey)?.get(kind);
           edges.push({
-            from,
-            fromPath: this._registry.decode(from),
-            to,
-            toPath: this._registry.decode(to),
+            from: Graph.decode(fromKey),
+            to: Graph.decode(toKey),
             kind,
             ...(props !== undefined && { props }),
           });
@@ -276,20 +227,15 @@ class Graph {
     this._edgeProps.clear();
   }
 
-  private _adjacent(
-    id: NodeId,
-  ): Map<NodeId, Set<Graph.Edge["kind"]>> | undefined {
+  private _adjacent(id: string): Map<string, Set<string>> | undefined {
     return this._edges.get(id);
   }
 
-  /**
-   * Sets the properties of the given edge.
-   */
   private _setEdgeProperties(
-    from: NodeId,
-    to: NodeId,
-    kind: Graph.Edge["kind"],
-    props: E["props"],
+    from: string,
+    to: string,
+    kind: string,
+    props: Edge["props"],
   ): this {
     if (!this._edgeProps.has(from)) {
       this._edgeProps.set(from, new Map());
@@ -310,6 +256,18 @@ class Graph {
 
     fromMap.get(to)!.set(kind, props);
     return this;
+  }
+}
+
+namespace Graph {
+  const DELIMITER = "\0";
+
+  export function encode(path: NodePath): string {
+    return path.join(DELIMITER);
+  }
+
+  export function decode(key: string): NodePath {
+    return key.split(DELIMITER) as NodePath;
   }
 }
 

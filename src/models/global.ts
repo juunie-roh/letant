@@ -2,9 +2,7 @@ import type Parser from "tree-sitter";
 
 import type { Branded } from "./utility";
 
-export type NodeId = Branded<string, "NODE_ID">;
 export type NodePath = Branded<string[], "NODE_PATH">;
-export type NodePathString = Branded<string, "NODE_PATH_STRING">;
 
 export type NodeSource = { name: string; external?: boolean };
 

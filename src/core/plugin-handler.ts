@@ -75,7 +75,7 @@ class PluginHandler {
     const { nodes, edges } = plugin.extract(filePath, tree.rootNode);
 
     return {
-      graph: new Graph(nodes, edges),
+      graph: new Graph(nodes, edges, filePath),
       tree,
       ext,
     };
