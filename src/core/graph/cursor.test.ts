@@ -122,6 +122,12 @@ describe("Graph Cursor", () => {
     });
   });
 
+  describe("root", () => {
+    it("returns root file path for the current node", () => {
+      expect(cursor.root).toEqual("file.ts");
+    });
+  });
+
   describe("parent()", () => {
     it("returns undefined for root node", () => {
       expect(cursor.parent()).toBeUndefined();
