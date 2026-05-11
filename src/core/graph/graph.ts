@@ -46,15 +46,15 @@ class Graph {
    */
   addNode(node: Node): this {
     const { path } = node;
-    const id = Graph.encode(path);
+    const key = Graph.encode(path);
 
-    const existing = this._nodes.get(id);
+    const existing = this._nodes.get(key);
     if (!existing || (node.type === "scope" && existing.type !== "scope")) {
-      this._nodes.set(id, node);
+      this._nodes.set(key, node);
     }
 
-    if (!this._edges.has(id)) {
-      this._edges.set(id, new Map());
+    if (!this._edges.has(key)) {
+      this._edges.set(key, new Map());
     }
 
     return this;
@@ -65,17 +65,17 @@ class Graph {
    * @returns `this` for chaining.
    */
   removeNode(node: Node): this {
-    const id = Graph.encode(node.path);
-    this._edges.delete(id);
-    this._nodes.delete(id);
-    this._edgeProps.delete(id);
+    const key = Graph.encode(node.path);
+    this._edges.delete(key);
+    this._nodes.delete(key);
+    this._edgeProps.delete(key);
 
     for (const adjacentNodes of this._edges.values()) {
-      adjacentNodes.delete(id);
+      adjacentNodes.delete(key);
     }
 
     for (const toMap of this._edgeProps.values()) {
-      toMap.delete(id);
+      toMap.delete(key);
     }
 
     return this;
@@ -109,34 +109,34 @@ class Graph {
    * @returns `this` for chaining.
    */
   addEdge(edge: Edge): this {
-    const fromId = Graph.encode(edge.from);
-    const toId = Graph.encode(edge.to);
+    const fromKey = Graph.encode(edge.from);
+    const toKey = Graph.encode(edge.to);
     const { kind, props } = edge;
 
-    if (!this._edges.has(fromId)) {
+    if (!this._edges.has(fromKey)) {
       throw new GraphError(
         "GRAPH_NO_NODE",
-        `There is no node with id: ${fromId}`,
+        `There is no node with key: ${fromKey}`,
       );
     }
 
-    const adjacentNodes = this._adjacent(fromId);
+    const adjacentNodes = this._adjacent(fromKey);
     defined(
       adjacentNodes,
       new GraphError(
         "GRAPH_UNDEFINED_INSTANCE",
-        `No adjacency map found for node: ${fromId}`,
+        `No adjacency map found for node: ${fromKey}`,
       ),
     );
 
-    if (!adjacentNodes.has(toId)) {
-      adjacentNodes.set(toId, new Set());
+    if (!adjacentNodes.has(toKey)) {
+      adjacentNodes.set(toKey, new Set());
     }
 
-    adjacentNodes.get(toId)!.add(kind);
+    adjacentNodes.get(toKey)!.add(kind);
 
     if (props !== undefined) {
-      this._setEdgeProperties(fromId, toId, kind, props);
+      this._setEdgeProperties(fromKey, toKey, kind, props);
     }
 
     return this;
@@ -146,10 +146,10 @@ class Graph {
    * @returns `this` for chaining.
    */
   removeEdge(from: NodePath, to: NodePath, kind: string): this {
-    const fromId = Graph.encode(from);
-    const toId = Graph.encode(to);
-    this._edges.get(fromId)?.get(toId)?.delete(kind);
-    this._edgeProps.get(fromId)?.get(toId)?.delete(kind);
+    const fromKey = Graph.encode(from);
+    const toKey = Graph.encode(to);
+    this._edges.get(fromKey)?.get(toKey)?.delete(kind);
+    this._edgeProps.get(fromKey)?.get(toKey)?.delete(kind);
     return this;
   }
 
@@ -227,8 +227,8 @@ class Graph {
     this._edgeProps.clear();
   }
 
-  private _adjacent(id: string): Map<string, Set<string>> | undefined {
-    return this._edges.get(id);
+  private _adjacent(key: string): Map<string, Set<string>> | undefined {
+    return this._edges.get(key);
   }
 
   private _setEdgeProperties(
