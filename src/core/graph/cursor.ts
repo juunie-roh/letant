@@ -1,5 +1,5 @@
 import { defined } from "@/common/defined";
-import type { NodeId, NodePath, Offset } from "@/models";
+import type { Node, NodePath, Offset } from "@/models";
 
 import GraphError from "./error";
 import type Graph from "./graph";
@@ -9,11 +9,11 @@ import type Graph from "./graph";
  */
 class GraphCursor {
   private readonly _graph: Graph;
-  private readonly _id: NodeId;
+  private readonly _path: NodePath;
 
-  constructor(graph: Graph, id: NodeId) {
+  constructor(graph: Graph, path: NodePath) {
     this._graph = graph;
-    this._id = id;
+    this._path = path;
   }
 
   /**
@@ -66,41 +66,45 @@ class GraphCursor {
     return startsBeforeOrAt && endsAfterOrAt;
   }
 
-  get node(): Graph.Node {
-    const n = this._graph.nodes.get(this._id);
+  get node(): Node {
+    const n = this._graph.getNode(this._path);
     defined(
       n,
       new GraphError(
         "GRAPH_NO_NODE",
-        `Failed to get node with id: ${this._id}`,
+        `Failed to get node at path: ${this._path}`,
       ),
     );
     return n;
   }
 
   get path(): NodePath {
-    return this._graph.path(this._id);
+    return this._path;
   }
 
   get depth(): number {
-    return this._graph.depth(this._id);
+    return this._graph.depth(this._path);
   }
 
   get name(): string {
-    return this.node.name;
+    return this._path[this._path.length - 1];
+  }
+
+  get root(): string {
+    return this._graph.root;
   }
 
   parent(): GraphCursor | undefined {
-    const parentId = this._graph.parent(this._id);
-    return parentId ? new GraphCursor(this._graph, parentId) : undefined;
+    const parentPath = this._graph.parent(this._path);
+    return parentPath ? new GraphCursor(this._graph, parentPath) : undefined;
   }
 
   children(edgeKind?: string): GraphCursor[] {
     const cursors: GraphCursor[] = [];
 
-    this._graph.adjacent(this._id)?.forEach((kinds, id) => {
+    this._graph.adjacent(this._path)?.forEach((kinds, childPath) => {
       if (edgeKind && !kinds.has(edgeKind)) return;
-      cursors.push(new GraphCursor(this._graph, id));
+      cursors.push(new GraphCursor(this._graph, childPath));
     });
 
     return cursors;

@@ -82,23 +82,30 @@ class Workspace {
 
     const references = new Set(this._handler.references(node, ext));
 
+    const resolved = new Map<string, GraphCursor | undefined>();
+
     for (const ref of references) {
-      const resolved = cursor.resolve(ref);
-      if (!resolved) {
-        console.log(`Unresolved reference: ${ref}`);
-      } else {
-        console.log(
-          `(${resolved.node.kind})`,
-          `${resolved.name}`,
-          "at:",
-          "name" in resolved.node.at
-            ? `${resolved.node.at.name}(${resolved.node.at.external ?? false})`
-            : resolved.node.at.startPosition.row,
-        );
-      }
+      resolved.set(ref, cursor.resolve(ref));
     }
 
     console.log("total:", references.size, "references");
+
+    resolved.forEach((cursor, name) => {
+      if (!cursor) {
+        console.log(`(unresolved) ${name}`);
+        return;
+      }
+
+      console.log(
+        `(${cursor.node.kind})`,
+        `${cursor.name}`,
+        "name" in cursor.node.at
+          ? `(${cursor.node.at.name}), external: ${!!cursor.node.at.external}`
+          : `(${cursor.root}:${cursor.node.at.startPosition.row + 1}:${cursor.node.at.startPosition.column + 1})`,
+      );
+    });
+
+    return resolved;
   }
 
   @Trace({

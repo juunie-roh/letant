@@ -7,7 +7,6 @@ import { createCommand } from "@commander-js/extra-typings";
 
 import { LetantError } from "@/common/error";
 import { loadConfig } from "@/config";
-import { printDotGraph } from "@/dot";
 import { Workspace } from "@/workspace";
 
 import pkg from "../../package.json";
@@ -29,7 +28,6 @@ const program = createCommand()
   .addOption(configOption)
   .addOption(encodingOption)
   .addOption(verboseOption)
-  .option("-d, --dot [name]", "print the graph in DOT format", false)
   .option("-o, --output <output>", "output file name", false)
   .option("--trace", "temp", false)
   .option("-r <row>", "temp")
@@ -50,10 +48,6 @@ const program = createCommand()
         row: Number(options.r) ?? 0,
         column: Number(options.c) ?? 0,
       });
-    }
-
-    if (options.dot) {
-      data = printDotGraph(data, { indent: 2 });
     }
 
     if (options.output) {
