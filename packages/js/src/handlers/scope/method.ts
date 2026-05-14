@@ -2,7 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import { getDecorators } from "../utility/decorator";
+import { getDecorators, isAsync, isStatic } from "../utility/field";
 import flatPattern from "../utility/pattern";
 
 const methodHandler: ConvertHandler<"method"> = (
@@ -12,13 +12,8 @@ const methodHandler: ConvertHandler<"method"> = (
 ) => {
   const result = createConvertResult<Node, Edge>();
   for (const c of captures) {
-    const { name, node, body, is_async, is_static, params, decorator } = c;
+    const { name, node, body, params } = c;
     const path = createChildPath(parent, name.text);
-    const decorators = decorator
-      ? getDecorators(decorator)
-          .map((d) => d.text)
-          .join(", ")
-      : undefined;
 
     result.edges.push({
       from: parent,
@@ -32,9 +27,9 @@ const methodHandler: ConvertHandler<"method"> = (
       at: getRange(node),
       blockStartIndex: body.startIndex,
       props: {
-        is_static: !!is_static,
-        is_async: !!is_async,
-        decorator: decorators,
+        is_static: isStatic(node),
+        is_async: isAsync(node),
+        decorator: getDecorators(node),
       },
     });
 

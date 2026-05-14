@@ -1,7 +1,6 @@
 ;; methods
 ;; @decorator @is_static @is_async @name@params @body
 (method_definition
-  decorator: (decorator)* @decorator
   "static"? @is_static
   "async"? @is_async
   name: (_) @name
@@ -9,9 +8,12 @@
   body: (statement_block) @body
 ) @node
 
+;; (method_definition
+;;   "static"? @is_static
+;;   name: (_) @name) @definition.method
+
 ;; arrow function / function expression methods
 (field_definition
-  decorator: (decorator)* @decorator
   "static"? @is_static
   property: (_) @name
   value: [
