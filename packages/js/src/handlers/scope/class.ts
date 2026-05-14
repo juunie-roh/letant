@@ -2,7 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import { getDecorators } from "../utility/decorator";
+import { getDecorators } from "../utility/field";
 
 const classHandler: ConvertHandler<"class"> = (
   captures,
@@ -12,13 +12,8 @@ const classHandler: ConvertHandler<"class"> = (
   const result = createConvertResult<Node, Edge>();
 
   for (const c of captures) {
-    const { name, node, decorator, extends: ext, body } = c;
+    const { name, node, extends: ext, body } = c;
     const path = createChildPath(parent, name.text);
-    const decorators = decorator
-      ? getDecorators(decorator)
-          .map((d) => d.text)
-          .join(", ")
-      : undefined;
 
     result.edges.push({
       from: parent,
@@ -33,7 +28,7 @@ const classHandler: ConvertHandler<"class"> = (
       blockStartIndex: body.startIndex,
       props: {
         extends: ext?.text,
-        decorator: decorators,
+        decorator: getDecorators(node),
       },
     });
 

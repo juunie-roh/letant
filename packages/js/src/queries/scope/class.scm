@@ -1,7 +1,6 @@
 ;; class declaration
 ;; @decorator class @name extends @extends @body
 (class_declaration
-  decorator: (decorator)* @decorator
   name: (identifier) @name
   (class_heritage (expression) @extends)?
   body: (class_body) @body
@@ -13,7 +12,6 @@
     name: (identifier) @name
     value: (class 
       (class_heritage (expression) @extends)?
-      decorator: (decorator)* @decorator
       body: (class_body) @body
       ))
 ) @node
@@ -24,7 +22,6 @@
     name: (identifier) @name
     value: (class 
       (class_heritage (expression) @extends)?
-      decorator: (decorator)* @decorator
       body: (class_body) @body
       ))
 ) @node

@@ -27,14 +27,6 @@ export function getParameters(node: SyntaxNode): SyntaxNode | null {
   );
 }
 
-/**
- * @param node A {@link SyntaxNode | node} to look up the child for.
- * @returns Children nodes under `decorator` field in the strict order following the source.
- */
-export function getDecorators(node: SyntaxNode): SyntaxNode[] {
-  return node.childrenForFieldName("decorator");
-}
-
 export function getLeft(node: SyntaxNode): SyntaxNode {
   return node.childForFieldName("left")!;
 }
@@ -46,8 +38,16 @@ export function getValue(node: SyntaxNode): SyntaxNode {
 /**
  * Get child node for the body field. The target node **MUST** have `body` field.
  * @param node A {@link SyntaxNode | node} having `body` field to get the child for.
- * @returns The child node classified by `body` field.
+ * @returns The child node for `body` field.
  */
 export function getBody(node: SyntaxNode): SyntaxNode {
   return node.childForFieldName("body")!;
+}
+
+/**
+ * @param node A {@link SyntaxNode | node} to look up the child for.
+ * @returns Text array of children nodes under `decorator` field in the strict order following the source.
+ */
+export function getDecorators(node: SyntaxNode): string[] | undefined {
+  return node.childrenForFieldName("decorator")?.map((child) => child.text);
 }
