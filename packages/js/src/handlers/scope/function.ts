@@ -2,7 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import getFunctionFields from "../utility/function";
+import getFunctionField from "../utility/function";
 import flatPattern from "../utility/pattern";
 
 const functionHandler: ConvertHandler<"function"> = (
@@ -13,7 +13,7 @@ const functionHandler: ConvertHandler<"function"> = (
   const result = createConvertResult<Node, Edge>();
 
   for (const c of captures) {
-    const { is_async, params, body } = getFunctionFields(
+    const { is_async, params, body } = getFunctionField(
       c["definition.function"],
     );
     const path = createChildPath(parent, c.name.text);

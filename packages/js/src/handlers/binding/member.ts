@@ -2,18 +2,13 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import { getDecorators } from "../utility/decorator";
+import { getDecorators, isStatic } from "../utility/field";
 
 const memberHandler: ConvertHandler<"member"> = (captures, parent) => {
   const result = createConvertResult<Node, Edge>();
   for (const c of captures) {
-    const { name, node, is_static, decorator } = c;
+    const { name, node } = c;
     const path = createChildPath(parent, name.text);
-    const decorators = decorator
-      ? getDecorators(decorator)
-          .map((d) => d.text)
-          .join(", ")
-      : undefined;
 
     result.edges.push({
       from: parent,
@@ -26,8 +21,8 @@ const memberHandler: ConvertHandler<"member"> = (captures, parent) => {
       kind: "member",
       at: getRange(node),
       props: {
-        is_static: is_static ? true : false,
-        decorator: decorators,
+        is_static: isStatic(node),
+        decorator: getDecorators(node),
       },
     });
   }
