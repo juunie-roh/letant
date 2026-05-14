@@ -1,6 +1,7 @@
 import type { SyntaxNode } from "tree-sitter";
 
-import { getBody, getParameters, isAsync } from "./field";
+import { getBody, getParameters } from "./node";
+import { isAsync } from "./property";
 
 type FunctionField = {
   is_async: boolean;
