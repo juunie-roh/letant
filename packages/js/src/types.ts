@@ -13,13 +13,13 @@ export type QueryConfig = {
     required: "node" | "body";
     optional: never;
   };
-  "esm.binding": {
+  "module.binding": {
     required: "source" | "name";
     optional: "alias";
   };
   member: {
     required: "node" | "name";
-    optional: "is_static" | "decorator";
+    optional: never;
   };
   variable: {
     required: "node" | "name" | "kind";
@@ -27,7 +27,7 @@ export type QueryConfig = {
   };
   class: {
     required: "node" | "name" | "body";
-    optional: "extends" | "decorator";
+    optional: "extends";
   };
   function: {
     required: "node" | "name" | "definition.function";
@@ -39,7 +39,7 @@ export type QueryConfig = {
   };
   method: {
     required: "node" | "name" | "body" | "params";
-    optional: "is_static" | "is_async" | "decorator";
+    optional: never;
   };
 };
 

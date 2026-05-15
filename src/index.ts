@@ -1,7 +1,6 @@
 export type * from "./config";
 export type * from "./core";
 export * from "./core";
-export type * from "./dot";
 export type * from "./models";
 export type * from "./utils";
 export type * from "./utils/query";

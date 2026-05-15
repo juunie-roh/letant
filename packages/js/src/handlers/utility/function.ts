@@ -1,33 +1,33 @@
-import Parser from "tree-sitter";
+import type { SyntaxNode } from "tree-sitter";
 
-type FunctionFields = {
+import { getBody, getParameters } from "./node";
+import { isAsync } from "./property";
+
+type FunctionField = {
   is_async: boolean;
-  params: Parser.SyntaxNode | null;
-  body: Parser.SyntaxNode;
+  params: SyntaxNode | null;
+  body: SyntaxNode;
 };
 
-const getFields = (n: Parser.SyntaxNode): FunctionFields => ({
-  is_async: n.children.some((c) => c.type === "async"),
-  params: n.childForFieldName("parameters"),
-  body: n.childForFieldName("body")!,
-});
+function getField(n: SyntaxNode): FunctionField {
+  return {
+    is_async: isAsync(n),
+    params: getParameters(n),
+    body: getBody(n),
+  };
+}
 
-const dispatcher: Record<string, (n: Parser.SyntaxNode) => FunctionFields> = {
-  function_declaration: getFields,
-  generator_function_declaration: getFields,
-  function_expression: getFields,
-  generator_function: getFields,
-  arrow_function: (n) => ({
-    is_async: n.children.some((c) => c.type === "async"),
-    params:
-      n.childForFieldName("parameters") ?? n.childForFieldName("parameter"),
-    body: n.childForFieldName("body")!,
-  }),
-  parenthesized_expression: (n) => getFunctionFields(n.firstNamedChild!),
-};
-
-export default function getFunctionFields(
-  node: Parser.SyntaxNode,
-): FunctionFields {
-  return dispatcher[node.type]!(node);
+export default function getFunctionField(node: SyntaxNode): FunctionField {
+  if (node.type === "parenthesized_expression") {
+    return getFunctionField(node.firstNamedChild!);
+  }
+  /*
+   * Other types:
+   * - function_declaration
+   * - generator_function_declaration
+   * - function_expression
+   * - generator_function
+   * - arrow_function
+   */
+  return getField(node);
 }

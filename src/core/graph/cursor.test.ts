@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { NodeId, NodePath } from "@/models";
+import { NodePath } from "@/models";
 
 import GraphCursor from "./cursor";
 import Graph from "./graph";
@@ -81,22 +81,23 @@ const graph = new Graph(
       kind: "imports",
     },
   ],
+  "file.ts",
 );
 
 describe("Graph Cursor", () => {
   let cursor: GraphCursor;
 
   beforeEach(() => {
-    cursor = new GraphCursor(graph, graph.nodes.values().toArray()[0].id);
+    cursor = graph.walk();
   });
 
   describe("node", () => {
-    it("returns the node at the current id", () => {
+    it("returns the node at the current path", () => {
       expect(cursor.node?.kind).toBe("module");
     });
 
-    it("throws for an unknown id", () => {
-      const unknown = new GraphCursor(graph, "ghost" as unknown as NodeId);
+    it("throws for an unknown path", () => {
+      const unknown = new GraphCursor(graph, ["ghost"] as NodePath);
       expect(() => unknown.node).toThrow();
     });
   });
@@ -118,6 +119,12 @@ describe("Graph Cursor", () => {
 
       const [bar] = foo.children();
       expect(bar.depth).toBe(2);
+    });
+  });
+
+  describe("root", () => {
+    it("returns root file path for the current node", () => {
+      expect(cursor.root).toEqual("file.ts");
     });
   });
 

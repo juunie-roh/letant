@@ -10,7 +10,10 @@ function isExternal(specifier: string): boolean {
   );
 }
 
-const esmBindingHandler: ConvertHandler<"esm.binding"> = (captures, parent) => {
+const moduleBindingHandler: ConvertHandler<"module.binding"> = (
+  captures,
+  parent,
+) => {
   const result = createConvertResult<Node, Edge>();
 
   for (const c of captures) {
@@ -23,7 +26,7 @@ const esmBindingHandler: ConvertHandler<"esm.binding"> = (captures, parent) => {
     result.nodes.push({
       path,
       type: "binding",
-      kind: "esm",
+      kind: "module",
       at: { name: source.text, external: isExternal(source.text) },
       props: alias ? { alias_of: name!.text } : undefined,
     });
@@ -32,4 +35,4 @@ const esmBindingHandler: ConvertHandler<"esm.binding"> = (captures, parent) => {
   return result;
 };
 
-export default esmBindingHandler;
+export default moduleBindingHandler;

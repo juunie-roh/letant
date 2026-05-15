@@ -2,8 +2,17 @@ packages:
   - "."
   - "packages/*"
 
+overrides:
+  tmp: ">=0.2.4"
+  lodash: ">=4.17.24"
+  minimatch: ">=10.2.1"
+
+allowBuilds:
+  esbuild: true
+  tree-sitter: true
+  tree-sitter-javascript: true
+
 onlyBuiltDependencies:
-  - esbuild
   - tree-sitter
   - tree-sitter-javascript
-  - tree-sitter-typescript
+  - tree-sitter-python
