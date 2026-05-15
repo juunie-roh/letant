@@ -1,6 +1,6 @@
 {
   "name": "letant",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "AST based language-agnostic structural code comprehension",
   "keywords": [],
   "author": "Juun",
