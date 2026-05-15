@@ -1,4 +1,4 @@
-# @juun-roh/letant-js
+# @letant/js
 
 ## 0.0.2
 

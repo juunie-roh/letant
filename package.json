@@ -83,7 +83,7 @@
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
-    "js": "pnpm --filter @juun-roh/letant-js"
+    "js": "pnpm --filter @letant/js"
   },
   "dependencies": {
     "commander": "^14.0.3",
@@ -99,7 +99,7 @@
     "@commitlint/format": "^21.0.1",
     "@commitlint/types": "^21.0.1",
     "@eslint/js": "^10.0.1",
-    "@juun-roh/letant-js": "workspace:*",
+    "@letant/js": "workspace:*",
     "@types/node": "^25.7.0",
     "@typescript-eslint/eslint-plugin": "^8.59.3",
     "@typescript-eslint/parser": "^8.59.3",
@@ -123,7 +123,7 @@
       "path": "@commitlint/cz-commitlint"
     }
   },
-  "packageManager": "pnpm@11.1.1",
+  "packageManager": "pnpm@11.1.2",
   "pnpm": {
     "overrides": {
       "tmp": ">=0.2.4",

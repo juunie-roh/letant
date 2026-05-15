@@ -30,7 +30,7 @@ vi.mock("tree-sitter", () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-const VALID_PLUGIN = "@juun-roh/letant-js";
+const VALID_PLUGIN = "@letant/js";
 
 const validLangShape = {
   name: "typescript",

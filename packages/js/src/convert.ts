@@ -1,8 +1,8 @@
 import ifHandler from "./handlers/anonymous/if";
 import iifeHandler from "./handlers/anonymous/iife";
 import whileHandler from "./handlers/anonymous/while";
-import esmBindingHandler from "./handlers/binding/esm";
 import memberHandler from "./handlers/binding/member";
+import moduleBindingHandler from "./handlers/binding/module";
 import variableHandler from "./handlers/binding/variable";
 import classHandler from "./handlers/scope/class";
 import functionHandler from "./handlers/scope/function";
@@ -16,7 +16,7 @@ export const convertConfig: ConvertConfig = {
   "iife.anonymous": iifeHandler,
   while: whileHandler,
   // binding
-  "esm.binding": esmBindingHandler,
+  "module.binding": moduleBindingHandler,
   member: memberHandler,
   variable: variableHandler,
   // scope
