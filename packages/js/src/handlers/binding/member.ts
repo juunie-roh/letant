@@ -2,7 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import { getDecorators, isStatic } from "../utility/field";
+import { getDecorators, isStatic } from "../utility/property";
 
 const memberHandler: ConvertHandler<"member"> = (captures, parent) => {
   const result = createConvertResult<Node, Edge>();

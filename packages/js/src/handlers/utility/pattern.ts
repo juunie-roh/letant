@@ -1,6 +1,6 @@
 import type Parser from "tree-sitter";
 
-import { getLeft, getValue } from "./field";
+import { getLeft, getValue } from "./node";
 
 type FlattenedPattern = {
   name: string;

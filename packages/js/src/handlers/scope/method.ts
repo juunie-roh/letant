@@ -2,8 +2,8 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import { getDecorators, isAsync, isStatic } from "../utility/field";
 import flatPattern from "../utility/pattern";
+import { getDecorators, isAsync, isStatic } from "../utility/property";
 
 const methodHandler: ConvertHandler<"method"> = (
   captures,

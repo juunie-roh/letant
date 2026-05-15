@@ -13,7 +13,7 @@ export type QueryConfig = {
     required: "node" | "body";
     optional: never;
   };
-  "esm.binding": {
+  "module.binding": {
     required: "source" | "name";
     optional: "alias";
   };

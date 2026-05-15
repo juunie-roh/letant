@@ -2,7 +2,7 @@ import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-import { getDecorators } from "../utility/field";
+import { getDecorators } from "../utility/property";
 
 const classHandler: ConvertHandler<"class"> = (
   captures,
