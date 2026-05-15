@@ -1,5 +1,5 @@
 {
-  "name": "@juun-roh/letant-python",
+  "name": "@letant/python",
   "version": "0.0.2",
   "description": "Python plugin for letant",
   "main": "dist/index.js",
