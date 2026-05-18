@@ -2,14 +2,6 @@ import { createChildPath, createConvertResult } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
-function isExternal(specifier: string): boolean {
-  return (
-    !specifier.startsWith(".") &&
-    !specifier.startsWith("/") &&
-    !specifier.startsWith("@/") // your path alias
-  );
-}
-
 const moduleBindingHandler: ConvertHandler<"module.binding"> = (
   captures,
   parent,
@@ -27,7 +19,7 @@ const moduleBindingHandler: ConvertHandler<"module.binding"> = (
       path,
       type: "binding",
       kind: "module",
-      at: { name: source.text, external: isExternal(source.text) },
+      at: { name: source.text },
       props: alias ? { alias_of: name!.text } : undefined,
     });
   }
