@@ -11,8 +11,13 @@ allowBuilds:
   esbuild: true
   tree-sitter: true
   tree-sitter-javascript: true
+  tree-sitter-typescript: true
 
 onlyBuiltDependencies:
   - tree-sitter
   - tree-sitter-javascript
   - tree-sitter-python
+  - tree-sitter-typescript
+
+patchedDependencies:
+  '@arethetypeswrong/core@0.18.2': patches/@arethetypeswrong__core@0.18.2.patch

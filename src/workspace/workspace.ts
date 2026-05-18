@@ -100,7 +100,7 @@ class Workspace {
         `(${cursor.node.kind})`,
         `${cursor.name}`,
         "name" in cursor.node.at
-          ? `(${cursor.node.at.name}), external: ${!!cursor.node.at.external}`
+          ? `(${cursor.node.at.name})`
           : `(${cursor.root}:${cursor.node.at.startPosition.row + 1}:${cursor.node.at.startPosition.column + 1})`,
       );
     });
