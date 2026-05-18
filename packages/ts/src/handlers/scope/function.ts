@@ -49,20 +49,25 @@ const functionHandler: ConvertHandler<"function"> = (
           at: getRange(params),
         });
       } else {
-        params.namedChildren.forEach((child) => {
-          flatPattern(child).forEach(({ name, node, has_default }) => {
-            const parameterPath = createChildPath(path, name);
-            result.edges.push({
-              from: path,
-              to: parameterPath,
-              kind: "defines",
-            });
-            result.nodes.push({
-              path: parameterPath,
-              type: "binding",
-              kind: "parameter",
-              at: getRange(node),
-              props: { has_default },
+        params.namedChildren.forEach((formal_parameters) => {
+          formal_parameters.namedChildren.forEach((child) => {
+            flatPattern(child).forEach(({ name, node, has_default }) => {
+              const parameterPath = createChildPath(path, name);
+              result.edges.push({
+                from: path,
+                to: parameterPath,
+                kind: "defines",
+              });
+              result.nodes.push({
+                path: parameterPath,
+                type: "binding",
+                kind: "parameter",
+                at: getRange(node),
+                props: {
+                  has_default,
+                  optional: child.type === "optional_parameter",
+                },
+              });
             });
           });
         });
