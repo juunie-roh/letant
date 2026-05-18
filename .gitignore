@@ -13,8 +13,9 @@ coverage
 *.tsbuildinfo
 
 # mock files
-packages/js/__mocks__/lodash.js
-packages/js/__mocks__/three.module.js
+packages/js/__mocks__/**
+packages/python/__mocks__/**
+packages/ts/__mocks__/**
 
 # misc
 CLAUDE.md

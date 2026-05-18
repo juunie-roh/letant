@@ -63,9 +63,8 @@ export default defineConfig([
     "**/build/**",
     "**/coverage/**",
     "**/docs/**",
-    "packages/js/__mocks__/three.core.js",
-    "packages/js/__mocks__/three.module.js",
-    "packages/js/__mocks__/lodash.js",
+    "packages/js/__mocks__/**",
+    "packages/ts/__mocks__/**",
   ]),
   {
     files: ["**/*.{js,ts}"],

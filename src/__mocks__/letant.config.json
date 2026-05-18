@@ -4,6 +4,10 @@
     {
       "extensions": [".js", ".cjs", ".mjs", "jsx"],
       "name": "@letant/js"
+    },
+    {
+      "extensions": [".ts", ".tsx"],
+      "name": "@letant/ts"
     }
   ]
 }
