@@ -5,12 +5,16 @@ export type QueryConfig = {
     required: "node" | "body" | "condition";
     optional: "else" | "else_body";
   };
-  while: {
-    required: "node" | "body" | "condition";
-    optional: never;
-  };
   "iife.anonymous": {
     required: "node" | "body";
+    optional: never;
+  };
+  "module.anonymous": {
+    required: "node" | "source";
+    optional: never;
+  };
+  while: {
+    required: "node" | "body" | "condition";
     optional: never;
   };
   "module.binding": {

@@ -1,5 +1,6 @@
 import ifHandler from "./handlers/anonymous/if";
 import iifeHandler from "./handlers/anonymous/iife";
+import moduleAnonymousHandler from "./handlers/anonymous/module";
 import whileHandler from "./handlers/anonymous/while";
 import memberHandler from "./handlers/binding/member";
 import moduleBindingHandler from "./handlers/binding/module";
@@ -14,6 +15,7 @@ export const convertConfig: ConvertConfig = {
   // anonymous
   if: ifHandler,
   "iife.anonymous": iifeHandler,
+  "module.anonymous": moduleAnonymousHandler,
   while: whileHandler,
   // binding
   "module.binding": moduleBindingHandler,
