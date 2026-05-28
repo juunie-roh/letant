@@ -27,6 +27,7 @@ export default defineConfig({
         "**/error.ts",
         "**/*.d.ts",
         "**/.DS_Store",
+        "**/*.md",
       ],
     },
   },
