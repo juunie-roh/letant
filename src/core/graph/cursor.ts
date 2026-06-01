@@ -136,6 +136,14 @@ class GraphCursor {
     // scope is the parent — you probably want the child
     return scope?.children().find((child) => child.name === symbol);
   }
+
+  toString(): string {
+    const str =
+      "name" in this.node.at
+        ? `(${this.node.at.name})`
+        : `(${this.root}:${this.node.at.startPosition.row + 1}:${this.node.at.startPosition.column + 1})`;
+    return str;
+  }
 }
 
 export default GraphCursor;
