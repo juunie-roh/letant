@@ -25,7 +25,7 @@ declare namespace Plugin {
     query: QueryMap<keyof Q & string>;
     captureConfig: CaptureConfig<Q>;
     convertConfig: ConvertConfig<Q, N, E>;
-    references: (node: Parser.SyntaxNode) => string[];
+    references: (node: Parser.SyntaxNode) => Parser.SyntaxNode[];
   }
 }
 
@@ -120,7 +120,7 @@ class Plugin {
     }
   }
 
-  references(node: Parser.SyntaxNode): string[] {
+  references(node: Parser.SyntaxNode): Parser.SyntaxNode[] {
     return this._module.references(node);
   }
 

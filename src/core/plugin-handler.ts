@@ -82,7 +82,7 @@ class PluginHandler {
   }
 
   @Trace({ label: "PluginHandler.references" })
-  references(node: Parser.SyntaxNode, ext: string): string[] {
+  references(node: Parser.SyntaxNode, ext: string): Parser.SyntaxNode[] {
     if (!this.plugins.has(ext))
       throw new CoreError(
         "CORE_UNREGISTERED_LANGUAGE",
