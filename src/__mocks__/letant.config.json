@@ -3,11 +3,11 @@
   "language": [
     {
       "extensions": [".js", ".cjs", ".mjs", "jsx"],
-      "name": "@letant/js"
+      "name": "../../packages/js/dist/index.mjs"
     },
     {
       "extensions": [".ts", ".tsx"],
-      "name": "@letant/ts"
+      "name": "../../packages/ts/dist/index.mjs"
     }
   ]
 }
