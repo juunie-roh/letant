@@ -1,3 +1,4 @@
+export { LetantError } from "./common/error";
 export type * from "./config";
 export type * from "./core";
 export * from "./core";

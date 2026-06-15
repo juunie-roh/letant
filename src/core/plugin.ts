@@ -1,6 +1,5 @@
 import Parser from "tree-sitter";
 
-import { assertPluginDescriptor } from "@/common/checker";
 import { Trace } from "@/common/decorators";
 import type {
   CaptureConfig,
@@ -10,7 +9,7 @@ import type {
   NodePath,
   QueryConfig,
 } from "@/models";
-import { createCapture, createConvert } from "@/utils";
+import { assertPluginDescriptor, createCapture, createConvert } from "@/utils";
 import { QueryMap } from "@/utils/query";
 
 import CoreError from "./error";

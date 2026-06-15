@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { resolve } from "node:path";
 
 import { createCommand } from "@commander-js/extra-typings";
+import { assertTreeSitterLanguage } from "letant/utils";
 import Parser from "tree-sitter";
-
-import { assertTreeSitterLanguage } from "@/common/checker";
 
 import { fileArg } from "../args";
 import BinaryError from "../error";
@@ -34,9 +35,15 @@ const queryCommand = createCommand("query")
     1,
   )
   .action((filePath, options) => {
+    // Resolve the grammar from the user's working directory, not from where
+    // the CLI itself is installed.
+    const requireFromCwd = createRequire(
+      resolve(process.cwd(), "package.json"),
+    );
+
     let mod: any;
     try {
-      mod = require(options.grammar);
+      mod = requireFromCwd(options.grammar);
     } catch (e: any) {
       throw new BinaryError(
         "BIN_MODULE_NOT_FOUND",

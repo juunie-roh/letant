@@ -5,7 +5,7 @@
   "keywords": [],
   "author": "Juun",
   "license": "MIT",
-  "packageManager": "pnpm@11.5.3",
+  "packageManager": "pnpm@11.6.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/juunie-roh/letant.git"
@@ -22,7 +22,6 @@
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "bin": "dist/bin/letant.js",
   "files": [
     "dist",
     "CHANGELOG.md"
@@ -79,21 +78,20 @@
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "check-types:all": "tsc -p ./tsconfig.json --noEmit && pnpm -r check-types",
     "dev": "tsup --watch",
-    "dev:config": "LOG_LEVEL=debug node dist/bin/letant.js --config src/__mocks__/letant.config.json",
+    "dev:config": "LOG_LEVEL=debug node packages/cli/dist/letant.js --config packages/cli/__mocks__/letant.config.json",
     "lint": "eslint . --cache",
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
-    "js": "pnpm --filter @letant/js"
+    "js": "pnpm --filter @letant/js",
+    "cli": "pnpm --filter @letant/cli"
   },
   "dependencies": {
-    "commander": "^15.0.0",
     "tree-sitter": "^0.25.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.3",
     "@changesets/cli": "^2.31.0",
-    "@commander-js/extra-typings": "^15.0.0",
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@commitlint/cz-commitlint": "^21.0.2",

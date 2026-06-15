@@ -26,7 +26,7 @@
     "build": "tsup",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "dev": "tsup --watch",
-    "dev:query": "pnpm letant query --grammar tree-sitter-typescript"
+    "dev:query": "node ../cli/dist/letant.js query --grammar tree-sitter-typescript"
   },
   "keywords": [],
   "author": "Juun",

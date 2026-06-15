@@ -1,0 +1,35 @@
+{
+  "name": "@letant/cli",
+  "version": "0.0.3",
+  "description": "Command-line interface for letant",
+  "bin": {
+    "letant": "dist/letant.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "check-types": "tsc -p ./tsconfig.json --noEmit",
+    "dev": "tsup --watch"
+  },
+  "keywords": [],
+  "author": "Juun",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": "^22.13.0 || >=24"
+  },
+  "dependencies": {
+    "@commander-js/extra-typings": "^15.0.0",
+    "commander": "^15.0.0",
+    "letant": "workspace:*",
+    "tree-sitter": "^0.25.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  }
+}
