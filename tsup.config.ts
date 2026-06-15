@@ -27,7 +27,6 @@ export default defineConfig([
   },
   {
     ...jsOptions,
-    entry: [...entry, "src/bin/letant.ts"],
     format: "cjs",
   },
   // Single DTS build from the root entry only.

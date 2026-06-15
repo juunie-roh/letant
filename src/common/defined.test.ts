@@ -13,7 +13,7 @@ describe("defined — boolean overload", () => {
   });
 
   it("throws the provided SpineError for false", () => {
-    const error = new LetantError("BIN_INVALID_OPTION", "test");
+    const error = new LetantError("CORE_NO_CONFIG", "test");
     expect(() => defined(false, error)).toThrow(error);
   });
 

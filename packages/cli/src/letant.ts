@@ -4,19 +4,18 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { createCommand } from "@commander-js/extra-typings";
+import { LetantError, Workspace } from "letant";
+import { loadConfig } from "letant/config";
 
-import { LetantError } from "@/common/error";
-import { loadConfig } from "@/config";
-import { Workspace } from "@/workspace";
-
-import pkg from "../../package.json";
+import pkg from "../package.json";
 import { fileArg, othersArg } from "./args";
 import queryCommand from "./commands/query";
+import BinaryError from "./error";
 import { group } from "./groups";
 import { configOption, encodingOption, verboseOption } from "./options";
 
 const program = createCommand()
-  .name(pkg.name)
+  .name("letant")
   .version(
     pkg.version,
     "-v, --version",
@@ -73,7 +72,7 @@ try {
   program.parse();
 } catch (e) {
   const verbose = program.opts().verbose;
-  if (e instanceof LetantError) {
+  if (e instanceof LetantError || e instanceof BinaryError) {
     process.stderr.write(`${badge(e.code, "41")} ${e.message}\n`);
     if (verbose) console.error(e);
   } else {
