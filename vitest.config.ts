@@ -12,7 +12,10 @@ export default defineConfig({
     setupFiles: ["src/__mocks__/setup.ts"],
     include: [
       "src/**/*.(test|spec).*",
-      "packages/javascript/src/**/*.(test|spec).*",
+      "packages/cli/src/**/*.(test|spec).*",
+      "packages/js/src/**/*.(test|spec).*",
+      "packages/python/src/**/*.(test|spec).*",
+      "packages/ts/src/**/*.(test|spec).*",
     ],
     exclude: ["**/node_modules/**"],
     environment: "node",
