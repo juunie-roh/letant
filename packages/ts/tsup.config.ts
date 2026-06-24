@@ -8,7 +8,7 @@ const options: Options = {
   esbuildPlugins: [scmPlugin],
   minify: false,
   target: ["node22", "node24", "node25"],
-  external: ["letant", "tree-sitter-javascript"],
+  external: ["letant", "tree-sitter-typescript"],
   sourcemap: false,
 };
 

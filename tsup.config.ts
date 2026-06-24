@@ -3,7 +3,6 @@ import { defineConfig, type Options } from "tsup";
 const entry: string[] = [
   "src/index.ts",
   "src/config/index.ts",
-  "src/dot/index.ts",
   "src/utils/index.ts",
   "src/utils/query/index.ts",
 ];
