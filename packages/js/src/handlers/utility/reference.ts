@@ -1,4 +1,4 @@
-import type { SyntaxNode } from "tree-sitter";
+import type Parser from "tree-sitter";
 
 import { utility } from "@/query";
 
@@ -7,7 +7,7 @@ import { utility } from "@/query";
  *
  * @returns Array of identifier strings.
  */
-function referenceHandler(node: SyntaxNode): SyntaxNode[] {
+function referenceHandler(node: Parser.SyntaxNode): Parser.SyntaxNode[] {
   const captured = utility
     .get("reference")
     .captures(node, { startIndex: node.startIndex, endIndex: node.endIndex })
