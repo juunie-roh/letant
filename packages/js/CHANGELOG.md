@@ -1,5 +1,13 @@
 # @letant/js
 
+## 0.0.3
+
+### Patch Changes
+
+- Rename JS plugin package from `@juun-roh/letant-js` to `@letant/js`.
+- Updated dependencies
+  - letant@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@letant/js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "JavaScript plugin for letant",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -26,7 +26,7 @@
     "build": "tsup",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "dev": "tsup --watch",
-    "dev:query": "pnpm letant query --grammar tree-sitter-javascript"
+    "dev:query": "node ../cli/dist/letant.js query --grammar tree-sitter-javascript"
   },
   "keywords": [],
   "author": "Juun",
@@ -38,12 +38,12 @@
     "node": "^22.13.0 || >=24"
   },
   "peerDependencies": {
-    "letant": "^0.0.2",
+    "letant": "^0.0.3",
     "tree-sitter-javascript": "^0.25.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.2",
-    "letant": "workspace:*",
+    "@arethetypeswrong/cli": "^0.18.4",
+    "letant": "workspace:^",
     "tree-sitter-javascript": "^0.25.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"

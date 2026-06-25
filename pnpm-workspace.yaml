@@ -6,14 +6,18 @@ overrides:
   tmp: ">=0.2.4"
   lodash: ">=4.17.24"
   minimatch: ">=10.2.1"
+  esbuild: ">=0.28.1"
+  js-yaml: ">=4.1.2"
 
 allowBuilds:
   esbuild: true
   tree-sitter: true
   tree-sitter-javascript: true
   tree-sitter-python: true
+  tree-sitter-typescript: true
 
 onlyBuiltDependencies:
   - tree-sitter
   - tree-sitter-javascript
   - tree-sitter-python
+  - tree-sitter-typescript

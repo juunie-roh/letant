@@ -44,3 +44,7 @@ core:
 "plugin: python":
   - changed-files:
     - any-glob-to-any-file: "packages/python/**"
+
+"plugin: typescript":
+  - changed-files:
+    - any-glob-to-any-file: "packages/ts/**"

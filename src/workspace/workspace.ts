@@ -82,27 +82,36 @@ class Workspace {
 
     const references = new Set(this._handler.references(node, ext));
 
-    const resolved = new Map<string, GraphCursor | undefined>();
+    const resolved = new Map<
+      string,
+      { cursor: GraphCursor | undefined; refs: Set<Parser.SyntaxNode> }
+    >();
 
     for (const ref of references) {
-      resolved.set(ref, cursor.resolve(ref));
+      const resolvedCursor = cursor.resolve(ref.text);
+      const key = resolvedCursor?.toString() ?? "";
+
+      if (!resolved.has(key)) {
+        resolved.set(key, { cursor: resolvedCursor, refs: new Set() });
+      }
+
+      resolved.get(key)!.refs.add(ref);
     }
 
     console.log("total:", references.size, "references");
 
-    resolved.forEach((cursor, name) => {
-      if (!cursor) {
-        console.log(`(unresolved) ${name}`);
-        return;
+    resolved.forEach(({ cursor: c, refs }) => {
+      if (!c) {
+        console.log("unresolved");
+      } else {
+        console.log(`(${c.node.kind})`, c.name, c.toString());
       }
 
-      console.log(
-        `(${cursor.node.kind})`,
-        `${cursor.name}`,
-        "name" in cursor.node.at
-          ? `(${cursor.node.at.name}), external: ${!!cursor.node.at.external}`
-          : `(${cursor.root}:${cursor.node.at.startPosition.row + 1}:${cursor.node.at.startPosition.column + 1})`,
-      );
+      refs.forEach((node) => {
+        console.log(
+          `    ${node.text} (${filePath}:${node.startPosition.row + 1}:${node.startPosition.column + 1})`,
+        );
+      });
     });
 
     return resolved;

@@ -1,10 +1,11 @@
 {
   "name": "letant",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "AST based language-agnostic structural code comprehension",
   "keywords": [],
   "author": "Juun",
   "license": "MIT",
+  "packageManager": "pnpm@11.9.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/juunie-roh/letant.git"
@@ -21,7 +22,6 @@
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "bin": "dist/bin/letant.js",
   "files": [
     "dist",
     "CHANGELOG.md"
@@ -78,36 +78,34 @@
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "check-types:all": "tsc -p ./tsconfig.json --noEmit && pnpm -r check-types",
     "dev": "tsup --watch",
-    "dev:config": "LOG_LEVEL=debug node dist/bin/letant.js --config src/__mocks__/letant.config.json",
+    "dev:config": "LOG_LEVEL=debug node packages/cli/dist/letant.js --config packages/cli/__mocks__/letant.config.json",
     "lint": "eslint . --cache",
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
-    "js": "pnpm --filter @letant/js"
+    "js": "pnpm --filter @letant/js",
+    "cli": "pnpm --filter @letant/cli"
   },
   "dependencies": {
-    "commander": "^14.0.3",
     "tree-sitter": "^0.25.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.2",
+    "@arethetypeswrong/cli": "^0.18.4",
     "@changesets/cli": "^2.31.0",
-    "@commander-js/extra-typings": "^14.0.0",
-    "@commitlint/cli": "^21.0.1",
-    "@commitlint/config-conventional": "^21.0.1",
-    "@commitlint/cz-commitlint": "^21.0.1",
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "@commitlint/cz-commitlint": "^21.0.2",
     "@commitlint/format": "^21.0.1",
     "@commitlint/types": "^21.0.1",
     "@eslint/js": "^10.0.1",
-    "@letant/js": "workspace:*",
-    "@types/node": "^25.7.0",
-    "@typescript-eslint/eslint-plugin": "^8.59.3",
-    "@typescript-eslint/parser": "^8.59.3",
-    "@vitest/coverage-v8": "4.1.5",
-    "esbuild": "^0.28.0",
-    "eslint": "^10.3.0",
-    "eslint-plugin-jsdoc": "^62.9.0",
-    "eslint-plugin-prettier": "^5.5.5",
+    "@types/node": "^26.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
+    "@vitest/coverage-v8": "4.1.9",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "eslint-plugin-jsdoc": "^63.0.7",
+    "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "husky": "^9.1.7",
@@ -115,20 +113,12 @@
     "tsup": "^8.5.1",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
-    "vite": "^7.3.3",
-    "vitest": "^4.1.6"
+    "vite": "^7.3.5",
+    "vitest": "^4.1.9"
   },
   "config": {
     "commitizen": {
       "path": "@commitlint/cz-commitlint"
-    }
-  },
-  "packageManager": "pnpm@11.1.2",
-  "pnpm": {
-    "overrides": {
-      "tmp": ">=0.2.4",
-      "lodash": ">=4.17.23",
-      "minimatch": ">=10.2.1"
     }
   }
 }

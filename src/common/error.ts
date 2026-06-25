@@ -1,8 +1,4 @@
 export type LetantErrorCode =
-  // binary
-  | "BIN_MODULE_NOT_FOUND"
-  | "BIN_INVALID_OPTION"
-  | "BIN_INVALID_LANGUAGE"
   // config
   | "CONFIG_INVALID_PATH"
   | "CONFIG_INVALID_SCHEMA"
