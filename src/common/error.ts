@@ -3,12 +3,13 @@ export type LetantErrorCode =
   | "CONFIG_INVALID_PATH"
   | "CONFIG_INVALID_SCHEMA"
   // core
+  | "CORE_INVALID_ACCESS"
   | "CORE_NO_CONFIG"
-  | "CORE_UNREGISTERED_LANGUAGE"
-  | "CORE_SYNTAX_ERROR"
-  | "CORE_UNDEFINED_INSTANCE"
   | "CORE_PLUGIN_LOAD_FAILED"
   | "CORE_PLUGIN_PARSE_FAILED"
+  | "CORE_SYNTAX_ERROR"
+  | "CORE_UNDEFINED_INSTANCE"
+  | "CORE_UNREGISTERED_LANGUAGE"
   // graph
   | "GRAPH_NO_NODE"
   | "GRAPH_UNRESOLVED_EDGE"
@@ -20,8 +21,7 @@ export type LetantErrorCode =
   | "QUERY_SET_DUPLICATE_KEY"
   | "QUERY_GET_INVALID_KEY"
   // workspace
-  | "WORKSPACE_FILE_NOT_PARSED"
-  | "WORKSPACE_INVALID_ACCESS";
+  | "WORKSPACE_FILE_NOT_PARSED";
 
 export class LetantError extends Error {
   readonly code: LetantErrorCode;

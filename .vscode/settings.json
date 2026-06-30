@@ -18,7 +18,8 @@
     "Létant",
     "lletant",
     "nodenext",
-    "rankdir"
+    "rankdir",
+    "structurizr"
   ],
   "editor.formatOnSave": false,
   "eslint.enable": true,
