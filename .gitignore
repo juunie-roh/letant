@@ -23,3 +23,4 @@ CLAUDE.md
 .DS_Store
 *.pem
 .eslintcache
+.structurizr
