@@ -81,6 +81,7 @@
     "dev:config": "LOG_LEVEL=debug node packages/cli/dist/letant.js --config packages/cli/__mocks__/letant.config.json",
     "lint": "eslint . --cache",
     "prepare": "husky",
+    "structurizr": "docker run -it --rm -p 8080:8080 -v ./docs/:/usr/local/structurizr structurizr/structurizr local",
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
     "js": "pnpm --filter @letant/js",
