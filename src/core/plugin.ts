@@ -22,6 +22,8 @@ declare namespace Plugin {
     E extends Edge = Edge,
   > {
     language: Parser.Language;
+    /** File extensions this plugin can resolve import specifiers against. */
+    extensions: string[];
     query: QueryMap<keyof Q & string>;
     captureConfig: CaptureConfig<Q>;
     convertConfig: ConvertConfig<Q, N, E>;
@@ -100,6 +102,13 @@ class Plugin {
    */
   get language() {
     return this._parser.getLanguage();
+  }
+
+  /**
+   * File extensions this plugin can resolve import specifiers against.
+   */
+  get extensions(): string[] {
+    return this._module.extensions;
   }
 
   /**
