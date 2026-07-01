@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { PluginConfig } from "@/models";
 import { QueryMap } from "@/utils/query";
 
 import CoreError from "./error";
@@ -30,7 +31,10 @@ vi.mock("tree-sitter", () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-const VALID_PLUGIN = "@letant/js";
+const VALID_PLUGIN_CONFIG: PluginConfig = {
+  name: "@letant/js",
+  extensions: [".js", ".jsx"],
+};
 
 const validLangShape = {
   name: "typescript",
@@ -84,7 +88,7 @@ describe("Plugin.load()", () => {
         mockDescriptor() as Plugin.Descriptor,
       );
 
-      const descriptor = await Plugin.load(VALID_PLUGIN);
+      const descriptor = await Plugin.load(VALID_PLUGIN_CONFIG.name);
 
       expect(descriptor.query).toBeInstanceOf(QueryMap);
       expect(descriptor.captureConfig).toBeDefined();
@@ -106,7 +110,7 @@ describe("Plugin", () => {
     vi.spyOn(Plugin, "load").mockResolvedValue(
       mockDescriptor() as Plugin.Descriptor,
     );
-    plugin = await Plugin.create(VALID_PLUGIN);
+    plugin = await Plugin.create(VALID_PLUGIN_CONFIG);
   });
 
   afterEach(() => {
@@ -149,7 +153,7 @@ describe("Plugin", () => {
       vi.spyOn(Plugin, "load").mockResolvedValue(
         descriptor as Plugin.Descriptor,
       );
-      const p = await Plugin.create(VALID_PLUGIN);
+      const p = await Plugin.create(VALID_PLUGIN_CONFIG);
       const node = {} as import("tree-sitter").SyntaxNode;
       p.references(node);
       expect(descriptor.references).toHaveBeenCalledWith(node);

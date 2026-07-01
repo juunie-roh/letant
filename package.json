@@ -75,6 +75,7 @@
     "attw:all": "pnpm attw:quiet && pnpm -r attw:quiet",
     "build": "tsup",
     "build:all": "pnpm build && pnpm -r build",
+    "build:structurizr": "docker run --rm -v ./docs:/var/model ghcr.io/avisi-cloud/structurizr-site-generatr generate-site --workspace-file workspace.dsl --default-branch main",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "check-types:all": "tsc -p ./tsconfig.json --noEmit && pnpm -r check-types",
     "dev": "tsup --watch",
