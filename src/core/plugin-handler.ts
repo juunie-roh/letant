@@ -4,6 +4,7 @@ import type Parser from "tree-sitter";
 
 import { Trace } from "@/common/decorators";
 import { defined } from "@/common/defined";
+import { Node } from "@/models";
 import type { Config } from "@/models/config";
 
 import CoreError from "./error";
@@ -22,9 +23,12 @@ declare namespace PluginHandler {
 }
 
 class PluginHandler {
+  private _config: Config;
+
   private _languagePlugins: Map<string, Plugin>;
 
-  private constructor(languagePlugins: Map<string, Plugin>) {
+  private constructor(config: Config, languagePlugins: Map<string, Plugin>) {
+    this._config = config;
     this._languagePlugins = languagePlugins;
   }
 
@@ -32,19 +36,23 @@ class PluginHandler {
     const languagePlugins = new Map<string, Plugin>();
 
     await Promise.all(
-      config.language.map(async (c) => {
-        const plugin = await Plugin.create(c.name);
-        for (const ext of c.extensions) {
+      config.plugins.map(async (pluginConfig) => {
+        const plugin = await Plugin.create(pluginConfig);
+        for (const ext of pluginConfig.extensions) {
           languagePlugins.set(ext, plugin);
         }
       }),
     );
 
-    return new PluginHandler(languagePlugins);
+    return new PluginHandler(config, languagePlugins);
+  }
+
+  get config(): Config {
+    return this._config;
   }
 
   /**
-   * {@link Plugin | spine `Language`} instances keyed by file extension.
+   * {@link Plugin | letant `Plugin`} instances keyed by file extension.
    */
   get plugins(): ReadonlyMap<string, Plugin> {
     return this._languagePlugins;
@@ -74,11 +82,20 @@ class PluginHandler {
 
     const { nodes, edges } = plugin.extract(filePath, tree.rootNode);
 
+    // TODO: resolve paths here.
+
     return {
       graph: new Graph(nodes, edges, filePath),
       tree,
       ext,
     };
+  }
+
+  resolvePaths({ nodes }: { nodes: Node[] }): {
+    nodes: Node[];
+  } {
+    // TODO: process paths
+    return { nodes };
   }
 
   @Trace({ label: "PluginHandler.references" })

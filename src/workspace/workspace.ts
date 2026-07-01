@@ -1,4 +1,3 @@
-import { CharacterEncoding } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
@@ -13,17 +12,12 @@ import { NormalizePath } from "./decorators";
 import WorkspaceError from "./error";
 
 class Workspace {
-  /**
-   * A root anchor for the workspace.
-   * All the paths used in the workspace are normalized relative to this.
-   * @default cwd()
-   */
-  private readonly _rootDir: string;
+  private _config: Config;
   private _handler: PluginHandler;
   private _files: Map<string, PluginHandler.ParseResult>;
 
   private constructor(config: Config, handler: PluginHandler) {
-    this._rootDir = config.rootDir || ".";
+    this._config = config;
     this._handler = handler;
     this._files = new Map();
   }
@@ -33,8 +27,12 @@ class Workspace {
     return new Workspace(config, handler);
   }
 
+  get config(): Config {
+    return this._config;
+  }
+
   get rootDir(): string {
-    return this._rootDir;
+    return this._config.rootDir ?? ".";
   }
 
   @NormalizePath
@@ -49,9 +47,9 @@ class Workspace {
   @Trace({ label: "Workspace.openFile" })
   async openFile(
     filePath: string,
-    encoding: CharacterEncoding = "utf-8",
+    encoding: BufferEncoding = "utf-8",
   ): Promise<PluginHandler.ParseResult> {
-    const fp = path.resolve(cwd(), this._rootDir, filePath);
+    const fp = path.resolve(cwd(), this.rootDir, filePath);
     const src = await readFile(fp, { encoding });
     const parsed = this._handler.parse(filePath, src);
     this._files.set(filePath, parsed);
