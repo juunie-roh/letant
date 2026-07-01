@@ -5,7 +5,7 @@
   "description" : "Software System Architecture of Letant.",
   "documentation" : { },
   "id" : 1,
-  "lastModifiedDate" : "2026-06-30T03:29:11Z",
+  "lastModifiedDate" : "2026-06-30T05:49:05Z",
   "model" : {
     "customElements" : [ {
       "description" : "A target source file with raw texts to process with letant.",
@@ -32,7 +32,7 @@
           "id" : "20",
           "instanceId" : 1,
           "properties" : {
-            "structurizr.dsl.identifier" : "cliEnv.73d9013a-1a75-46d9-a3ac-2cbf96acdc45.3de1cef4-ab90-48a5-83e3-fddd976396c2.60db2ca6-6265-48e0-bf25-e6e9d71f8b37"
+            "structurizr.dsl.identifier" : "cliEnv.e60a5ae0-7b63-4c69-a8b9-c549d6d45340.658838b5-2ad6-44c5-89ea-7664145dcd48.b58fedd4-2990-4379-b30e-1d03e8096acc"
           },
           "tags" : "Container Instance"
         } ],
@@ -42,7 +42,7 @@
         "instances" : "1",
         "name" : "Node.js Runtime",
         "properties" : {
-          "structurizr.dsl.identifier" : "cliEnv.73d9013a-1a75-46d9-a3ac-2cbf96acdc45.3de1cef4-ab90-48a5-83e3-fddd976396c2"
+          "structurizr.dsl.identifier" : "cliEnv.e60a5ae0-7b63-4c69-a8b9-c549d6d45340.658838b5-2ad6-44c5-89ea-7664145dcd48"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Node.js >= 22"
@@ -53,7 +53,7 @@
       "instances" : "1",
       "name" : "User Machine",
       "properties" : {
-        "structurizr.dsl.identifier" : "cliEnv.73d9013a-1a75-46d9-a3ac-2cbf96acdc45"
+        "structurizr.dsl.identifier" : "cliEnv.e60a5ae0-7b63-4c69-a8b9-c549d6d45340"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "Windows, macOS, Linux, ..."
