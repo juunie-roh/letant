@@ -1,9 +1,12 @@
 {
-  "rootDir": "../../",
-  "language": [
+  "rootDir": ".",
+  "plugins": [
     {
       "extensions": [".js", ".cjs", ".mjs", "jsx"],
-      "name": "../packages/js/dist/index.mjs"
+      "name": "../packages/js/dist/index.mjs",
+      "paths": {
+        "__mocks__": ["./packages/js/__mocks__/"]
+      }
     },
     {
       "extensions": [".ts", ".tsx"],

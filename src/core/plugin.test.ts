@@ -49,6 +49,7 @@ function mockQueryMap(): QueryMap<string> {
 function mockDescriptor() {
   return {
     language: validLangShape,
+    extensions: [".js", ".jsx"],
     query: mockQueryMap(),
     captureConfig: {},
     convertConfig: {},
