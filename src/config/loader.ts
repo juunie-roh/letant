@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { cwd } from "node:process";
 
@@ -6,11 +6,11 @@ import type { Config } from "@/models/config";
 
 import ConfigError from "./error";
 
-async function loadConfig(configPath: unknown): Promise<Config> {
+async function loadConfig(configPath: unknown): Promise<Readonly<Config>> {
   assertConfigPath(configPath);
   try {
-    const config = readFileSync(path.resolve(cwd(), configPath), "utf-8");
-    return JSON.parse(config) as Config;
+    const config = await readFile(path.resolve(cwd(), configPath), "utf-8");
+    return JSON.parse(config) as Readonly<Config>;
   } catch (e) {
     throw new ConfigError(
       "CONFIG_INVALID_SCHEMA",
