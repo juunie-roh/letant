@@ -5,6 +5,7 @@ node_modules
 # build
 dist
 .tsup
+docs/build
 
 # test
 coverage
