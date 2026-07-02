@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
 
@@ -168,9 +168,9 @@ class PluginHandler {
 
   /**
    * Tries `candidate` as-is, then with each of `extensions` appended, and
-   * returns the first path that exists on disk, normalized relative to
-   * `rootDir`. Returns `null` if none exist, or if the match falls outside
-   * `rootDir`.
+   * returns the first path that is a real file on disk, normalized relative
+   * to `rootDir`. Returns `null` if none exist, or if the match falls
+   * outside `rootDir`.
    */
   private _probeExtensions(
     candidate: string,
@@ -178,7 +178,7 @@ class PluginHandler {
     extensions: string[],
   ): string | null {
     const match = [candidate, ...extensions.map((ext) => candidate + ext)].find(
-      existsSync,
+      (c) => existsSync(c) && statSync(c).isFile(),
     );
 
     if (!match) return null;
