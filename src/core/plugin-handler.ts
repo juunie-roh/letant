@@ -1,4 +1,4 @@
-import { existsSync, statSync } from "node:fs";
+import { statSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
 
@@ -6,7 +6,6 @@ import type Parser from "tree-sitter";
 
 import { Trace } from "@/common/decorators";
 import { defined } from "@/common/defined";
-import { normalizePath } from "@/common/path";
 import { Node } from "@/models";
 import type { Config, PluginConfig } from "@/models/config";
 
@@ -100,12 +99,15 @@ class PluginHandler {
    * are left untouched.
    */
   resolvePaths(filePath: string, nodes: Node[], plugin: Plugin): Node[] {
+    const anchor = path.resolve(cwd(), this._config.rootDir ?? ".");
+
     return nodes.map((node) => {
       if (!("name" in node.at)) return node;
 
       const resolved = this._resolveImportPath(
         node.at.name,
         filePath,
+        anchor,
         plugin.extensions,
         plugin.config.paths,
       );
@@ -114,80 +116,6 @@ class PluginHandler {
 
       return { ...node, at: { ...node.at, name: resolved } };
     });
-  }
-
-  /**
-   * @returns A workspace-relative path that exists on disk, or `null` if
-   * `importPath` cannot be resolved (bare specifier, unmatched alias, or no
-   * matching extension found on disk).
-   */
-  private _resolveImportPath(
-    importPath: string,
-    filePath: string,
-    extensions: string[],
-    paths?: PluginConfig["paths"],
-  ): string | null {
-    const rootDir = this._config.rootDir ?? ".";
-    const anchor = path.resolve(cwd(), rootDir);
-
-    // 1. relative to the importing file
-    if (importPath.startsWith("./") || importPath.startsWith("../")) {
-      const abs = path.resolve(anchor, path.dirname(filePath), importPath);
-      return this._probeExtensions(abs, rootDir, extensions);
-    }
-
-    // 2. alias substitution
-    if (paths) {
-      for (const [alias, targets] of Object.entries(paths)) {
-        const prefix = alias.endsWith("/*") ? alias.slice(0, -1) : alias;
-        if (!importPath.startsWith(prefix)) continue;
-
-        for (const target of targets) {
-          const targetPrefix = target.endsWith("/*")
-            ? target.slice(0, -1)
-            : target;
-          const substituted = targetPrefix + importPath.slice(prefix.length);
-          const abs = path.resolve(anchor, substituted);
-
-          const resolved = this._probeExtensions(abs, rootDir, extensions);
-          if (resolved !== null) return resolved;
-        }
-
-        return null;
-      }
-    }
-
-    // 3. absolute path, possibly under rootDir
-    if (path.isAbsolute(importPath)) {
-      return this._probeExtensions(importPath, rootDir, extensions);
-    }
-
-    // 4. bare specifier — external, leave as-is
-    return null;
-  }
-
-  /**
-   * Tries `candidate` as-is, then with each of `extensions` appended, and
-   * returns the first path that is a real file on disk, normalized relative
-   * to `rootDir`. Returns `null` if none exist, or if the match falls
-   * outside `rootDir`.
-   */
-  private _probeExtensions(
-    candidate: string,
-    rootDir: string,
-    extensions: string[],
-  ): string | null {
-    const match = [candidate, ...extensions.map((ext) => candidate + ext)].find(
-      (c) => existsSync(c) && statSync(c).isFile(),
-    );
-
-    if (!match) return null;
-
-    try {
-      return normalizePath(rootDir, match);
-    } catch {
-      return null;
-    }
   }
 
   @Trace({ label: "PluginHandler.references" })
@@ -234,6 +162,81 @@ class PluginHandler {
     );
 
     return { plugin, ext };
+  }
+
+  /**
+   * @returns A workspace-relative path that exists on disk, or `null` if
+   * `importPath` cannot be resolved (bare specifier, unmatched alias, no
+   * matching extension found on disk, or the match falls outside `anchor`).
+   */
+  private _resolveImportPath(
+    importPath: string,
+    filePath: string,
+    anchor: string,
+    extensions: string[],
+    paths?: PluginConfig["paths"],
+  ): string | null {
+    const candidates = this._candidatePaths(
+      importPath,
+      filePath,
+      anchor,
+      paths,
+    );
+    if (candidates === null) return null;
+
+    const match = candidates
+      .filter((candidate) => !path.relative(anchor, candidate).startsWith(".."))
+      .flatMap((candidate) => [
+        candidate,
+        ...extensions.map((ext) => candidate + ext),
+      ])
+      .find((c) => statSync(c, { throwIfNoEntry: false })?.isFile());
+
+    if (!match) return null;
+
+    return path.relative(anchor, match);
+  }
+
+  /**
+   * Expands `importPath` into the absolute paths it may point to, without
+   * touching the disk: one candidate for relative and absolute specifiers,
+   * one per target for the first matching alias. Returns `null` for
+   * specifiers that cannot name a workspace file.
+   */
+  private _candidatePaths(
+    importPath: string,
+    filePath: string,
+    anchor: string,
+    paths?: PluginConfig["paths"],
+  ): string[] | null {
+    // 1. relative to the importing file
+    if (importPath.startsWith("./") || importPath.startsWith("../")) {
+      return [path.resolve(anchor, path.dirname(filePath), importPath)];
+    }
+
+    // 2. alias substitution
+    if (paths) {
+      for (const [alias, targets] of Object.entries(paths)) {
+        const prefix = alias.endsWith("/*") ? alias.slice(0, -1) : alias;
+        if (!importPath.startsWith(prefix)) continue;
+
+        return targets.map((target) => {
+          const targetPrefix = target.endsWith("/*")
+            ? target.slice(0, -1)
+            : target;
+          return path.resolve(
+            anchor,
+            targetPrefix + importPath.slice(prefix.length),
+          );
+        });
+      }
+    }
+
+    // 3. absolute path, possibly under rootDir
+    if (path.isAbsolute(importPath)) return [importPath];
+
+    // 4. bare specifier — external, leave as-is
+    return null;
   }
 }
 
