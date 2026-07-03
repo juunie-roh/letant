@@ -1,5 +1,4 @@
-import type { NodeSource } from "letant/utils";
-import { createChildPath, createConvertResult } from "letant/utils";
+import { createChildPath, createConvertResult, NodeSource } from "letant/utils";
 
 import type { ConvertHandler, Edge, Node } from "@/types";
 
@@ -20,7 +19,7 @@ const moduleBindingHandler: ConvertHandler<"module.binding"> = (
       path,
       type: "binding",
       kind: "module",
-      at: source.text as NodeSource,
+      at: NodeSource(source.text),
       props: alias ? { alias_of: name!.text } : undefined,
     });
   }
