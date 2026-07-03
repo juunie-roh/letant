@@ -1,10 +1,6 @@
 import type Parser from "tree-sitter";
 
-import type { Branded } from "./utility";
-
-export type NodePath = Branded<string[], "NODE_PATH">;
-
-export type NodeSource = { name: string; external?: boolean };
+import type { NodePath, NodeSource } from "@/common/branded-types";
 
 type BaseNode<K extends string = string> = {
   /**

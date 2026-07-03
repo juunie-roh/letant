@@ -4,6 +4,7 @@ import { cwd } from "node:process";
 
 import Parser from "tree-sitter";
 
+import { isNodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
 import { GraphCursor, PluginHandler } from "@/core";
 import type { Config, Offset } from "@/models";
@@ -146,7 +147,7 @@ class Workspace {
     if (cursorNode.type !== "binding") {
       // for scope node, set start index as its block start index
       o = cursorNode.blockStartIndex;
-    } else if ("name" in cursorNode.at) {
+    } else if (isNodeSource(cursorNode.at)) {
       // if the node is an imported module, start at root
       o = 0;
     } else {

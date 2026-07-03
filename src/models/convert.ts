@@ -1,7 +1,8 @@
+import type { NodePath } from "@/common/branded-types";
 import type { createCapture, createConvert } from "@/utils";
 
 import type { SingleCaptureResult } from "./capture";
-import type { Edge, Node, NodePath, QueryConfig } from "./global";
+import type { Edge, Node, QueryConfig } from "./global";
 
 export type ConvertResult<N extends Node, E extends Edge> = {
   nodes: N[];

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { NodePath } from "@/models";
+import { NodePath, NodeSource } from "@/common/branded-types";
 
 import GraphCursor from "./cursor";
 import Graph from "./graph";
@@ -15,69 +15,69 @@ const makeRange = (start: number, end: number) => ({
 const graph = new Graph(
   [
     {
-      path: ["file.ts"] as NodePath,
+      path: NodePath(["file.ts"]),
       kind: "module",
       type: "scope",
       blockStartIndex: 0,
-      at: { name: "file.ts" },
+      at: NodeSource("file.ts"),
     },
     {
-      path: ["file.ts", "Foo", "bar"] as NodePath,
+      path: NodePath(["file.ts", "Foo", "bar"]),
       kind: "method",
       type: "scope",
       blockStartIndex: 26,
       at: makeRange(20, 50),
     },
     {
-      path: ["file.ts", "Foo"] as NodePath,
+      path: NodePath(["file.ts", "Foo"]),
       kind: "class",
       type: "scope",
       blockStartIndex: 19,
       at: makeRange(10, 80),
     },
     {
-      path: ["file.ts", "Foo", "x"] as NodePath,
+      path: NodePath(["file.ts", "Foo", "x"]),
       kind: "member",
       type: "binding",
       at: makeRange(53, 58),
     },
     {
-      path: ["file.ts", "x"] as NodePath,
+      path: NodePath(["file.ts", "x"]),
       kind: "variable",
       type: "binding",
       at: makeRange(60, 75),
     },
     {
-      path: ["file.ts", "React"] as NodePath,
+      path: NodePath(["file.ts", "React"]),
       kind: "import",
       type: "binding",
-      at: { name: "react" },
+      at: NodeSource("react"),
     },
   ],
   [
     {
-      from: ["file.ts"] as NodePath,
-      to: ["file.ts", "Foo"] as NodePath,
+      from: NodePath(["file.ts"]),
+      to: NodePath(["file.ts", "Foo"]),
       kind: "defines",
     },
     {
-      from: ["file.ts", "Foo"] as NodePath,
-      to: ["file.ts", "Foo", "bar"] as NodePath,
+      from: NodePath(["file.ts", "Foo"]),
+      to: NodePath(["file.ts", "Foo", "bar"]),
       kind: "defines",
     },
     {
-      from: ["file.ts", "Foo"] as NodePath,
-      to: ["file.ts", "Foo", "x"] as NodePath,
+      from: NodePath(["file.ts", "Foo"]),
+      to: NodePath(["file.ts", "Foo", "x"]),
       kind: "defines",
     },
     {
-      from: ["file.ts"] as NodePath,
-      to: ["file.ts", "x"] as NodePath,
+      from: NodePath(["file.ts"]),
+      to: NodePath(["file.ts", "x"]),
       kind: "defines",
     },
     {
-      from: ["file.ts"] as NodePath,
-      to: ["file.ts", "React"] as NodePath,
+      from: NodePath(["file.ts"]),
+      to: NodePath(["file.ts", "React"]),
       kind: "imports",
     },
   ],
@@ -97,7 +97,7 @@ describe("Graph Cursor", () => {
     });
 
     it("throws for an unknown path", () => {
-      const unknown = new GraphCursor(graph, ["ghost"] as NodePath);
+      const unknown = new GraphCursor(graph, NodePath(["ghost"]));
       expect(() => unknown.node).toThrow();
     });
   });
@@ -261,8 +261,8 @@ describe("Graph Cursor", () => {
       expect(GraphCursor.at(graph, 10).path).toEqual(["file.ts", "Foo"]);
     });
 
-    it("includes a node whose endIndex equals the offset", () => {
-      expect(GraphCursor.at(graph, 80).path).toEqual(["file.ts", "Foo"]);
+    it("excludes a node whose endIndex equals the offset (exclusive end)", () => {
+      expect(GraphCursor.at(graph, 80).path).toEqual(["file.ts"]);
     });
   });
 
@@ -295,10 +295,9 @@ describe("Graph Cursor", () => {
       ]);
     });
 
-    it("includes a node at its end position boundary", () => {
+    it("excludes a node at its end position boundary (exclusive end)", () => {
       expect(GraphCursor.at(graph, { row: 0, column: 80 }).path).toEqual([
         "file.ts",
-        "Foo",
       ]);
     });
   });

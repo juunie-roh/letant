@@ -1,5 +1,6 @@
+import { isNodeSource, NodePath } from "@/common/branded-types";
 import { defined } from "@/common/defined";
-import type { Edge, Node, NodePath } from "@/models";
+import type { Edge, Node } from "@/models";
 
 import GraphCursor from "./cursor";
 import GraphError from "./error";
@@ -168,7 +169,7 @@ class Graph {
    */
   parent(path: NodePath): NodePath | undefined {
     if (path.length <= 1) return undefined;
-    const parentKey = Graph.encode(path.slice(0, -1) as NodePath);
+    const parentKey = Graph.encode(NodePath(path.slice(0, -1)));
     return this._edges.has(parentKey) ? Graph.decode(parentKey) : undefined;
   }
 
@@ -190,16 +191,12 @@ class Graph {
     const nodes = Array.from(
       this._nodes.values().map((n) => ({
         ...n,
-        at:
-          "name" in n.at
-            ? {
-                name: n.at.name,
-                external: n.at.external ?? false,
-              }
-            : {
-                byte: `${n.at.startIndex}:${n.at.endIndex}`,
-                line: `L${n.at.startPosition.row}:L${n.at.endPosition.row}`,
-              },
+        at: isNodeSource(n.at)
+          ? n.at
+          : {
+              byte: `${n.at.startIndex}:${n.at.endIndex}`,
+              line: `L${n.at.startPosition.row}:L${n.at.endPosition.row}`,
+            },
       })),
     );
     const edges = [];
@@ -267,7 +264,7 @@ namespace Graph {
   }
 
   export function decode(key: string): NodePath {
-    return key.split(DELIMITER) as NodePath;
+    return NodePath(key.split(DELIMITER));
   }
 }
 

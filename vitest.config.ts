@@ -17,7 +17,7 @@ export default defineConfig({
       "packages/python/src/**/*.(test|spec).*",
       "packages/ts/src/**/*.(test|spec).*",
     ],
-    exclude: ["**/node_modules/**"],
+    exclude: ["**/node_modules/**", "**/__snapshots__/**"],
     environment: "node",
     coverage: {
       include: ["src/**"],

@@ -10,7 +10,10 @@
     },
     {
       "extensions": [".ts", ".tsx"],
-      "name": "../packages/ts/dist/index.mjs"
+      "name": "../packages/ts/dist/index.mjs",
+      "paths": {
+        "@": ["./src/"]
+      }
     }
   ]
 }
