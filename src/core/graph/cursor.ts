@@ -46,7 +46,7 @@ class GraphCursor {
    */
   static contains(cursor: GraphCursor, offset: Offset): boolean {
     // if the cursor is at an imported module:
-    if ("name" in cursor.node.at) return false;
+    if (typeof cursor.node.at === "string") return false;
     // if the offset is byte offset:
     if (typeof offset === "number") {
       const { startIndex, endIndex } = cursor.node.at;
@@ -139,8 +139,8 @@ class GraphCursor {
 
   toString(): string {
     const str =
-      "name" in this.node.at
-        ? `(${this.node.at.name})`
+      typeof this.node.at === "string"
+        ? `(${this.node.at})`
         : `(${this.root}:${this.node.at.startPosition.row + 1}:${this.node.at.startPosition.column + 1})`;
     return str;
   }

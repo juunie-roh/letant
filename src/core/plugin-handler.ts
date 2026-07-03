@@ -6,7 +6,7 @@ import type Parser from "tree-sitter";
 
 import { Trace } from "@/common/decorators";
 import { defined } from "@/common/defined";
-import { Node } from "@/models";
+import { Node, NodeSource } from "@/models";
 import type { Config, PluginConfig } from "@/models/config";
 
 import CoreError from "./error";
@@ -102,19 +102,19 @@ class PluginHandler {
     const anchor = path.resolve(cwd(), this._config.rootDir ?? ".");
 
     return nodes.map((node) => {
-      if (!("name" in node.at)) return node;
+      if (!(typeof node.at === "string")) return node;
 
       const resolved = this._resolveImportPath(
-        node.at.name,
+        node.at,
         filePath,
         anchor,
         plugin.extensions,
         plugin.config.paths,
-      );
+      ) as NodeSource;
 
       if (resolved === null) return node;
 
-      return { ...node, at: { ...node.at, name: resolved } };
+      return { ...node, at: resolved };
     });
   }
 

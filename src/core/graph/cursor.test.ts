@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { NodePath } from "@/models";
+import { NodePath, NodeSource } from "@/models";
 
 import GraphCursor from "./cursor";
 import Graph from "./graph";
@@ -19,7 +19,7 @@ const graph = new Graph(
       kind: "module",
       type: "scope",
       blockStartIndex: 0,
-      at: { name: "file.ts" },
+      at: "file.ts" as NodeSource,
     },
     {
       path: ["file.ts", "Foo", "bar"] as NodePath,
@@ -51,7 +51,7 @@ const graph = new Graph(
       path: ["file.ts", "React"] as NodePath,
       kind: "import",
       type: "binding",
-      at: { name: "react" },
+      at: "react" as NodeSource,
     },
   ],
   [

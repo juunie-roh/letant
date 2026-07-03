@@ -1,5 +1,5 @@
 import { defined } from "@/common/defined";
-import type { Edge, Node, NodePath } from "@/models";
+import type { Edge, Node, NodePath, NodeSource } from "@/models";
 
 import GraphCursor from "./cursor";
 import GraphError from "./error";
@@ -191,11 +191,8 @@ class Graph {
       this._nodes.values().map((n) => ({
         ...n,
         at:
-          "name" in n.at
-            ? {
-                name: n.at.name,
-                external: n.at.external ?? false,
-              }
+          typeof n.at === "string"
+            ? (n.at as NodeSource)
             : {
                 byte: `${n.at.startIndex}:${n.at.endIndex}`,
                 line: `L${n.at.startPosition.row}:L${n.at.endPosition.row}`,

@@ -7,6 +7,7 @@ import type {
   Edge,
   Node,
   NodePath,
+  NodeSource,
   QueryConfig,
 } from "@/models";
 import type { PluginConfig } from "@/models/config";
@@ -152,7 +153,7 @@ class Plugin {
       path: [filePath] as NodePath,
       kind: "module",
       type: "scope",
-      at: { name: filePath },
+      at: filePath as NodeSource,
       blockStartIndex: 0,
     });
 

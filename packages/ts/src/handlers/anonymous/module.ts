@@ -1,3 +1,4 @@
+import type { NodeSource } from "letant/utils";
 import { createChildPath, createConvertResult } from "letant/utils";
 
 import { ConvertHandler, Edge, Node } from "@/types";
@@ -17,7 +18,7 @@ const moduleAnonymousHandler: ConvertHandler<"module.anonymous"> = (
       path,
       type: "anonymous",
       kind: "module",
-      at: { name: source.text },
+      at: source.text as NodeSource,
       blockStartIndex: node.startIndex,
     });
   }

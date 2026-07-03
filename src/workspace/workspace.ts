@@ -146,7 +146,7 @@ class Workspace {
     if (cursorNode.type !== "binding") {
       // for scope node, set start index as its block start index
       o = cursorNode.blockStartIndex;
-    } else if ("name" in cursorNode.at) {
+    } else if (typeof cursorNode.at === "string") {
       // if the node is an imported module, start at root
       o = 0;
     } else {
