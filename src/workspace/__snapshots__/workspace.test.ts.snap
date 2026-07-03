@@ -1,0 +1,164 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
+{
+  "edges": [
+    {
+      "from": [
+        "main.js",
+      ],
+      "kind": "imports",
+      "to": [
+        "main.js",
+        "a",
+      ],
+    },
+    {
+      "from": [
+        "main.js",
+      ],
+      "kind": "imports",
+      "to": [
+        "main.js",
+        "b",
+      ],
+    },
+    {
+      "from": [
+        "main.js",
+      ],
+      "kind": "imports",
+      "to": [
+        "main.js",
+        "c",
+      ],
+    },
+    {
+      "from": [
+        "main.js",
+      ],
+      "kind": "imports",
+      "to": [
+        "main.js",
+        "fs",
+      ],
+    },
+    {
+      "from": [
+        "main.js",
+      ],
+      "kind": "imports",
+      "to": [
+        "main.js",
+        "m",
+      ],
+    },
+    {
+      "from": [
+        "main.js",
+      ],
+      "kind": "imports",
+      "to": [
+        "main.js",
+        "out",
+      ],
+    },
+    {
+      "from": [
+        "main.js",
+      ],
+      "kind": "defines",
+      "to": [
+        "main.js",
+        "z",
+      ],
+    },
+  ],
+  "nodes": [
+    {
+      "at": "main.js",
+      "blockStartIndex": 0,
+      "kind": "module",
+      "path": [
+        "main.js",
+      ],
+      "type": "scope",
+    },
+    {
+      "at": "a.js",
+      "kind": "module",
+      "path": [
+        "main.js",
+        "a",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "sub/b.js",
+      "kind": "module",
+      "path": [
+        "main.js",
+        "b",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "lib/c.js",
+      "kind": "module",
+      "path": [
+        "main.js",
+        "c",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "node:fs",
+      "kind": "module",
+      "path": [
+        "main.js",
+        "fs",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "#missing/thing",
+      "kind": "module",
+      "path": [
+        "main.js",
+        "m",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "../outside",
+      "kind": "module",
+      "path": [
+        "main.js",
+        "out",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": {
+        "byte": "189:224",
+        "line": "L9:L9",
+      },
+      "kind": "variable",
+      "path": [
+        "main.js",
+        "z",
+      ],
+      "props": {
+        "kind": "const",
+      },
+      "type": "binding",
+    },
+  ],
+}
+`;
