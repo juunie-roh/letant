@@ -1,3 +1,4 @@
+export type { NodePath, NodeSource } from "./common/branded-types";
 export { LetantError } from "./common/error";
 export type * from "./config";
 export type * from "./core";

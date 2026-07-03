@@ -4,9 +4,10 @@ import { cwd } from "node:process";
 
 import type Parser from "tree-sitter";
 
+import { isNodeSource, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
 import { defined } from "@/common/defined";
-import { Node, NodeSource } from "@/models";
+import { Node } from "@/models";
 import type { Config, PluginConfig } from "@/models/config";
 
 import CoreError from "./error";
@@ -102,7 +103,7 @@ class PluginHandler {
     const anchor = path.resolve(cwd(), this._config.rootDir ?? ".");
 
     return nodes.map((node) => {
-      if (!(typeof node.at === "string")) return node;
+      if (!isNodeSource(node.at)) return node;
 
       const resolved = this._resolveImportPath(
         node.at,
@@ -110,7 +111,7 @@ class PluginHandler {
         anchor,
         plugin.extensions,
         plugin.config.paths,
-      ) as NodeSource;
+      );
 
       if (resolved === null) return node;
 
@@ -175,7 +176,7 @@ class PluginHandler {
     anchor: string,
     extensions: string[],
     paths?: PluginConfig["paths"],
-  ): string | null {
+  ): NodeSource | null {
     const candidates = this._candidatePaths(
       importPath,
       filePath,
@@ -194,7 +195,7 @@ class PluginHandler {
 
     if (!match) return null;
 
-    return path.relative(anchor, match);
+    return NodeSource(path.relative(anchor, match));
   }
 
   /**

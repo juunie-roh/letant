@@ -1,13 +1,12 @@
 import Parser from "tree-sitter";
 
+import { NodePath, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
 import type {
   CaptureConfig,
   ConvertConfig,
   Edge,
   Node,
-  NodePath,
-  NodeSource,
   QueryConfig,
 } from "@/models";
 import type { PluginConfig } from "@/models/config";
@@ -147,13 +146,13 @@ class Plugin {
     node: Parser.SyntaxNode,
   ): { edges: Edge[]; nodes: Node[] } {
     const captures = this._capture(node);
-    const result = this._convert(captures, [filePath] as NodePath);
+    const result = this._convert(captures, NodePath([filePath]));
     // add root file node once
     result.nodes.push({
-      path: [filePath] as NodePath,
+      path: NodePath([filePath]),
       kind: "module",
       type: "scope",
-      at: filePath as NodeSource,
+      at: NodeSource(filePath),
       blockStartIndex: 0,
     });
 

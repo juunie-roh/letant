@@ -1,5 +1,7 @@
+import type { NodePath } from "@/common/branded-types";
+import { isNodeSource } from "@/common/branded-types";
 import { defined } from "@/common/defined";
-import type { Node, NodePath, Offset } from "@/models";
+import type { Node, Offset } from "@/models";
 
 import GraphError from "./error";
 import type Graph from "./graph";
@@ -46,11 +48,12 @@ class GraphCursor {
    */
   static contains(cursor: GraphCursor, offset: Offset): boolean {
     // if the cursor is at an imported module:
-    if (typeof cursor.node.at === "string") return false;
+    if (isNodeSource(cursor.node.at)) return false;
     // if the offset is byte offset:
     if (typeof offset === "number") {
       const { startIndex, endIndex } = cursor.node.at;
-      return startIndex <= offset && endIndex >= offset;
+      // @see https://github.com/tree-sitter/blob/master/lib/include/tree_sitter/api.h#L120
+      return startIndex <= offset && endIndex > offset;
     }
 
     const { startPosition, endPosition } = cursor.node.at;
@@ -61,7 +64,7 @@ class GraphCursor {
 
     const endsAfterOrAt =
       endPosition.row > offset.row ||
-      (endPosition.row === offset.row && endPosition.column >= offset.column);
+      (endPosition.row === offset.row && endPosition.column > offset.column);
 
     return startsBeforeOrAt && endsAfterOrAt;
   }
@@ -138,10 +141,9 @@ class GraphCursor {
   }
 
   toString(): string {
-    const str =
-      typeof this.node.at === "string"
-        ? `(${this.node.at})`
-        : `(${this.root}:${this.node.at.startPosition.row + 1}:${this.node.at.startPosition.column + 1})`;
+    const str = isNodeSource(this.node.at)
+      ? `(${this.node.at})`
+      : `(${this.root}:${this.node.at.startPosition.row + 1}:${this.node.at.startPosition.column + 1})`;
     return str;
   }
 }

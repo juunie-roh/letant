@@ -1,5 +1,6 @@
 import type Parser from "tree-sitter";
 
+import { NodePath } from "@/common/branded-types";
 import type {
   CaptureConfig,
   ConvertConfig,
@@ -7,7 +8,6 @@ import type {
   Edge,
   FullCaptureResult,
   Node,
-  NodePath,
   QueryConfig,
   SingleCaptureResult,
 } from "@/models";
@@ -15,9 +15,7 @@ import type {
 import type { QueryMap } from "./query";
 
 export function createChildPath(parent: NodePath, name: string): NodePath {
-  const path = [...parent] as NodePath;
-  path.push(name);
-  return path;
+  return NodePath([...parent, name]);
 }
 
 export function createConvertResult<
