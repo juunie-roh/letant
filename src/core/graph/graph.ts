@@ -7,7 +7,7 @@ import GraphError from "./error";
 
 /**
  *
- * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0002-sha-256-based-nodepath-encryption.md ADR-0002}
+ * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0002-sha-256-based-node-path-hashing.md ADR-0002}
  */
 class Graph {
   private readonly _root: string;
