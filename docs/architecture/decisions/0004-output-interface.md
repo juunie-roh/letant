@@ -78,9 +78,13 @@ acquisition.
   dumps the scope tree for inspection and snapshot tests. It carries no
   compatibility promise to end users.
 - **Two transport layers.** In-process: live `GraphCursor`s — chainable,
-  workspace-scoped. Wire (editor plugin, CLI): plain positions — file plus
-  half-open `[start, end)` range — so a client can highlight raw text with
-  no further interpretation.
+  workspace-scoped. Wire: the cursor itself is the output, transmitted as
+  its _address_ — `[root, ...path]`. A cursor is immutable `(graph, path)`,
+  so a resident engine reconstructs it from the address statelessly: no
+  handle registry, idempotent queries, and addresses survive reparses as
+  long as the name chain does (ADR 0002). Positions — file plus half-open
+  `[start, end)` range — are attributes a client asks an address for, so
+  raw text can be highlighted with no further interpretation.
 
 ## Consequences
 
@@ -95,6 +99,12 @@ acquisition.
 - The plugin contract is unchanged: positions already come from captures;
   cross-file continuation uses `[filePath, name]` identity (ADR 0002) and
   `topLevelNames`.
+- The intended workflow is a resident engine (`letant serve`): open a file
+  into the workspace, pick a reference, follow `origin` — the client
+  accumulates followed cursors as a set keyed by address, never visiting
+  the same cursor twice. This applies to AI consumers identically: no
+  inference about where to read — pick one entry scope (e.g. by grep),
+  then follow cursors on demand.
 
 ## Open Questions
 
