@@ -1,6 +1,6 @@
 import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
-import type { ConvertHandler, Edge, Node } from "@/types";
+import type { ConvertHandler, Node } from "@/types";
 
 import { getDecorators } from "../utility/property";
 
@@ -9,17 +9,12 @@ const classHandler: ConvertHandler<"class"> = (
   parent,
   { capture, convert },
 ) => {
-  const result = createConvertResult<Node, Edge>();
+  const result = createConvertResult<Node>();
 
   for (const c of captures) {
     const { name, node, extends: ext, body } = c;
     const path = createChildPath(parent, name.text);
 
-    result.edges.push({
-      from: parent,
-      to: path,
-      kind: "defines",
-    });
     result.nodes.push({
       path,
       type: "scope",

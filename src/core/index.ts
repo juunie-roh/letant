@@ -1,6 +1,6 @@
-import Graph from "./graph";
-import GraphCursor from "./graph/cursor";
 import Plugin from "./plugin";
 import PluginHandler from "./plugin-handler";
+import Tree from "./tree";
+import TreeCursor from "./tree/cursor";
 
-export { Graph, GraphCursor, Plugin, PluginHandler };
+export { Plugin, PluginHandler, Tree, TreeCursor };

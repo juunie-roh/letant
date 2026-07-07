@@ -1,6 +1,6 @@
 import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
-import type { ConvertHandler, Edge, Node } from "@/types";
+import type { ConvertHandler, Node } from "@/types";
 
 import getFunctionField from "../utility/function";
 import flatPattern from "../utility/pattern";
@@ -10,19 +10,13 @@ const functionHandler: ConvertHandler<"function"> = (
   parent,
   { capture, convert },
 ) => {
-  const result = createConvertResult<Node, Edge>();
+  const result = createConvertResult<Node>();
 
   for (const c of captures) {
     const { is_async, params, body } = getFunctionField(
       c["definition.function"],
     );
     const path = createChildPath(parent, c.name.text);
-
-    result.edges.push({
-      from: parent,
-      to: path,
-      kind: "defines",
-    });
 
     result.nodes.push({
       path,
@@ -36,11 +30,6 @@ const functionHandler: ConvertHandler<"function"> = (
     if (params) {
       if (params.type === "identifier") {
         const paramPath = createChildPath(path, params.text);
-        result.edges.push({
-          from: path,
-          to: paramPath,
-          kind: "defines",
-        });
 
         result.nodes.push({
           path: paramPath,
@@ -52,11 +41,7 @@ const functionHandler: ConvertHandler<"function"> = (
         params.namedChildren.forEach((child) => {
           flatPattern(child).forEach(({ name, node, has_default }) => {
             const parameterPath = createChildPath(path, name);
-            result.edges.push({
-              from: path,
-              to: parameterPath,
-              kind: "defines",
-            });
+
             result.nodes.push({
               path: parameterPath,
               type: "binding",

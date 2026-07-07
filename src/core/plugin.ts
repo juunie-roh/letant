@@ -2,13 +2,7 @@ import Parser from "tree-sitter";
 
 import { NodePath, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
-import type {
-  CaptureConfig,
-  ConvertConfig,
-  Edge,
-  Node,
-  QueryConfig,
-} from "@/models";
+import type { CaptureConfig, ConvertConfig, Node, QueryConfig } from "@/models";
 import type { PluginConfig } from "@/models/config";
 import { assertPluginDescriptor, createCapture, createConvert } from "@/utils";
 import { QueryMap } from "@/utils/query";
@@ -19,14 +13,13 @@ declare namespace Plugin {
   export interface Descriptor<
     Q extends QueryConfig = QueryConfig,
     N extends Node = Node,
-    E extends Edge = Edge,
   > {
     language: Parser.Language;
     /** File extensions this plugin can resolve import specifiers against. */
     extensions: string[];
     query: QueryMap<keyof Q & string>;
     captureConfig: CaptureConfig<Q>;
-    convertConfig: ConvertConfig<Q, N, E>;
+    convertConfig: ConvertConfig<Q, N>;
     references: (node: Parser.SyntaxNode) => Parser.SyntaxNode[];
   }
 }
@@ -43,7 +36,7 @@ class Plugin {
 
   private _capture: ReturnType<typeof createCapture<QueryConfig>>;
 
-  private _convert: ReturnType<typeof createConvert<QueryConfig, Node, Edge>>;
+  private _convert: ReturnType<typeof createConvert<QueryConfig, Node>>;
 
   private constructor(config: PluginConfig, descriptor: Plugin.Descriptor) {
     this._config = config;
@@ -54,7 +47,7 @@ class Plugin {
       this._module.captureConfig,
     );
 
-    this._convert = createConvert<QueryConfig, Node, Edge>(
+    this._convert = createConvert<QueryConfig, Node>(
       this._capture,
       this._module.convertConfig,
     );
@@ -141,10 +134,7 @@ class Plugin {
   }
 
   @Trace({ label: "Plugin.extract" })
-  extract(
-    filePath: string,
-    node: Parser.SyntaxNode,
-  ): { edges: Edge[]; nodes: Node[] } {
+  extract(filePath: string, node: Parser.SyntaxNode): { nodes: Node[] } {
     const captures = this._capture(node);
     const result = this._convert(captures, NodePath([filePath]));
     // add root file node once
