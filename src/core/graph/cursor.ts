@@ -21,9 +21,13 @@ class GraphCursor {
   /**
    * Get graph cursor instance at given {@link Offset | offset}.
    *
+   * Descends over scope-bearing nodes only: a binding offers no space to
+   * traverse or resolve within, so the entry is always the innermost
+   * enclosing scope.
+   *
    * @param graph A graph where to find cursor instance.
    * @param offset An offset to locate cursor within the given graph.
-   * @returns The innermost graph cursor containing the given offset.
+   * @returns The innermost scope cursor containing the given offset.
    */
   static at(graph: Graph, offset: Offset): GraphCursor {
     let cursor = graph.walk();
@@ -31,7 +35,11 @@ class GraphCursor {
     while (
       (next = cursor
         .children()
-        .find((cursor) => GraphCursor.contains(cursor, offset)))
+        .find(
+          (cursor) =>
+            cursor.node.type !== "binding" &&
+            GraphCursor.contains(cursor, offset),
+        ))
     ) {
       cursor = next;
     }
