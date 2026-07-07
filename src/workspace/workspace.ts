@@ -74,6 +74,19 @@ class Workspace {
     return this._files.has(filePath);
   }
 
+  /**
+   * Top-level names declared in each opened file, keyed by
+   * workspace-relative file path. These are the only names referable
+   * across files.
+   */
+  topLevelNames(): Map<string, string[]> {
+    const result = new Map<string, string[]>();
+    for (const [filePath, { graph }] of this._files) {
+      result.set(filePath, graph.topLevelNames());
+    }
+    return result;
+  }
+
   @NormalizePath
   @Trace({ label: "Workspace.trace" })
   trace(filePath: string, offset: Offset) {

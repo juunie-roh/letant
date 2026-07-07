@@ -8,6 +8,16 @@ declare const __brand: unique symbol;
  */
 export type Branded<T, K extends string> = T & { [__brand]: K };
 
+/**
+ * Intra-graph node id. Ephemeral — minted per {@link Graph} instance,
+ * never persisted or compared across graphs. See ADR 0002.
+ */
+export type NodeId = Branded<number, "NODE_ID">;
+
+export function NodeId(value: number): NodeId {
+  return value as NodeId;
+}
+
 export type NodePath = Branded<string[], "NODE_PATH">;
 
 export function NodePath(value: string[]): NodePath {
