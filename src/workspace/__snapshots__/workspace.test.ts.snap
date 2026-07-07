@@ -6,6 +6,16 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     {
       "at": "main.js",
       "blockStartIndex": 0,
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+      ],
+      "id": 0,
       "kind": "module",
       "path": [
         "main.js",
@@ -14,6 +24,8 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": "a.js",
+      "children": [],
+      "id": 1,
       "kind": "module",
       "path": [
         "main.js",
@@ -24,6 +36,8 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": "sub/b.js",
+      "children": [],
+      "id": 2,
       "kind": "module",
       "path": [
         "main.js",
@@ -34,6 +48,8 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": "lib/c.js",
+      "children": [],
+      "id": 3,
       "kind": "module",
       "path": [
         "main.js",
@@ -44,6 +60,8 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": "node:fs",
+      "children": [],
+      "id": 4,
       "kind": "module",
       "path": [
         "main.js",
@@ -54,6 +72,8 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": "#missing/thing",
+      "children": [],
+      "id": 5,
       "kind": "module",
       "path": [
         "main.js",
@@ -64,6 +84,8 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": "../outside",
+      "children": [],
+      "id": 6,
       "kind": "module",
       "path": [
         "main.js",
@@ -85,6 +107,8 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
           "row": 9,
         },
       },
+      "children": [],
+      "id": 7,
       "kind": "variable",
       "path": [
         "main.js",
