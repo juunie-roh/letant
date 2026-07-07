@@ -53,7 +53,7 @@ workspace "Letant" {
             description "A structural code comprehension assistance."
 
             letant = container "letant" {
-                description "A core engine that manages graph construction."
+                description "A core engine that manages tree construction."
                 technology "Node.js"
 
                 group "Core" {
@@ -63,17 +63,17 @@ workspace "Letant" {
                     pluginHandler = module "Plugin Handler" {
                         description "A middle layer that bridges between workspace and plugin."
                     }
-                    graph = module "Graph" {
-                        description "A declaration graph of name bindings and scope boundaries parsed from a source file."
+                    tree = module "Tree" {
+                        description "A declaration tree of name bindings and scope boundaries parsed from a source file."
                     }
-                    cursor = module "Graph Cursor" {
-                        description "A cursor for graph traversal."
+                    cursor = module "Tree Cursor" {
+                        description "A cursor for tree traversal."
                     }
                 }
 
                 group "Workspace" {
                     ws = module "Workspace" {
-                        description "An application layer where the core engine runs. Caches graphs mapped with file paths."
+                        description "An application layer where the core engine runs. Caches trees mapped with file paths."
                     }
                 }
 

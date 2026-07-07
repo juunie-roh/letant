@@ -1,10 +1,10 @@
-# 3. Containment Tree as the Base Structure of the Queryable Model
+# 3. Containment Tree as the Base Structure
 
 Date: 2026-07-06
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -82,3 +82,12 @@ of it — a traversed output — not the store.
   derived, re-buildable index over scope nodes only, mapping intervals
   many-to-one to nodes (declaration merging yields one node with several
   intervals).
+
+> **Note (2026-07-07):** the relational-edge reservation above was vacated
+> by ADR 0004 — provenance is enacted via positions and references are
+> computed on demand, so the implementation stores no edges at all. `Edge`
+> was removed from the project entirely: `children()` derives from a
+> children index over interned paths, attachment kinds proved derivable
+> from node data (`imports` ⟺ source-shaped `at`), and the cursor's
+> `children` filter takes a node type (`scope`/`anonymous`/`binding`)
+> instead of an edge kind.

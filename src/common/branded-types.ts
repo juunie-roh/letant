@@ -9,8 +9,10 @@ declare const __brand: unique symbol;
 export type Branded<T, K extends string> = T & { [__brand]: K };
 
 /**
- * Intra-graph node id. Ephemeral — minted per {@link Graph} instance,
- * never persisted or compared across graphs. See ADR 0002.
+ * Intra-tree node id. Ephemeral — minted per {@link Tree} instance,
+ * never persisted or compared across trees. See ADR 0002.
+ *
+ * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0002-sha-256-based-node-path-hashing.md ADR-0002}
  */
 export type NodeId = Branded<number, "NODE_ID">;
 
