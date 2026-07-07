@@ -6,7 +6,7 @@ import Parser from "tree-sitter";
 
 import { isNodeSource, NodePath, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
-import { GraphCursor, PluginHandler } from "@/core";
+import { PluginHandler, TreeCursor } from "@/core";
 import type { Config, Offset } from "@/models";
 
 import { NormalizePath } from "./decorators";
@@ -81,7 +81,7 @@ class Workspace {
    */
   topLevelNames(): Map<string, string[]> {
     const result = new Map<string, string[]>();
-    for (const [filePath, { graph }] of this._files) {
+    for (const [filePath, { tree: graph }] of this._files) {
       result.set(filePath, graph.topLevelNames());
     }
     return result;
@@ -94,9 +94,9 @@ class Workspace {
    * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0004-output-interface.md ADR-0004}
    */
   @NormalizePath
-  at(filePath: string, offset: Offset): GraphCursor {
-    const { graph } = this.get(filePath);
-    return GraphCursor.at(graph, offset);
+  at(filePath: string, offset: Offset): TreeCursor {
+    const { tree: graph } = this.get(filePath);
+    return TreeCursor.at(graph, offset);
   }
 
   /**
@@ -106,7 +106,7 @@ class Workspace {
    * Auto-follows import bindings while their source file is already opened
    * (explored territory); stops at the frontier otherwise.
    *
-   * @returns A {@link GraphCursor} at the declaration (its `at` is a local
+   * @returns A {@link TreeCursor} at the declaration (its `at` is a local
    * range, possibly in another file — see `cursor.root`), the
    * {@link NodeSource} of the next file to open (frontier), or `undefined`
    * when the name cannot be resolved.
@@ -117,15 +117,15 @@ class Workspace {
   origin(
     filePath: string,
     offset: Offset,
-  ): GraphCursor | NodeSource | undefined {
-    const { graph, tree } = this.get(filePath);
+  ): TreeCursor | NodeSource | undefined {
+    const { tree: graph, tsTree: tree } = this.get(filePath);
 
     const target =
       typeof offset === "number"
         ? tree.rootNode.descendantForIndex(offset)
         : tree.rootNode.descendantForPosition(offset);
 
-    let resolved = GraphCursor.at(graph, offset).resolve(target.text);
+    let resolved = TreeCursor.at(graph, offset).resolve(target.text);
 
     const visited = new Set<string>([filePath]);
 
@@ -141,10 +141,10 @@ class Workspace {
 
       const name =
         typeof props?.alias_of === "string" ? props.alias_of : resolved.name;
-      const { graph: next } = this.get(at);
+      const { tree: next } = this.get(at);
       const path = NodePath([at, name]);
 
-      resolved = next.getNode(path) ? new GraphCursor(next, path) : undefined;
+      resolved = next.getNode(path) ? new TreeCursor(next, path) : undefined;
     }
 
     return undefined;
@@ -159,7 +159,7 @@ class Workspace {
 
     const resolved = new Map<
       string,
-      { cursor: GraphCursor | undefined; refs: Set<Parser.SyntaxNode> }
+      { cursor: TreeCursor | undefined; refs: Set<Parser.SyntaxNode> }
     >();
 
     for (const ref of references) {
@@ -210,11 +210,11 @@ class Workspace {
     offset: Offset,
   ): {
     ext: string;
-    cursor: GraphCursor;
+    cursor: TreeCursor;
     node: Parser.SyntaxNode;
   } {
-    const { graph, tree, ext } = this.get(filePath);
-    const cursor = GraphCursor.at(graph, offset);
+    const { tree: graph, tsTree: tree, ext } = this.get(filePath);
+    const cursor = TreeCursor.at(graph, offset);
 
     // the cursor always lands on a scope — start at its inner block
     const o = cursor.node.blockStartIndex ?? 0;

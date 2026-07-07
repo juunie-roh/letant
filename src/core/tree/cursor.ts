@@ -3,17 +3,17 @@ import { isNodeSource } from "@/common/branded-types";
 import { defined } from "@/common/defined";
 import type { Node, Offset } from "@/models";
 
-import GraphError from "./error";
-import type Graph from "./graph";
+import TreeError from "./error";
+import type Tree from "./tree";
 
 /**
  * A lightweight immutable cursor instance.
  */
-class GraphCursor {
-  private readonly _graph: Graph;
+class TreeCursor {
+  private readonly _graph: Tree;
   private readonly _path: NodePath;
 
-  constructor(graph: Graph, path: NodePath) {
+  constructor(graph: Tree, path: NodePath) {
     this._graph = graph;
     this._path = path;
   }
@@ -29,16 +29,16 @@ class GraphCursor {
    * @param offset An offset to locate cursor within the given graph.
    * @returns The innermost scope cursor containing the given offset.
    */
-  static at(graph: Graph, offset: Offset): GraphCursor {
+  static at(graph: Tree, offset: Offset): TreeCursor {
     let cursor = graph.walk();
-    let next: GraphCursor | undefined;
+    let next: TreeCursor | undefined;
     while (
       (next = cursor
         .children()
         .find(
           (cursor) =>
             cursor.node.type !== "binding" &&
-            GraphCursor.contains(cursor, offset),
+            TreeCursor.contains(cursor, offset),
         ))
     ) {
       cursor = next;
@@ -48,13 +48,13 @@ class GraphCursor {
   }
 
   /**
-   * Test whether a {@link GraphCursor | cursor}'s range contains the given {@link Offset | offset}.
+   * Test whether a {@link TreeCursor | cursor}'s range contains the given {@link Offset | offset}.
    *
    * @param cursor A cursor to test for containment.
    * @param offset An offset to test for containment.
    * @returns Whether the cursor contains the given offset.
    */
-  static contains(cursor: GraphCursor, offset: Offset): boolean {
+  static contains(cursor: TreeCursor, offset: Offset): boolean {
     // if the cursor is at an imported module:
     if (isNodeSource(cursor.node.at)) return false;
     // if the offset is byte offset:
@@ -81,8 +81,8 @@ class GraphCursor {
     const n = this._graph.getNode(this._path);
     defined(
       n,
-      new GraphError(
-        "GRAPH_NO_NODE",
+      new TreeError(
+        "TREE_NO_NODE",
         `Failed to get node at path: ${this._path}`,
       ),
     );
@@ -105,18 +105,23 @@ class GraphCursor {
     return this._graph.root;
   }
 
-  parent(): GraphCursor | undefined {
+  parent(): TreeCursor | undefined {
     const parentPath = this._graph.parent(this._path);
-    return parentPath ? new GraphCursor(this._graph, parentPath) : undefined;
+    return parentPath ? new TreeCursor(this._graph, parentPath) : undefined;
   }
 
-  children(edgeKind?: string): GraphCursor[] {
-    const cursors: GraphCursor[] = [];
+  /**
+   * Direct children of the current node, optionally filtered by node
+   * {@link Node.type | type} (`"scope"`, `"anonymous"`, or `"binding"`).
+   */
+  children(type?: Node["type"]): TreeCursor[] {
+    const cursors: TreeCursor[] = [];
 
-    this._graph.adjacent(this._path)?.forEach((kinds, childPath) => {
-      if (edgeKind && !kinds.has(edgeKind)) return;
-      cursors.push(new GraphCursor(this._graph, childPath));
-    });
+    for (const childPath of this._graph.children(this._path)) {
+      const cursor = new TreeCursor(this._graph, childPath);
+      if (type && cursor.node.type !== type) continue;
+      cursors.push(cursor);
+    }
 
     return cursors;
   }
@@ -124,10 +129,8 @@ class GraphCursor {
   /**
    * Find the closest ancestor of the current node that satisfies the given predicate.
    */
-  closest(
-    predicate: (cursor: GraphCursor) => boolean,
-  ): GraphCursor | undefined {
-    let c: GraphCursor | undefined = this;
+  closest(predicate: (cursor: TreeCursor) => boolean): TreeCursor | undefined {
+    let c: TreeCursor | undefined = this;
 
     while (c) {
       if (predicate(c)) return c;
@@ -140,7 +143,7 @@ class GraphCursor {
   /**
    * Find the closest node from ancestors of the current node having the given symbol as its name.
    */
-  resolve(symbol: string): GraphCursor | undefined {
+  resolve(symbol: string): TreeCursor | undefined {
     const scope = this.closest((c) =>
       c.children().some((child) => child.name === symbol),
     );
@@ -156,4 +159,4 @@ class GraphCursor {
   }
 }
 
-export default GraphCursor;
+export default TreeCursor;

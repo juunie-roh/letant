@@ -162,12 +162,11 @@ describe("Plugin", () => {
   });
 
   describe("extract()", () => {
-    it("returns nodes and edges arrays for a parsed source", () => {
+    it("returns a nodes array for a parsed source", () => {
       const tree = plugin.parse("export function greet() {}");
       const result = plugin.extract("greet.ts", tree.rootNode);
 
       expect(Array.isArray(result.nodes)).toBe(true);
-      expect(Array.isArray(result.edges)).toBe(true);
     });
   });
 });

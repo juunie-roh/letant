@@ -11,15 +11,15 @@ import { Node } from "@/models";
 import type { Config, PluginConfig } from "@/models/config";
 
 import CoreError from "./error";
-import Graph from "./graph";
 import Plugin from "./plugin";
+import Tree from "./tree";
 
 declare namespace PluginHandler {
   export type ParseResult = {
-    /** A graph constructed from the result converted by plugin. */
-    graph: Graph;
+    /** A scope tree constructed from the result converted by plugin. */
+    tree: Tree;
     /** Raw AST parsed by tree-sitter. */
-    tree: Parser.Tree;
+    tsTree: Parser.Tree;
     /** The extension of the parsed file. */
     ext: string;
   };
@@ -83,12 +83,12 @@ class PluginHandler {
       throw new CoreError("CORE_SYNTAX_ERROR", `Syntax error in "${filePath}"`);
     }
 
-    const { nodes, edges } = plugin.extract(filePath, tree.rootNode);
+    const { nodes } = plugin.extract(filePath, tree.rootNode);
     const resolved = this.resolvePaths(filePath, nodes, plugin);
 
     return {
-      graph: new Graph(resolved, edges, filePath),
-      tree,
+      tree: new Tree(resolved, filePath),
+      tsTree: tree,
       ext,
     };
   }

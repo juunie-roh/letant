@@ -35,12 +35,12 @@ const program = createCommand()
   .addCommand(queryCommand)
   .action(async (file, others, options) => {
     const workspace = await Workspace.create(await loadConfig(options.config));
-    const { graph } = workspace.openSource(
+    const { tree } = workspace.openSource(
       file,
       readFileSync(file, options.encoding),
     );
 
-    let data: any = graph.serialize();
+    let data: any = tree.serialize();
 
     if (options.trace) {
       workspace.trace(file, {

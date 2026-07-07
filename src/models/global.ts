@@ -53,32 +53,6 @@ type BindingNode<K extends string = string> = BaseNode<K> & {
  */
 export type Node<K extends string = string> = ScopeNode<K> | BindingNode<K>;
 
-/**
- * @template K - String union of valid `kind` values for this edge. Defaults to
- * `string` for untyped use; narrow it to a literal union to get type-safe `kind` access.
- * @example
- * import type * as letant from "letant";
- * type Edge = letant.Edge<"edge kind" | "string literals">;
- */
-export type Edge<K extends string = string> = {
-  /**
-   * ID of the source node where the relationship originates.
-   */
-  from: NodePath;
-  /**
-   * A name or ID of the target node where the relationship terminates.
-   */
-  to: NodePath;
-  /**
-   * Kind of relationship this edge represents.
-   */
-  kind: K;
-  /**
-   * Language-specific property supplements.
-   */
-  props?: Record<string, unknown>;
-};
-
 export type QueryConfig = Record<
   string,
   { required: string; optional: string }

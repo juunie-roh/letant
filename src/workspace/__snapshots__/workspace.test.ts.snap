@@ -2,78 +2,6 @@
 
 exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
 {
-  "edges": [
-    {
-      "from": [
-        "main.js",
-      ],
-      "kind": "imports",
-      "to": [
-        "main.js",
-        "a",
-      ],
-    },
-    {
-      "from": [
-        "main.js",
-      ],
-      "kind": "imports",
-      "to": [
-        "main.js",
-        "b",
-      ],
-    },
-    {
-      "from": [
-        "main.js",
-      ],
-      "kind": "imports",
-      "to": [
-        "main.js",
-        "c",
-      ],
-    },
-    {
-      "from": [
-        "main.js",
-      ],
-      "kind": "imports",
-      "to": [
-        "main.js",
-        "fs",
-      ],
-    },
-    {
-      "from": [
-        "main.js",
-      ],
-      "kind": "imports",
-      "to": [
-        "main.js",
-        "m",
-      ],
-    },
-    {
-      "from": [
-        "main.js",
-      ],
-      "kind": "imports",
-      "to": [
-        "main.js",
-        "out",
-      ],
-    },
-    {
-      "from": [
-        "main.js",
-      ],
-      "kind": "defines",
-      "to": [
-        "main.js",
-        "z",
-      ],
-    },
-  ],
   "nodes": [
     {
       "at": "main.js",
@@ -146,8 +74,16 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": {
-        "byte": "189:224",
-        "line": "L9:L9",
+        "endIndex": 224,
+        "endPosition": {
+          "column": 42,
+          "row": 9,
+        },
+        "startIndex": 189,
+        "startPosition": {
+          "column": 7,
+          "row": 9,
+        },
       },
       "kind": "variable",
       "path": [

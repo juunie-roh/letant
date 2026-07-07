@@ -5,7 +5,6 @@ import type {
   CaptureConfig,
   ConvertConfig,
   ConvertResult,
-  Edge,
   FullCaptureResult,
   Node,
   QueryConfig,
@@ -18,19 +17,14 @@ export function createChildPath(parent: NodePath, name: string): NodePath {
   return NodePath([...parent, name]);
 }
 
-export function createConvertResult<
-  N extends Node,
-  E extends Edge,
->(): ConvertResult<N, E> & {
-  push(...results: ConvertResult<N, E>[]): void;
+export function createConvertResult<N extends Node>(): ConvertResult<N> & {
+  push(...results: ConvertResult<N>[]): void;
 } {
   const result = {
     nodes: [] as N[],
-    edges: [] as E[],
-    push(...rs: ConvertResult<N, E>[]) {
+    push(...rs: ConvertResult<N>[]) {
       for (const r of rs) {
         result.nodes.push(...r.nodes);
-        result.edges.push(...r.edges);
       }
     },
   };
@@ -104,33 +98,29 @@ export function createCapture<Q extends QueryConfig>(
   return capture;
 }
 
-export function createConvert<
-  Q extends QueryConfig,
-  N extends Node,
-  E extends Edge,
->(
+export function createConvert<Q extends QueryConfig, N extends Node>(
   capture: ReturnType<typeof createCapture<Q>>,
-  config: ConvertConfig<Q, N, E>,
+  config: ConvertConfig<Q, N>,
 ) {
   function convert(
     captures: FullCaptureResult<Q>,
     parent: NodePath,
-  ): ConvertResult<N, E>;
+  ): ConvertResult<N>;
   function convert<K extends keyof Q>(
     captures: SingleCaptureResult<Q[K]>[],
     parent: NodePath,
     key: K,
-  ): ConvertResult<N, E>;
+  ): ConvertResult<N>;
   function convert<K extends keyof Q>(
     captures: FullCaptureResult<Q> | SingleCaptureResult<Q[K]>[],
     parent: NodePath,
     key?: K,
-  ): ConvertResult<N, E> {
+  ): ConvertResult<N> {
     const context = { capture, convert };
 
     if (!key) {
       const full = captures as FullCaptureResult<Q>;
-      const result = createConvertResult<N, E>();
+      const result = createConvertResult<N>();
 
       for (const k of Object.keys(full) as (keyof Q)[]) {
         const r = config[k](full[k], parent, context);
