@@ -1,6 +1,6 @@
 {
   "name": "@letant/ts",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "TypeScript plugin for letant",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -38,7 +38,7 @@
     "node": "^22.13.0 || >=24"
   },
   "peerDependencies": {
-    "letant": "^0.0.3",
+    "letant": "^0.0.4",
     "tree-sitter-typescript": "^0.23.2"
   },
   "devDependencies": {
