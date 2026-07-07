@@ -1,4 +1,4 @@
-# 2. SHA-256 based NodePath Encryption
+# 2. SHA-256 based Node Path Hashing
 
 Date: 2026-07-03
 
