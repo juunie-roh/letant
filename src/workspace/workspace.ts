@@ -4,7 +4,7 @@ import { cwd } from "node:process";
 
 import Parser from "tree-sitter";
 
-import { isNodeSource } from "@/common/branded-types";
+import { isNodeSource, NodePath, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
 import { GraphCursor, PluginHandler } from "@/core";
 import type { Config, Offset } from "@/models";
@@ -87,6 +87,69 @@ class Workspace {
     return result;
   }
 
+  /**
+   * Positional entry: the innermost scope containing the offset. One level
+   * of disclosure is `at(...).children()`; what to explore further is the
+   * user's decision.
+   * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0004-output-interface.md ADR-0004}
+   */
+  @NormalizePath
+  at(filePath: string, offset: Offset): GraphCursor {
+    const { graph } = this.get(filePath);
+    return GraphCursor.at(graph, offset);
+  }
+
+  /**
+   * The pointed genealogical query: where did the name at this position
+   * come from?.
+   *
+   * Auto-follows import bindings while their source file is already opened
+   * (explored territory); stops at the frontier otherwise.
+   *
+   * @returns A {@link GraphCursor} at the declaration (its `at` is a local
+   * range, possibly in another file — see `cursor.root`), the
+   * {@link NodeSource} of the next file to open (frontier), or `undefined`
+   * when the name cannot be resolved.
+   * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0004-output-interface.md ADR-0004}
+   */
+  @NormalizePath
+  @Trace({ label: "Workspace.origin" })
+  origin(
+    filePath: string,
+    offset: Offset,
+  ): GraphCursor | NodeSource | undefined {
+    const { graph, tree } = this.get(filePath);
+
+    const target =
+      typeof offset === "number"
+        ? tree.rootNode.descendantForIndex(offset)
+        : tree.rootNode.descendantForPosition(offset);
+
+    let resolved = GraphCursor.at(graph, offset).resolve(target.text);
+
+    const visited = new Set<string>([filePath]);
+
+    while (resolved) {
+      const { at, props } = resolved.node;
+      // local declaration — position acquired
+      if (!isNodeSource(at)) return resolved;
+      // frontier — the source file has not been opened
+      if (!this.has(at)) return at;
+      // cycle in re-export chain
+      if (visited.has(at)) return undefined;
+      visited.add(at);
+
+      const name =
+        typeof props?.alias_of === "string" ? props.alias_of : resolved.name;
+      const { graph: next } = this.get(at);
+      const path = NodePath([at, name]);
+
+      resolved = next.getNode(path) ? new GraphCursor(next, path) : undefined;
+    }
+
+    return undefined;
+  }
+
   @NormalizePath
   @Trace({ label: "Workspace.trace" })
   trace(filePath: string, offset: Offset) {
@@ -153,20 +216,8 @@ class Workspace {
     const { graph, tree, ext } = this.get(filePath);
     const cursor = GraphCursor.at(graph, offset);
 
-    const cursorNode = cursor.node;
-
-    let o: number;
-
-    if (cursorNode.type !== "binding") {
-      // for scope node, set start index as its block start index
-      o = cursorNode.blockStartIndex;
-    } else if (isNodeSource(cursorNode.at)) {
-      // if the node is an imported module, start at root
-      o = 0;
-    } else {
-      // neither, then set start index at the node's.
-      o = cursorNode.at.startIndex;
-    }
+    // the cursor always lands on a scope — start at its inner block
+    const o = cursor.node.blockStartIndex ?? 0;
 
     const node = tree.rootNode.descendantForIndex(o).parent ?? tree.rootNode;
 
