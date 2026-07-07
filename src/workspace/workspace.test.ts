@@ -44,11 +44,21 @@ describe("Workspace", () => {
     expect(ext).toBe(".js");
     expect(workspace.has("main.js")).toBe(true);
 
-    // capture order is not part of the contract — sort for a stable snapshot
+    // capture order is not part of the contract — sort for a stable
+    // snapshot, and remap the capture-order-minted ids to sorted order
     const { nodes } = graph.serialize();
     nodes.sort((x, y) => x.path.join("\0").localeCompare(y.path.join("\0")));
 
-    expect({ nodes }).toMatchSnapshot();
+    const remap = new Map(nodes.map((n, index) => [n.id, index]));
+    const normalized = nodes.map((n) => ({
+      ...n,
+      id: remap.get(n.id),
+      children: n.children
+        .map((child) => remap.get(child)!)
+        .sort((a, b) => a - b),
+    }));
+
+    expect({ nodes: normalized }).toMatchSnapshot();
   });
 
   describe("origin()", () => {

@@ -200,4 +200,23 @@ describe("Tree", () => {
       expect(tree.walk().path).toEqual(["file.ts"]);
     });
   });
+
+  describe("serialize()", () => {
+    it("emits nodes with ids and children as id references", () => {
+      const { nodes } = tree.serialize();
+      const byId = new Map(nodes.map((n) => [n.id, n]));
+
+      const root = nodes.find((n) => n.path.length === 1);
+      const childNames = root?.children.map((id) => byId.get(id)?.path.at(-1));
+
+      expect(childNames).toEqual(["Foo", "x", "if#0"]);
+    });
+
+    it("emits copies — mutating children does not affect the tree", () => {
+      const { nodes } = tree.serialize();
+      nodes.find((n) => n.path.length === 1)?.children.pop();
+
+      expect(tree.children(NodePath(["file.ts"]))).toHaveLength(3);
+    });
+  });
 });

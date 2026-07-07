@@ -157,8 +157,7 @@ class Tree {
   /**
    * Top-level names declared in this file: the non-anonymous nodes sitting
    * directly under the root module. These are the only names referable
-   * across files. Sorted, since extraction order is not
-   * guaranteed.
+   * across files. Sorted, since extraction order is not guaranteed.
    */
   topLevelNames(): string[] {
     const names: string[] = [];
@@ -177,12 +176,17 @@ class Tree {
   /**
    * Development surface: dumps the scope tree nodes for inspection and
    * snapshot tests. Carries no compatibility promise (ADR 0004).
+   *
+   * Each node carries its intra-tree `id` and its direct `children` as id
+   * references — ids are only meaningful as cross-references within one
+   * dump (ADR 0002).
    */
   serialize() {
     const nodes = Array.from(
-      this._nodes.values().map((n) => ({
+      this._nodes.entries().map(([id, n]) => ({
+        id,
         ...n,
-        at: n.at,
+        children: [...(this._children.get(id) ?? [])],
       })),
     );
 
