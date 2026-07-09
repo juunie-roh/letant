@@ -1,30 +1,37 @@
+import { statSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 
 import type Parser from "tree-sitter";
 
+import { isNodeSource, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
 import { defined } from "@/common/defined";
-import type { Config } from "@/models/config";
+import { Node } from "@/models";
+import type { Config, PluginConfig } from "@/models/config";
 
 import CoreError from "./error";
-import Graph from "./graph";
 import Plugin from "./plugin";
+import Tree from "./tree";
 
 declare namespace PluginHandler {
   export type ParseResult = {
-    /** A graph constructed from the result converted by plugin. */
-    graph: Graph;
+    /** A scope tree constructed from the result converted by plugin. */
+    tree: Tree;
     /** Raw AST parsed by tree-sitter. */
-    tree: Parser.Tree;
+    tsTree: Parser.Tree;
     /** The extension of the parsed file. */
     ext: string;
   };
 }
 
 class PluginHandler {
+  private _config: Config;
+
   private _languagePlugins: Map<string, Plugin>;
 
-  private constructor(languagePlugins: Map<string, Plugin>) {
+  private constructor(config: Config, languagePlugins: Map<string, Plugin>) {
+    this._config = config;
     this._languagePlugins = languagePlugins;
   }
 
@@ -32,19 +39,23 @@ class PluginHandler {
     const languagePlugins = new Map<string, Plugin>();
 
     await Promise.all(
-      config.language.map(async (c) => {
-        const plugin = await Plugin.create(c.name);
-        for (const ext of c.extensions) {
+      config.plugins.map(async (pluginConfig) => {
+        const plugin = await Plugin.create(pluginConfig);
+        for (const ext of pluginConfig.extensions) {
           languagePlugins.set(ext, plugin);
         }
       }),
     );
 
-    return new PluginHandler(languagePlugins);
+    return new PluginHandler(config, languagePlugins);
+  }
+
+  get config(): Config {
+    return this._config;
   }
 
   /**
-   * {@link Plugin | spine `Language`} instances keyed by file extension.
+   * {@link Plugin | letant `Plugin`} instances keyed by file extension.
    */
   get plugins(): ReadonlyMap<string, Plugin> {
     return this._languagePlugins;
@@ -72,13 +83,40 @@ class PluginHandler {
       throw new CoreError("CORE_SYNTAX_ERROR", `Syntax error in "${filePath}"`);
     }
 
-    const { nodes, edges } = plugin.extract(filePath, tree.rootNode);
+    const { nodes } = plugin.extract(filePath, tree.rootNode);
+    const resolved = this.resolvePaths(filePath, nodes, plugin);
 
     return {
-      graph: new Graph(nodes, edges, filePath),
-      tree,
+      tree: new Tree(resolved, filePath),
+      tsTree: tree,
       ext,
     };
+  }
+
+  /**
+   * Resolves import specifiers on binding nodes to workspace-relative paths
+   * that exist on disk, so results are directly navigable. Specifiers that
+   * cannot be resolved to a real file (bare specifiers, unmatched aliases)
+   * are left untouched.
+   */
+  resolvePaths(filePath: string, nodes: Node[], plugin: Plugin): Node[] {
+    const anchor = path.resolve(cwd(), this._config.rootDir ?? ".");
+
+    return nodes.map((node) => {
+      if (!isNodeSource(node.at)) return node;
+
+      const resolved = this._resolveImportPath(
+        node.at,
+        filePath,
+        anchor,
+        plugin.extensions,
+        plugin.config.paths,
+      );
+
+      if (resolved === null) return node;
+
+      return { ...node, at: resolved };
+    });
   }
 
   @Trace({ label: "PluginHandler.references" })
@@ -125,6 +163,81 @@ class PluginHandler {
     );
 
     return { plugin, ext };
+  }
+
+  /**
+   * @returns A workspace-relative path that exists on disk, or `null` if
+   * `importPath` cannot be resolved (bare specifier, unmatched alias, no
+   * matching extension found on disk, or the match falls outside `anchor`).
+   */
+  private _resolveImportPath(
+    importPath: string,
+    filePath: string,
+    anchor: string,
+    extensions: string[],
+    paths?: PluginConfig["paths"],
+  ): NodeSource | null {
+    const candidates = this._candidatePaths(
+      importPath,
+      filePath,
+      anchor,
+      paths,
+    );
+    if (candidates === null) return null;
+
+    const match = candidates
+      .filter((candidate) => !path.relative(anchor, candidate).startsWith(".."))
+      .flatMap((candidate) => [
+        candidate,
+        ...extensions.map((ext) => candidate + ext),
+      ])
+      .find((c) => statSync(c, { throwIfNoEntry: false })?.isFile());
+
+    if (!match) return null;
+
+    return NodeSource(path.relative(anchor, match));
+  }
+
+  /**
+   * Expands `importPath` into the absolute paths it may point to, without
+   * touching the disk: one candidate for relative and absolute specifiers,
+   * one per target for the first matching alias. Returns `null` for
+   * specifiers that cannot name a workspace file.
+   */
+  private _candidatePaths(
+    importPath: string,
+    filePath: string,
+    anchor: string,
+    paths?: PluginConfig["paths"],
+  ): string[] | null {
+    // 1. relative to the importing file
+    if (importPath.startsWith("./") || importPath.startsWith("../")) {
+      return [path.resolve(anchor, path.dirname(filePath), importPath)];
+    }
+
+    // 2. alias substitution
+    if (paths) {
+      for (const [alias, targets] of Object.entries(paths)) {
+        const prefix = alias.endsWith("/*") ? alias.slice(0, -1) : alias;
+        if (!importPath.startsWith(prefix)) continue;
+
+        return targets.map((target) => {
+          const targetPrefix = target.endsWith("/*")
+            ? target.slice(0, -1)
+            : target;
+          return path.resolve(
+            anchor,
+            targetPrefix + importPath.slice(prefix.length),
+          );
+        });
+      }
+    }
+
+    // 3. absolute path, possibly under rootDir
+    if (path.isAbsolute(importPath)) return [importPath];
+
+    // 4. bare specifier — external, leave as-is
+    return null;
   }
 }
 

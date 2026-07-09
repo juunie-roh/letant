@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { NodePath } from "@/models";
+import { NodePath, NodeSource } from "@/common/branded-types";
 
-import GraphCursor from "./cursor";
-import Graph from "./graph";
+import TreeCursor from "./cursor";
+import Tree from "./tree";
 
 const makeRange = (start: number, end: number) => ({
   startIndex: start,
@@ -12,83 +12,56 @@ const makeRange = (start: number, end: number) => ({
   endPosition: { row: 0, column: end },
 });
 
-const graph = new Graph(
+const tree = new Tree(
   [
     {
-      path: ["file.ts"] as NodePath,
+      path: NodePath(["file.ts"]),
       kind: "module",
       type: "scope",
       blockStartIndex: 0,
-      at: { name: "file.ts" },
+      at: NodeSource("file.ts"),
     },
     {
-      path: ["file.ts", "Foo", "bar"] as NodePath,
+      path: NodePath(["file.ts", "Foo", "bar"]),
       kind: "method",
       type: "scope",
       blockStartIndex: 26,
       at: makeRange(20, 50),
     },
     {
-      path: ["file.ts", "Foo"] as NodePath,
+      path: NodePath(["file.ts", "Foo"]),
       kind: "class",
       type: "scope",
       blockStartIndex: 19,
       at: makeRange(10, 80),
     },
     {
-      path: ["file.ts", "Foo", "x"] as NodePath,
+      path: NodePath(["file.ts", "Foo", "x"]),
       kind: "member",
       type: "binding",
       at: makeRange(53, 58),
     },
     {
-      path: ["file.ts", "x"] as NodePath,
+      path: NodePath(["file.ts", "x"]),
       kind: "variable",
       type: "binding",
       at: makeRange(60, 75),
     },
     {
-      path: ["file.ts", "React"] as NodePath,
+      path: NodePath(["file.ts", "React"]),
       kind: "import",
       type: "binding",
-      at: { name: "react" },
-    },
-  ],
-  [
-    {
-      from: ["file.ts"] as NodePath,
-      to: ["file.ts", "Foo"] as NodePath,
-      kind: "defines",
-    },
-    {
-      from: ["file.ts", "Foo"] as NodePath,
-      to: ["file.ts", "Foo", "bar"] as NodePath,
-      kind: "defines",
-    },
-    {
-      from: ["file.ts", "Foo"] as NodePath,
-      to: ["file.ts", "Foo", "x"] as NodePath,
-      kind: "defines",
-    },
-    {
-      from: ["file.ts"] as NodePath,
-      to: ["file.ts", "x"] as NodePath,
-      kind: "defines",
-    },
-    {
-      from: ["file.ts"] as NodePath,
-      to: ["file.ts", "React"] as NodePath,
-      kind: "imports",
+      at: NodeSource("react"),
     },
   ],
   "file.ts",
 );
 
-describe("Graph Cursor", () => {
-  let cursor: GraphCursor;
+describe("Tree Cursor", () => {
+  let cursor: TreeCursor;
 
   beforeEach(() => {
-    cursor = graph.walk();
+    cursor = tree.walk();
   });
 
   describe("node", () => {
@@ -97,7 +70,7 @@ describe("Graph Cursor", () => {
     });
 
     it("throws for an unknown path", () => {
-      const unknown = new GraphCursor(graph, ["ghost"] as NodePath);
+      const unknown = new TreeCursor(tree, NodePath(["ghost"]));
       expect(() => unknown.node).toThrow();
     });
   });
@@ -151,13 +124,13 @@ describe("Graph Cursor", () => {
       expect(cursor.children()).toHaveLength(3);
     });
 
-    it("filters children by edge kind", () => {
-      expect(cursor.children("defines")).toHaveLength(2);
-      expect(cursor.children("imports")).toHaveLength(1);
+    it("filters children by node type", () => {
+      expect(cursor.children("scope")).toHaveLength(1);
+      expect(cursor.children("binding")).toHaveLength(2);
     });
 
-    it("returns empty array for unknown edge kind", () => {
-      expect(cursor.children("extends")).toHaveLength(0);
+    it("returns empty array when no child matches the type", () => {
+      expect(cursor.children("anonymous")).toHaveLength(0);
     });
 
     it("returns empty array for leaf node", () => {
@@ -236,69 +209,68 @@ describe("Graph Cursor", () => {
 
   describe("at() — byte offset", () => {
     it("falls back to root when no node covers the offset", () => {
-      expect(GraphCursor.at(graph, 200).depth).toEqual(0);
+      expect(TreeCursor.at(tree, 200).depth).toEqual(0);
     });
 
     it("returns the deepest node covering the offset", () => {
       // offset 30 is inside Foo (10-80) and bar (20-50)
-      const c = GraphCursor.at(graph, 30);
+      const c = TreeCursor.at(tree, 30);
       expect(c.path).toEqual(["file.ts", "Foo", "bar"]);
     });
 
     it("returns a shallower node when offset is outside deeper nodes", () => {
       // offset 15 is inside Foo (10-80) but not bar (20-50)
-      const c = GraphCursor.at(graph, 15);
+      const c = TreeCursor.at(tree, 15);
       expect(c.path).toEqual(["file.ts", "Foo"]);
     });
 
     it("falls back to root when offset is outside all ranged nodes", () => {
       // offset 90 is outside Foo (10-80), bar (20-50), and x (60-75); file.ts uses NodeSource and is skipped
-      const c = GraphCursor.at(graph, 90);
+      const c = TreeCursor.at(tree, 90);
       expect(c.depth).toEqual(0);
     });
 
     it("includes a node whose startIndex equals the offset", () => {
-      expect(GraphCursor.at(graph, 10).path).toEqual(["file.ts", "Foo"]);
+      expect(TreeCursor.at(tree, 10).path).toEqual(["file.ts", "Foo"]);
     });
 
-    it("includes a node whose endIndex equals the offset", () => {
-      expect(GraphCursor.at(graph, 80).path).toEqual(["file.ts", "Foo"]);
+    it("excludes a node whose endIndex equals the offset (exclusive end)", () => {
+      expect(TreeCursor.at(tree, 80).path).toEqual(["file.ts"]);
     });
   });
 
   describe("at() — Point target", () => {
     // makeRange maps column=start..end on row 0 for all nodes
     it("returns the deepest node covering the point", () => {
-      const c = GraphCursor.at(graph, { row: 0, column: 30 });
+      const c = TreeCursor.at(tree, { row: 0, column: 30 });
       expect(c.path).toEqual(["file.ts", "Foo", "bar"]);
     });
 
     it("returns a shallower node when point is outside deeper nodes", () => {
-      const c = GraphCursor.at(graph, { row: 0, column: 15 });
+      const c = TreeCursor.at(tree, { row: 0, column: 15 });
       expect(c.path).toEqual(["file.ts", "Foo"]);
     });
 
     it("falls back to root when point is outside all ranged nodes", () => {
-      const c = GraphCursor.at(graph, { row: 0, column: 90 });
+      const c = TreeCursor.at(tree, { row: 0, column: 90 });
       expect(c.depth).toEqual(0);
     });
 
     it("falls back to root when row is outside all ranged nodes", () => {
-      const c = GraphCursor.at(graph, { row: 5, column: 30 });
+      const c = TreeCursor.at(tree, { row: 5, column: 30 });
       expect(c.depth).toEqual(0);
     });
 
     it("includes a node at its start position boundary", () => {
-      expect(GraphCursor.at(graph, { row: 0, column: 10 }).path).toEqual([
+      expect(TreeCursor.at(tree, { row: 0, column: 10 }).path).toEqual([
         "file.ts",
         "Foo",
       ]);
     });
 
-    it("includes a node at its end position boundary", () => {
-      expect(GraphCursor.at(graph, { row: 0, column: 80 }).path).toEqual([
+    it("excludes a node at its end position boundary (exclusive end)", () => {
+      expect(TreeCursor.at(tree, { row: 0, column: 80 }).path).toEqual([
         "file.ts",
-        "Foo",
       ]);
     });
   });
@@ -307,7 +279,7 @@ describe("Graph Cursor", () => {
     it("skips nodes with NodeSource (name-based) at", () => {
       // React import has at: { name: "react" } — at() should never descend into it
       // offset 0 is within the file but React has no range, so root is returned
-      const c = GraphCursor.at(graph, 0);
+      const c = TreeCursor.at(tree, 0);
       expect(c.path).toEqual(["file.ts"]);
     });
   });

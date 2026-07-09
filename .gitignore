@@ -5,6 +5,7 @@ node_modules
 # build
 dist
 .tsup
+docs/build
 
 # test
 coverage
@@ -23,3 +24,4 @@ CLAUDE.md
 .DS_Store
 *.pem
 .eslintcache
+.structurizr

@@ -4,7 +4,7 @@
     "src/config/index.ts",
     "src/core/index.ts",
     "src/models/index.ts",
-    "src/query/index.ts",
+    "src/utils/query/index.ts",
     "src/utils/index.ts"
   ],
   "out": "docs/api",

@@ -6,6 +6,15 @@ import type { Descriptor } from "./types";
 
 export const descriptor: Descriptor = {
   language,
+  extensions: [
+    ".mjs",
+    ".js",
+    ".jsx",
+    ".json",
+    "/index.mjs",
+    "/index.js",
+    "/index.jsx",
+  ],
   query,
   captureConfig,
   convertConfig,

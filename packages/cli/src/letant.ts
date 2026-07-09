@@ -35,12 +35,12 @@ const program = createCommand()
   .addCommand(queryCommand)
   .action(async (file, others, options) => {
     const workspace = await Workspace.create(await loadConfig(options.config));
-    const { graph } = workspace.openSource(
+    const { tree } = workspace.openSource(
       file,
       readFileSync(file, options.encoding),
     );
 
-    let data: any = graph.serialize();
+    let data: any = tree.serialize();
 
     if (options.trace) {
       workspace.trace(file, {
@@ -68,17 +68,21 @@ const program = createCommand()
 const badge = (label: string, color: string) =>
   `\x1b[${color}m\x1b[97m ${label} \x1b[0m`;
 
-try {
-  program.parse();
-} catch (e) {
-  const verbose = program.opts().verbose;
-  if (e instanceof LetantError || e instanceof BinaryError) {
-    process.stderr.write(`${badge(e.code, "41")} ${e.message}\n`);
-    if (verbose) console.error(e);
-  } else {
-    const msg = e instanceof Error ? e.message : String(e);
-    process.stderr.write(`${badge("ERROR", "41")} ${msg}\n`);
-    if (verbose) console.error(e);
+async function main() {
+  try {
+    await program.parseAsync();
+  } catch (e) {
+    const verbose = program.opts().verbose;
+    if (e instanceof LetantError || e instanceof BinaryError) {
+      process.stderr.write(`${badge(e.code, "41")} ${e.message}\n`);
+      if (verbose) console.error(e);
+    } else {
+      const msg = e instanceof Error ? e.message : String(e);
+      process.stderr.write(`${badge("ERROR", "41")} ${msg}\n`);
+      if (verbose) console.error(e);
+    }
+    process.exit(1);
   }
-  process.exit();
 }
+
+void main();

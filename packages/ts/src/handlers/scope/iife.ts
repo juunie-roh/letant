@@ -1,6 +1,6 @@
 import { createChildPath, createConvertResult, getRange } from "letant/utils";
 
-import type { ConvertHandler, Edge, Node } from "@/types";
+import type { ConvertHandler, Node } from "@/types";
 
 import flatPattern from "../utility/pattern";
 
@@ -9,17 +9,13 @@ const iifeBindingHandler: ConvertHandler<"iife.scope"> = (
   parent,
   { convert, capture },
 ) => {
-  const result = createConvertResult<Node, Edge>();
+  const result = createConvertResult<Node>();
   for (const c of captures) {
     const { kind, name, body } = c;
 
     if (name.type === "identifier") {
       const path = createChildPath(parent, name.text);
-      result.edges.push({
-        from: parent,
-        to: path,
-        kind: "defines",
-      });
+
       result.nodes.push({
         path,
         type: "scope",
@@ -33,11 +29,7 @@ const iifeBindingHandler: ConvertHandler<"iife.scope"> = (
     } else {
       for (const { name: nm } of flatPattern(name)) {
         const path = createChildPath(parent, nm);
-        result.edges.push({
-          from: parent,
-          to: path,
-          kind: "defines",
-        });
+
         result.nodes.push({
           path,
           type: "scope",

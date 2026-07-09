@@ -1,0 +1,124 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
+{
+  "nodes": [
+    {
+      "at": "main.js",
+      "blockStartIndex": 0,
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+      ],
+      "id": 0,
+      "kind": "module",
+      "path": [
+        "main.js",
+      ],
+      "type": "scope",
+    },
+    {
+      "at": "a.js",
+      "children": [],
+      "id": 1,
+      "kind": "module",
+      "path": [
+        "main.js",
+        "a",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "sub/b.js",
+      "children": [],
+      "id": 2,
+      "kind": "module",
+      "path": [
+        "main.js",
+        "b",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "lib/c.js",
+      "children": [],
+      "id": 3,
+      "kind": "module",
+      "path": [
+        "main.js",
+        "c",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "node:fs",
+      "children": [],
+      "id": 4,
+      "kind": "module",
+      "path": [
+        "main.js",
+        "fs",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "#missing/thing",
+      "children": [],
+      "id": 5,
+      "kind": "module",
+      "path": [
+        "main.js",
+        "m",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "../outside",
+      "children": [],
+      "id": 6,
+      "kind": "module",
+      "path": [
+        "main.js",
+        "out",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 224,
+        "endPosition": {
+          "column": 42,
+          "row": 9,
+        },
+        "startIndex": 189,
+        "startPosition": {
+          "column": 7,
+          "row": 9,
+        },
+      },
+      "children": [],
+      "id": 7,
+      "kind": "variable",
+      "path": [
+        "main.js",
+        "z",
+      ],
+      "props": {
+        "kind": "const",
+      },
+      "type": "binding",
+    },
+  ],
+}
+`;

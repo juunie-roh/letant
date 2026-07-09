@@ -10,15 +10,13 @@
     "commitlint",
     "crockford",
     "CXXFLAGS",
-    "etant",
-    "étant",
     "Graphviz",
     "L'étant",
     "letant",
     "Létant",
-    "lletant",
     "nodenext",
-    "rankdir"
+    "rankdir",
+    "structurizr"
   ],
   "editor.formatOnSave": false,
   "eslint.enable": true,

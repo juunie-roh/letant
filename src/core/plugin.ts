@@ -1,14 +1,9 @@
 import Parser from "tree-sitter";
 
+import { NodePath, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
-import type {
-  CaptureConfig,
-  ConvertConfig,
-  Edge,
-  Node,
-  NodePath,
-  QueryConfig,
-} from "@/models";
+import type { CaptureConfig, ConvertConfig, Node, QueryConfig } from "@/models";
+import type { PluginConfig } from "@/models/config";
 import { assertPluginDescriptor, createCapture, createConvert } from "@/utils";
 import { QueryMap } from "@/utils/query";
 
@@ -18,12 +13,13 @@ declare namespace Plugin {
   export interface Descriptor<
     Q extends QueryConfig = QueryConfig,
     N extends Node = Node,
-    E extends Edge = Edge,
   > {
     language: Parser.Language;
+    /** File extensions this plugin can resolve import specifiers against. */
+    extensions: string[];
     query: QueryMap<keyof Q & string>;
     captureConfig: CaptureConfig<Q>;
-    convertConfig: ConvertConfig<Q, N, E>;
+    convertConfig: ConvertConfig<Q, N>;
     references: (node: Parser.SyntaxNode) => Parser.SyntaxNode[];
   }
 }
@@ -32,23 +28,26 @@ declare namespace Plugin {
  * Represents a loaded and initialized letant language plugin.
  */
 class Plugin {
+  private _config: PluginConfig;
+
   private _parser: Parser;
 
   private _module: Plugin.Descriptor;
 
   private _capture: ReturnType<typeof createCapture<QueryConfig>>;
 
-  private _convert: ReturnType<typeof createConvert<QueryConfig, Node, Edge>>;
+  private _convert: ReturnType<typeof createConvert<QueryConfig, Node>>;
 
-  private constructor(plugin: Plugin.Descriptor) {
-    this._module = plugin;
+  private constructor(config: PluginConfig, descriptor: Plugin.Descriptor) {
+    this._config = config;
+    this._module = descriptor;
 
     this._capture = createCapture<QueryConfig>(
       this._module.query,
       this._module.captureConfig,
     );
 
-    this._convert = createConvert<QueryConfig, Node, Edge>(
+    this._convert = createConvert<QueryConfig, Node>(
       this._capture,
       this._module.convertConfig,
     );
@@ -57,9 +56,9 @@ class Plugin {
     this._parser.setLanguage(this._module.language);
   }
 
-  static async create(name: string): Promise<Plugin> {
-    const descriptor = await Plugin.load(name);
-    return new Plugin(descriptor);
+  static async create(config: PluginConfig): Promise<Plugin> {
+    const descriptor = await Plugin.load(config.name);
+    return new Plugin(config, descriptor);
   }
 
   static async load(name: string): Promise<Plugin.Descriptor> {
@@ -87,11 +86,22 @@ class Plugin {
     return descriptor;
   }
 
+  get config(): PluginConfig {
+    return this._config;
+  }
+
   /**
    * The {@link Parser.Language | tree-sitter `Language`} instance used by this plugin.
    */
   get language() {
     return this._parser.getLanguage();
+  }
+
+  /**
+   * File extensions this plugin can resolve import specifiers against.
+   */
+  get extensions(): string[] {
+    return this._module.extensions;
   }
 
   /**
@@ -124,18 +134,15 @@ class Plugin {
   }
 
   @Trace({ label: "Plugin.extract" })
-  extract(
-    filePath: string,
-    node: Parser.SyntaxNode,
-  ): { edges: Edge[]; nodes: Node[] } {
+  extract(filePath: string, node: Parser.SyntaxNode): { nodes: Node[] } {
     const captures = this._capture(node);
-    const result = this._convert(captures, [filePath] as NodePath);
+    const result = this._convert(captures, NodePath([filePath]));
     // add root file node once
     result.nodes.push({
-      path: [filePath] as NodePath,
+      path: NodePath([filePath]),
       kind: "module",
       type: "scope",
-      at: { name: filePath },
+      at: NodeSource(filePath),
       blockStartIndex: 0,
     });
 

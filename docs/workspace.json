@@ -1,0 +1,640 @@
+{
+  "configuration" : {
+    "scope" : "SoftwareSystem"
+  },
+  "description" : "Software System Architecture of Letant.",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedDate" : "2026-06-30T05:49:05Z",
+  "model" : {
+    "customElements" : [ {
+      "description" : "A target source file with raw texts to process with letant.",
+      "id" : "17",
+      "name" : "Source File",
+      "properties" : {
+        "structurizr.dsl.identifier" : "source"
+      },
+      "tags" : "Element,File"
+    }, {
+      "description" : "A configuration for letant.",
+      "id" : "16",
+      "name" : "letant.config.json",
+      "properties" : {
+        "structurizr.dsl.identifier" : "configJSON"
+      },
+      "tags" : "Element,JSON"
+    } ],
+    "deploymentNodes" : [ {
+      "children" : [ {
+        "containerInstances" : [ {
+          "containerId" : "9",
+          "environment" : "CLI",
+          "id" : "20",
+          "instanceId" : 1,
+          "properties" : {
+            "structurizr.dsl.identifier" : "cliEnv.e60a5ae0-7b63-4c69-a8b9-c549d6d45340.658838b5-2ad6-44c5-89ea-7664145dcd48.b58fedd4-2990-4379-b30e-1d03e8096acc"
+          },
+          "tags" : "Container Instance"
+        } ],
+        "description" : "A Node.js runtime environment where tree-sitter provides bindings.",
+        "environment" : "CLI",
+        "id" : "19",
+        "instances" : "1",
+        "name" : "Node.js Runtime",
+        "properties" : {
+          "structurizr.dsl.identifier" : "cliEnv.e60a5ae0-7b63-4c69-a8b9-c549d6d45340.658838b5-2ad6-44c5-89ea-7664145dcd48"
+        },
+        "tags" : "Element,Deployment Node",
+        "technology" : "Node.js >= 22"
+      } ],
+      "description" : "A device of user.",
+      "environment" : "CLI",
+      "id" : "18",
+      "instances" : "1",
+      "name" : "User Machine",
+      "properties" : {
+        "structurizr.dsl.identifier" : "cliEnv.e60a5ae0-7b63-4c69-a8b9-c549d6d45340"
+      },
+      "tags" : "Element,Deployment Node",
+      "technology" : "Windows, macOS, Linux, ..."
+    } ],
+    "softwareSystems" : [ {
+      "containers" : [ {
+        "components" : [ {
+          "description" : "An instance that carries letant plugin descriptor for each.",
+          "documentation" : { },
+          "group" : "Core",
+          "id" : "3",
+          "name" : "Plugin",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.letant.plugin"
+          },
+          "relationships" : [ {
+            "description" : "Initializes",
+            "destinationId" : "15",
+            "id" : "26",
+            "sourceId" : "3",
+            "tags" : "Relationship,Sync",
+            "technology" : "Function Call"
+          }, {
+            "description" : "Gets descriptor of",
+            "destinationId" : "10",
+            "id" : "38",
+            "sourceId" : "3",
+            "tags" : "Relationship,Sync",
+            "technology" : "Function Call"
+          } ],
+          "tags" : "Element,Component,Module"
+        }, {
+          "description" : "A middle layer that bridges between workspace and plugin.",
+          "documentation" : { },
+          "group" : "Core",
+          "id" : "4",
+          "name" : "Plugin Handler",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.letant.pluginHandler"
+          },
+          "relationships" : [ {
+            "description" : "Initializes",
+            "destinationId" : "3",
+            "id" : "37",
+            "sourceId" : "4",
+            "tags" : "Relationship,Sync",
+            "technology" : "Function Call"
+          } ],
+          "tags" : "Element,Component,Module"
+        }, {
+          "description" : "A graph data structure constructed by nodes and edges.",
+          "documentation" : { },
+          "group" : "Core",
+          "id" : "5",
+          "name" : "Graph",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.letant.graph"
+          },
+          "tags" : "Element,Component,Module"
+        }, {
+          "description" : "A cursor for graph traversal.",
+          "documentation" : { },
+          "group" : "Core",
+          "id" : "6",
+          "name" : "Graph Cursor",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.letant.cursor"
+          },
+          "tags" : "Element,Component,Module"
+        }, {
+          "description" : "An application surface where the core engine runs.",
+          "documentation" : { },
+          "group" : "Workspace",
+          "id" : "7",
+          "name" : "Workspace",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.letant.ws"
+          },
+          "relationships" : [ {
+            "description" : "Initializes",
+            "destinationId" : "4",
+            "id" : "36",
+            "sourceId" : "7",
+            "tags" : "Relationship,Sync",
+            "technology" : "Function Call"
+          } ],
+          "tags" : "Element,Component,Module"
+        }, {
+          "description" : "An initializer of letant, reading configuration json.",
+          "documentation" : { },
+          "group" : "Config",
+          "id" : "8",
+          "name" : "Configuration Loader",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.letant.loader"
+          },
+          "relationships" : [ {
+            "description" : "Reads from",
+            "destinationId" : "16",
+            "id" : "21",
+            "sourceId" : "8",
+            "tags" : "Relationship,Async",
+            "technology" : "File System"
+          }, {
+            "description" : "Returns",
+            "destinationId" : "9",
+            "id" : "33",
+            "sourceId" : "8",
+            "tags" : "Relationship,Sync",
+            "technology" : "Returns"
+          } ],
+          "tags" : "Element,Component,Module"
+        } ],
+        "description" : "A core engine that manages graph construction.",
+        "documentation" : { },
+        "id" : "2",
+        "name" : "letant",
+        "properties" : {
+          "structurizr.dsl.identifier" : "l.letant"
+        },
+        "relationships" : [ {
+          "description" : "Reads from",
+          "destinationId" : "16",
+          "id" : "22",
+          "linkedRelationshipId" : "21",
+          "sourceId" : "2",
+          "technology" : "File System"
+        }, {
+          "description" : "Initializes",
+          "destinationId" : "15",
+          "id" : "27",
+          "linkedRelationshipId" : "26",
+          "sourceId" : "2",
+          "technology" : "Function Call"
+        }, {
+          "description" : "Returns",
+          "destinationId" : "9",
+          "id" : "34",
+          "linkedRelationshipId" : "33",
+          "sourceId" : "2",
+          "technology" : "Returns"
+        }, {
+          "description" : "Gets descriptor of",
+          "destinationId" : "10",
+          "id" : "39",
+          "linkedRelationshipId" : "38",
+          "sourceId" : "2",
+          "technology" : "Function Call"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Node"
+      }, {
+        "description" : "Command-line interface for letant",
+        "documentation" : { },
+        "id" : "9",
+        "name" : "@letant/cli",
+        "properties" : {
+          "structurizr.dsl.identifier" : "l.cli"
+        },
+        "relationships" : [ {
+          "description" : "Reads from",
+          "destinationId" : "17",
+          "id" : "24",
+          "sourceId" : "9",
+          "tags" : "Relationship,Async",
+          "technology" : "File System"
+        }, {
+          "description" : "Calls",
+          "destinationId" : "8",
+          "id" : "31",
+          "sourceId" : "9",
+          "tags" : "Relationship,Sync",
+          "technology" : "Function Call"
+        }, {
+          "description" : "Calls",
+          "destinationId" : "2",
+          "id" : "32",
+          "linkedRelationshipId" : "31",
+          "sourceId" : "9",
+          "technology" : "Function Call"
+        }, {
+          "description" : "Initializes",
+          "destinationId" : "7",
+          "id" : "35",
+          "sourceId" : "9",
+          "tags" : "Relationship,Sync",
+          "technology" : "Function Call"
+        } ],
+        "tags" : "Element,Container,CLI",
+        "technology" : "Node, commander"
+      }, {
+        "components" : [ {
+          "description" : "A query strings",
+          "documentation" : { },
+          "id" : "11",
+          "name" : "Tree-sitter Query String",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.js.queryString"
+          },
+          "tags" : "Element,Component,Module",
+          "technology" : "Tree-sitter, scm"
+        }, {
+          "description" : "Dispatches actions on running tree-sitter queries.",
+          "documentation" : { },
+          "id" : "12",
+          "name" : "Capture",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.js.capture"
+          },
+          "relationships" : [ {
+            "description" : "Passes result to",
+            "destinationId" : "13",
+            "id" : "42",
+            "sourceId" : "12",
+            "tags" : "Relationship,Sync",
+            "technology" : "Function Call"
+          } ],
+          "tags" : "Element,Component,Module",
+          "technology" : "Node"
+        }, {
+          "description" : "Dispatches actions for each conversion of query results.",
+          "documentation" : { },
+          "id" : "13",
+          "name" : "Convert",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.js.convert"
+          },
+          "tags" : "Element,Component,Module"
+        }, {
+          "description" : "A map of queries.",
+          "documentation" : { },
+          "id" : "14",
+          "name" : "Query",
+          "properties" : {
+            "structurizr.dsl.identifier" : "l.js.query"
+          },
+          "relationships" : [ {
+            "description" : "Gets language specification from",
+            "destinationId" : "15",
+            "id" : "29",
+            "sourceId" : "14",
+            "tags" : "Relationship,Sync",
+            "technology" : "Function Call"
+          }, {
+            "description" : "Uses",
+            "destinationId" : "11",
+            "id" : "40",
+            "sourceId" : "14",
+            "tags" : "Relationship,Sync"
+          }, {
+            "description" : "Dispatches to",
+            "destinationId" : "12",
+            "id" : "41",
+            "sourceId" : "14",
+            "tags" : "Relationship,Sync",
+            "technology" : "Function Call"
+          } ],
+          "tags" : "Element,Component,Module"
+        } ],
+        "description" : "A javascript plugin for letant",
+        "documentation" : { },
+        "group" : "Language Plugins",
+        "id" : "10",
+        "name" : "@letant/js",
+        "properties" : {
+          "structurizr.dsl.identifier" : "l.js"
+        },
+        "relationships" : [ {
+          "description" : "Gets language specification from",
+          "destinationId" : "15",
+          "id" : "30",
+          "linkedRelationshipId" : "29",
+          "sourceId" : "10",
+          "technology" : "Function Call"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "Node"
+      } ],
+      "description" : "A structural code comprehension assistance.",
+      "documentation" : {
+        "decisions" : [ {
+          "content" : "# 1. Record architecture decisions\n\nDate: 2026-06-29\n\n## Status\n\nAccepted\n\n## Context\n\nWe need to record the architectural decisions made on this project.\n\n## Decision\n\nWe will use Architecture Decision Records, as [described by Michael Nygard](http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions).\n\n## Consequences\n\nSee Michael Nygard's article, linked above. For a lightweight ADR toolset, see Nat Pryce's [adr-tools](https://github.com/npryce/adr-tools).\n",
+          "date" : "2026-06-29T00:00:00Z",
+          "format" : "Markdown",
+          "id" : "1",
+          "status" : "Accepted",
+          "title" : "Record architecture decisions"
+        } ],
+        "sections" : [ {
+          "content" : "# L'étant\n\nL'étant is a short for _les étant_, meaning \"The Beings\" in French.\n\n[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?logo=opensourceinitiative&logoColor=fff)](https://opensource.org/licenses/MIT)\n\nProvide a clear provenance map, trimming out noises for comprehension.\n\n## About\n\nA structural code comprehension tool. letant parses source files using Tree-Sitter, extracts every scope boundary and name binding, construct a queryable definition graph, provide provenance map of given position.\n\n### A Different Question\n\nEvery other tool in this space asks \"where is this symbol and who uses it?\" — a cartographic question that requires mapping everything. L'étant asks \"where did this come from?\" — a genealogical question that requires only following the lineage of what you're looking at.\n\nThis follows the natural direction of code comprehension. When you read code, you encounter a symbol and look up where it came from. L'étant only traces forward: from usage to origin.\n\n## Architecture\n\n### Data Model\n\nAll output is two types:\n\n- **Node** — a code entity with a path segments, hashed to a compact `NodeId` inside the graph. A `kind` classifies the entity, a `type` role classifies its scope behavior.\n- **Edge** — a directed relationship between two nodes (`from` → `to`)\n\n### Node Roles\n\nEvery node has a `type` field with one of three values:\n\n| `type` | Description | Example `kind` values |\n| ------ | ----------- | --------------------- |\n| `\"scope\"` | A named scope — introduces names and is itself introduced into a parent scope | `function`, `class`, `method`, ... |\n| `\"anonymous\"` | An unnamed scope — introduces names but has no binding identity of its own | `iife`, `if`, `for`, `while`, ... |\n| `\"binding\"` | A pure binding — is introduced into a scope, does not introduce names | `variable`, `member`, `import`, `parameter`, ... |\n\n### Responsibilities\n\nL'étant separates concerns across three layers:\n\n**Language plugin** — interprets the raw Tree-Sitter AST for a specific language. Faithfully extracts every entity the parser exposes and maps it to the common node/edge schema. Two phases:\n\n- `capture` — runs tree-sitter queries against AST nodes and returns typed match results. Decides **what entity** to capture from the source.\n- `convert` — transforms captures into graph nodes and edges. Decides **how the entities relate**, and provides opinionated result.\n\n**Core** — constructs a queryable graph based on the converted result from plugin, and provides navigable interface on top of it.\n\n## Prerequisites\n\n- **Node.js 22+** — Node 22 uses prebuilt Tree-Sitter binaries. Node 24 and 25 build from source and additionally require `python3`, `make`, and `g++` with C++20 support.\n- **pnpm** — workspace manager.\n- On Node 24/25, set `CXXFLAGS=\"-std=c++20\"` before installing.\n\n## Usage\n\n```bash\n# Install dependencies (Node 24/25: prefix with CXXFLAGS=\"-std=c++20\")\npnpm install\n\n# Build core\npnpm build\n\n# Build all packages\npnpm build:all\n\n# Type check everything\npnpm check-types:all\n\n# Run CLI against mock data\npnpm dev:config\n\n# Lint\npnpm lint\n\n# Tests\npnpm test\n```\n\n## License\n\n[MIT](LICENSE)\n",
+          "format" : "Markdown",
+          "order" : 1,
+          "title" : ""
+        } ]
+      },
+      "id" : "1",
+      "name" : "Letant",
+      "properties" : {
+        "structurizr.dsl.identifier" : "l"
+      },
+      "relationships" : [ {
+        "description" : "Reads from",
+        "destinationId" : "16",
+        "id" : "23",
+        "linkedRelationshipId" : "21",
+        "sourceId" : "1",
+        "technology" : "File System"
+      }, {
+        "description" : "Reads from",
+        "destinationId" : "17",
+        "id" : "25",
+        "linkedRelationshipId" : "24",
+        "sourceId" : "1",
+        "technology" : "File System"
+      }, {
+        "description" : "Initializes",
+        "destinationId" : "15",
+        "id" : "28",
+        "linkedRelationshipId" : "26",
+        "sourceId" : "1",
+        "technology" : "Function Call"
+      } ],
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "An AST generator with language plugins.",
+      "documentation" : { },
+      "id" : "15",
+      "name" : "Tree-sitter",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ts"
+      },
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "Letant",
+  "properties" : {
+    "structurizr.inspection.error" : "4",
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "componentViews" : [ {
+      "containerId" : "2",
+      "elements" : [ {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "16",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "CoreEngine",
+      "name" : "Component View: Letant - letant",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "21"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "30"
+      }, {
+        "id" : "31"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "35"
+      }, {
+        "id" : "36"
+      }, {
+        "id" : "37"
+      }, {
+        "id" : "38"
+      } ]
+    }, {
+      "containerId" : "10",
+      "elements" : [ {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "13",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "Plugin",
+      "name" : "Component View: Letant - @letant/js",
+      "order" : 4,
+      "relationships" : [ {
+        "id" : "29"
+      }, {
+        "id" : "40"
+      }, {
+        "id" : "41"
+      }, {
+        "id" : "42"
+      } ]
+    } ],
+    "configuration" : {
+      "lastSavedView" : "Container",
+      "styles" : {
+        "elements" : [ {
+          "shape" : "Terminal",
+          "tag" : "CLI"
+        }, {
+          "shape" : "Folder",
+          "tag" : "File"
+        }, {
+          "shape" : "Shell",
+          "tag" : "JSON"
+        }, {
+          "shape" : "Component",
+          "tag" : "Module"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "dimensions" : {
+        "height" : 2089,
+        "width" : 2630
+      },
+      "elements" : [ {
+        "id" : "2",
+        "x" : 250,
+        "y" : 760
+      }, {
+        "id" : "9",
+        "x" : 1090,
+        "y" : 660
+      }, {
+        "id" : "10",
+        "x" : 1090,
+        "y" : 260
+      }, {
+        "id" : "15",
+        "x" : 1090,
+        "y" : 1199
+      }, {
+        "id" : "16",
+        "x" : 1090,
+        "y" : 1549
+      }, {
+        "id" : "17",
+        "x" : 1980,
+        "y" : 660
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "Container",
+      "name" : "Container View: Letant",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "22",
+        "vertices" : [ {
+          "x" : 870,
+          "y" : 1062
+        }, {
+          "x" : 1040,
+          "y" : 1062
+        } ]
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "27",
+        "vertices" : [ {
+          "x" : 870,
+          "y" : 961
+        }, {
+          "x" : 1040,
+          "y" : 961
+        } ]
+      }, {
+        "id" : "30"
+      }, {
+        "id" : "32",
+        "vertices" : [ {
+          "x" : 1040,
+          "y" : 860
+        }, {
+          "x" : 870,
+          "y" : 860
+        } ]
+      }, {
+        "id" : "34",
+        "vertices" : [ {
+          "x" : 870,
+          "y" : 735
+        }, {
+          "x" : 1040,
+          "y" : 735
+        } ]
+      }, {
+        "id" : "39"
+      } ],
+      "softwareSystemId" : "1"
+    } ],
+    "deploymentViews" : [ {
+      "elements" : [ {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "19",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "environment" : "CLI",
+      "key" : "Deployment-CLI",
+      "name" : "Deployment View: Letant - CLI",
+      "order" : 5,
+      "softwareSystemId" : "1"
+    } ],
+    "systemContextViews" : [ {
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "SystemContext",
+      "name" : "System Context View: Letant",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "28"
+      } ],
+      "softwareSystemId" : "1"
+    } ]
+  }
+}

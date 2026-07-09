@@ -1,12 +1,12 @@
-import { createChildPath, createConvertResult } from "letant/utils";
+import { createChildPath, createConvertResult, NodeSource } from "letant/utils";
 
-import type { ConvertHandler, Edge, Node } from "@/types";
+import type { ConvertHandler, Node } from "@/types";
 
 const moduleBindingHandler: ConvertHandler<"module.binding"> = (
   captures,
   parent,
 ) => {
-  const result = createConvertResult<Node, Edge>();
+  const result = createConvertResult<Node>();
 
   for (const c of captures) {
     const { source, name, alias } = c;
@@ -14,12 +14,11 @@ const moduleBindingHandler: ConvertHandler<"module.binding"> = (
     const representative = alias?.text ?? name.text;
 
     const path = createChildPath(parent, representative);
-    result.edges.push({ from: parent, to: path, kind: "imports" });
     result.nodes.push({
       path,
       type: "binding",
       kind: "module",
-      at: { name: source.text },
+      at: NodeSource(source.text),
       props: alias ? { alias_of: name!.text } : undefined,
     });
   }

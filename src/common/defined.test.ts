@@ -40,12 +40,12 @@ describe("defined — generic overload", () => {
   });
 
   it("throws the provided SpineError for null", () => {
-    const error = new LetantError("GRAPH_NO_NODE", "missing node");
+    const error = new LetantError("TREE_NO_NODE", "missing node");
     expect(() => defined(null, error)).toThrow(error);
   });
 
   it("throws the provided SpineError for undefined", () => {
-    const error = new LetantError("GRAPH_NO_NODE", "missing node");
+    const error = new LetantError("TREE_NO_NODE", "missing node");
     expect(() => defined(undefined, error)).toThrow(error);
   });
 
