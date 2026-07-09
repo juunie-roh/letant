@@ -63,8 +63,7 @@ export default defineConfig([
     "**/build/**",
     "**/coverage/**",
     "**/docs/**",
-    "packages/js/__mocks__/**",
-    "packages/ts/__mocks__/**",
+    "**/samples.local/**",
   ]),
   {
     files: ["**/*.{js,ts}"],

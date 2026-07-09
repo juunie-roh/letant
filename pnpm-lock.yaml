@@ -125,6 +125,9 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.4
         version: 0.18.4
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
       letant:
         specifier: workspace:^
         version: link:../..
@@ -164,6 +167,9 @@ importers:
       '@arethetypeswrong/cli':
         specifier: ^0.18.4
         version: 0.18.4
+      '@types/node':
+        specifier: ^26.1.0
+        version: 26.1.0
       letant:
         specifier: workspace:^
         version: link:../..

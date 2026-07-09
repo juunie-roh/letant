@@ -86,6 +86,8 @@
     "test": "vitest run",
     "test:watch": "vitest watch --coverage",
     "js": "pnpm --filter @letant/js",
+    "ts": "pnpm --filter @letant/ts",
+    "python": "pnpm --filter @letant/python",
     "cli": "pnpm --filter @letant/cli"
   },
   "dependencies": {
