@@ -13,6 +13,7 @@ allowBuilds:
   esbuild: true
   tree-sitter: true
   tree-sitter-javascript: true
+  tree-sitter-python: true
   tree-sitter-typescript: true
 
 onlyBuiltDependencies:

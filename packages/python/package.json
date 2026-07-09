@@ -1,7 +1,7 @@
 {
-  "name": "@letant/ts",
-  "version": "0.0.4",
-  "description": "TypeScript plugin for letant",
+  "name": "@letant/python",
+  "version": "0.0.2",
+  "description": "Python plugin for letant",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -26,7 +26,7 @@
     "build": "tsup",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "dev": "tsup --watch",
-    "dev:query": "node ../cli/dist/letant.js query --grammar tree-sitter-typescript"
+    "dev:query": "pnpm letant query --grammar tree-sitter-python"
   },
   "keywords": [],
   "author": "Juun",
@@ -39,13 +39,13 @@
   },
   "peerDependencies": {
     "letant": "^0.0.4",
-    "tree-sitter-typescript": "^0.23.2"
+    "tree-sitter-python": "^0.25.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.4",
+    "@arethetypeswrong/cli": "^0.18.2",
     "@types/node": "^26.1.0",
-    "letant": "workspace:^",
-    "tree-sitter-typescript": "^0.23.2",
+    "letant": "workspace:*",
+    "tree-sitter-python": "^0.25.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   }

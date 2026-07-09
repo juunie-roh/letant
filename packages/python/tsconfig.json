@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "esnext",
-    "module": "preserve",
-    "moduleResolution": "bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "lib": ["ESNext"],
     "types": ["node"],
     "esModuleInterop": true,
@@ -24,9 +24,9 @@
     "outDir": "./dist",
     "rootDir": ".",
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.*js"],
-  "exclude": ["node_modules", "dist", "samples.local"]
+  "exclude": ["node_modules", "dist"]
 }

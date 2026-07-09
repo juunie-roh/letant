@@ -2,20 +2,18 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
 
+import type { Config } from "letant";
+import { Workspace } from "letant";
+import { TreeCursor } from "letant";
+import { isNodeSource } from "letant/utils";
 import { describe, expect, it } from "vitest";
-
-import { isNodeSource } from "@/common/branded-types";
-import { TreeCursor } from "@/core";
-import type { Config } from "@/models";
-
-import Workspace from "./workspace";
 
 // Exercises the real parse pipeline end-to-end: config → plugin load →
 // tree-sitter parse → extract → import path resolution → serialized graph.
 // The fixture covers every import specifier kind: relative (with and
 // without extension), matched alias, unmatched alias, escaping the root,
 // and bare. Requires `@letant/js` to be built (`pnpm build:all`).
-const FIXTURE_ROOT = "src/__mocks__/workspace-fixture";
+const FIXTURE_ROOT = "packages/js/__mocks__/fixture";
 
 const config: Config = {
   rootDir: FIXTURE_ROOT,

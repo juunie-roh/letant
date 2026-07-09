@@ -1,0 +1,363 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Workspace (python) > parses a source file into a stable serialized tree 1`] = `
+{
+  "nodes": [
+    {
+      "at": "main.py",
+      "blockStartIndex": 0,
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        13,
+        14,
+        15,
+      ],
+      "id": 0,
+      "kind": "module",
+      "path": [
+        "main.py",
+      ],
+      "type": "scope",
+    },
+    {
+      "at": "a.py",
+      "children": [],
+      "id": 1,
+      "kind": "module",
+      "path": [
+        "main.py",
+        "alpha",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": "pkg/__init__.py",
+      "children": [],
+      "id": 2,
+      "kind": "module",
+      "path": [
+        "main.py",
+        "beta",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 111,
+        "endPosition": {
+          "column": 15,
+          "row": 6,
+        },
+        "startIndex": 100,
+        "startPosition": {
+          "column": 4,
+          "row": 6,
+        },
+      },
+      "children": [],
+      "id": 3,
+      "kind": "variable",
+      "path": [
+        "main.py",
+        "flag",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 186,
+        "endPosition": {
+          "column": 18,
+          "row": 10,
+        },
+        "startIndex": 113,
+        "startPosition": {
+          "column": 0,
+          "row": 8,
+        },
+      },
+      "blockStartIndex": 145,
+      "children": [
+        10,
+        11,
+        12,
+      ],
+      "id": 4,
+      "kind": "function",
+      "path": [
+        "main.py",
+        "greet",
+      ],
+      "props": {
+        "is_async": false,
+      },
+      "type": "scope",
+    },
+    {
+      "at": {
+        "endIndex": 264,
+        "endPosition": {
+          "column": 16,
+          "row": 16,
+        },
+        "startIndex": 188,
+        "startPosition": {
+          "column": 0,
+          "row": 12,
+        },
+      },
+      "blockStartIndex": 207,
+      "children": [
+        6,
+        7,
+      ],
+      "id": 5,
+      "kind": "class",
+      "path": [
+        "main.py",
+        "Greeter",
+      ],
+      "props": {
+        "extends": undefined,
+      },
+      "type": "scope",
+    },
+    {
+      "at": {
+        "endIndex": 221,
+        "endPosition": {
+          "column": 18,
+          "row": 13,
+        },
+        "startIndex": 207,
+        "startPosition": {
+          "column": 4,
+          "row": 13,
+        },
+      },
+      "children": [],
+      "id": 6,
+      "kind": "variable",
+      "path": [
+        "main.py",
+        "Greeter",
+        "default",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 264,
+        "endPosition": {
+          "column": 16,
+          "row": 16,
+        },
+        "startIndex": 227,
+        "startPosition": {
+          "column": 4,
+          "row": 15,
+        },
+      },
+      "blockStartIndex": 256,
+      "children": [
+        8,
+        9,
+      ],
+      "id": 7,
+      "kind": "function",
+      "path": [
+        "main.py",
+        "Greeter",
+        "method",
+      ],
+      "props": {
+        "is_async": false,
+      },
+      "type": "scope",
+    },
+    {
+      "at": {
+        "endIndex": 242,
+        "endPosition": {
+          "column": 19,
+          "row": 15,
+        },
+        "startIndex": 238,
+        "startPosition": {
+          "column": 15,
+          "row": 15,
+        },
+      },
+      "children": [],
+      "id": 8,
+      "kind": "parameter",
+      "path": [
+        "main.py",
+        "Greeter",
+        "method",
+        "self",
+      ],
+      "props": {
+        "has_default": false,
+      },
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 245,
+        "endPosition": {
+          "column": 22,
+          "row": 15,
+        },
+        "startIndex": 244,
+        "startPosition": {
+          "column": 21,
+          "row": 15,
+        },
+      },
+      "children": [],
+      "id": 9,
+      "kind": "parameter",
+      "path": [
+        "main.py",
+        "Greeter",
+        "method",
+        "x",
+      ],
+      "props": {
+        "has_default": false,
+      },
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 167,
+        "endPosition": {
+          "column": 26,
+          "row": 9,
+        },
+        "startIndex": 145,
+        "startPosition": {
+          "column": 4,
+          "row": 9,
+        },
+      },
+      "children": [],
+      "id": 10,
+      "kind": "variable",
+      "path": [
+        "main.py",
+        "greet",
+        "message",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 127,
+        "endPosition": {
+          "column": 14,
+          "row": 8,
+        },
+        "startIndex": 123,
+        "startPosition": {
+          "column": 10,
+          "row": 8,
+        },
+      },
+      "children": [],
+      "id": 11,
+      "kind": "parameter",
+      "path": [
+        "main.py",
+        "greet",
+        "name",
+      ],
+      "props": {
+        "has_default": false,
+      },
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 138,
+        "endPosition": {
+          "column": 25,
+          "row": 8,
+        },
+        "startIndex": 129,
+        "startPosition": {
+          "column": 16,
+          "row": 8,
+        },
+      },
+      "children": [],
+      "id": 12,
+      "kind": "parameter",
+      "path": [
+        "main.py",
+        "greet",
+        "punct",
+      ],
+      "props": {
+        "has_default": true,
+      },
+      "type": "binding",
+    },
+    {
+      "at": "numpy",
+      "children": [],
+      "id": 13,
+      "kind": "module",
+      "path": [
+        "main.py",
+        "np",
+      ],
+      "props": {
+        "alias_of": "numpy",
+      },
+      "type": "binding",
+    },
+    {
+      "at": "os",
+      "children": [],
+      "id": 14,
+      "kind": "module",
+      "path": [
+        "main.py",
+        "os",
+      ],
+      "props": undefined,
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 286,
+        "endPosition": {
+          "column": 20,
+          "row": 18,
+        },
+        "startIndex": 266,
+        "startPosition": {
+          "column": 0,
+          "row": 18,
+        },
+      },
+      "children": [],
+      "id": 15,
+      "kind": "variable",
+      "path": [
+        "main.py",
+        "value",
+      ],
+      "type": "binding",
+    },
+  ],
+}
+`;

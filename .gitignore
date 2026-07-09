@@ -13,10 +13,8 @@ coverage
 # typescript
 *.tsbuildinfo
 
-# mock files
-packages/js/__mocks__/**
-packages/python/__mocks__/**
-packages/ts/__mocks__/**
+# local
+**/*.local*
 
 # misc
 CLAUDE.md
