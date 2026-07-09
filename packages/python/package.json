@@ -38,11 +38,12 @@
     "node": "^22.13.0 || >=24"
   },
   "peerDependencies": {
-    "letant": "^0.0.2",
+    "letant": "^0.0.4",
     "tree-sitter-python": "^0.25.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
+    "@types/node": "^26.1.0",
     "letant": "workspace:*",
     "tree-sitter-python": "^0.25.0",
     "tsup": "^8.5.1",
