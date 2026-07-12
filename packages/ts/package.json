@@ -42,8 +42,8 @@
     "tree-sitter-typescript": "^0.23.2"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.4",
-    "@types/node": "^26.1.0",
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@types/node": "^26.1.1",
     "letant": "workspace:^",
     "tree-sitter-typescript": "^0.23.2",
     "tsup": "^8.5.1",
