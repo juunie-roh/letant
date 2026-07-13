@@ -28,5 +28,6 @@ jobs:
           title: 'ci(deps): Weekly dependency updates'
           body: 'ci(deps): Automated dependency updates'
           branch: 'deps/weekly-updates'
+          base: 'dev'
         env:
           HUSKY: 0
