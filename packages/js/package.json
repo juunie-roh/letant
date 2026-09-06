@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.4.1",
     "letant": "workspace:^",
     "tree-sitter-javascript": "^0.25.0",
     "tsup": "^8.5.1",

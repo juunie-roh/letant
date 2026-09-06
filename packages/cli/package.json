@@ -26,10 +26,10 @@
     "@commander-js/extra-typings": "^15.0.0",
     "commander": "^15.0.0",
     "letant": "workspace:*",
-    "tree-sitter": "^0.25.0"
+    "tree-sitter": "^0.25.1"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.4.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   }
