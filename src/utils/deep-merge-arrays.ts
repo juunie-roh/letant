@@ -50,9 +50,7 @@ function deepMergeArrays<T, U>(first: T[], second: U[]): (T | U | (T & U))[] {
     ...first.map(
       (value, i) =>
         deepMergeObjects(value, i < second.length ? second[i] : void 0) as
-          | T
-          | U
-          | (T & U),
+          T | U | (T & U),
     ),
     ...second.slice(first.length),
   ];

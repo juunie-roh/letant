@@ -79,10 +79,7 @@ export type BypassQueryKey = "export";
 export type UtilityQueryKey = "reference";
 
 export type NodeKind =
-  | letant.Head<keyof QueryConfig>
-  | "parameter"
-  | "component"
-  | "else";
+  letant.Head<keyof QueryConfig> | "parameter" | "component" | "else";
 
 export type Node = letant.Node<NodeKind>;
 
