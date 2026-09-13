@@ -3,9 +3,14 @@ import type Parser from "tree-sitter";
 import JavaScript from "tree-sitter-javascript";
 
 // anonymous
+import blockQueryString from "@/queries/anonymous/block.scm";
+import doQueryString from "@/queries/anonymous/do.scm";
+import forQueryString from "@/queries/anonymous/for.scm";
 import ifQueryString from "@/queries/anonymous/if.scm";
 import iifeAnonymousQueryString from "@/queries/anonymous/iife.scm";
 import moduleAnonymousQueryString from "@/queries/anonymous/module.scm";
+import staticQueryString from "@/queries/anonymous/static.scm";
+import switchQueryString from "@/queries/anonymous/switch.scm";
 import whileQueryString from "@/queries/anonymous/while.scm";
 // binding
 import memberQueryString from "@/queries/binding/member.scm";
@@ -28,9 +33,14 @@ export const language = JavaScript as Parser.Language;
 
 export const query = new QueryMap<keyof QueryConfig>(language)
   // anonymous
+  .set("block", blockQueryString)
+  .set("do", doQueryString)
+  .set("for", forQueryString)
   .set("if", ifQueryString)
   .set("iife.anonymous", iifeAnonymousQueryString)
   .set("module.anonymous", moduleAnonymousQueryString)
+  .set("static", staticQueryString)
+  .set("switch", switchQueryString)
   .set("while", whileQueryString)
   // binding
   .set("module.binding", moduleBindingQueryString)

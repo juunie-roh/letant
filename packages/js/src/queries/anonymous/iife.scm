@@ -22,16 +22,30 @@
         (arrow_function body: (statement_block) @body)
       ]))
 ) @node
-;; method-style, (function () {}).call/apply(this)
+;; method-style, paren around the whole call, (function () {}.call(this))
 (expression_statement
   (parenthesized_expression
     (call_expression
       function: (member_expression
                   object: [
-                    ;; (function () @body).call/apply(this)
+                    ;; (function () @body.call/apply(this))
                     (function_expression body: (statement_block) @body)
-                    ;; (() => @body).call/apply(this)
+                    ;; (() => @body.call/apply(this))
                     (arrow_function body: (statement_block) @body)
                   ]
                   property: (property_identifier) @c (#any-of? @c "call" "apply"))))
+) @node
+
+;; method-style, paren around the function only, (function () {}).call(this)
+(expression_statement
+  (call_expression
+    function: (member_expression
+                object: (parenthesized_expression
+                          [
+                            ;; (function () @body).call/apply(this)
+                            (function_expression body: (statement_block) @body)
+                            ;; (() => @body).call/apply(this)
+                            (arrow_function body: (statement_block) @body)
+                          ])
+                property: (property_identifier) @c (#any-of? @c "call" "apply")))
 ) @node

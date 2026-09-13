@@ -1,6 +1,25 @@
 import type * as letant from "letant";
 
 export type QueryConfig = {
+  block: {
+    required: "node";
+    optional: never;
+  };
+  do: {
+    required: "node" | "body" | "condition";
+    optional: never;
+  };
+  for: {
+    required: "node" | "body";
+    optional:
+      | "initializer"
+      | "condition"
+      | "increment"
+      | "kind"
+      | "pattern"
+      | "type"
+      | "expression";
+  };
   if: {
     required: "node" | "body" | "condition";
     optional: "else" | "else_body";
@@ -11,6 +30,14 @@ export type QueryConfig = {
   };
   "module.anonymous": {
     required: "node" | "source";
+    optional: never;
+  };
+  static: {
+    required: "node" | "body";
+    optional: never;
+  };
+  switch: {
+    required: "node" | "body" | "condition";
     optional: never;
   };
   while: {

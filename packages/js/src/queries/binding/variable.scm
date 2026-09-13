@@ -13,3 +13,10 @@
   (variable_declarator
     name: (_) @name)
 ) @node
+
+;; @kind = "using"
+(using_declaration
+  ("using") @kind
+  (variable_declarator
+    name: (_) @name)
+) @node

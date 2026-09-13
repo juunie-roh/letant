@@ -29,6 +29,7 @@ const classHandler: ConvertHandler<"class"> = (
 
     result.push(convert(capture(body, "method"), path, "method"));
     result.push(convert(capture(body, "member"), path, "member"));
+    result.push(convert(capture(body, "static"), path, "static"));
   }
 
   return result;
