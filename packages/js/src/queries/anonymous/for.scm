@@ -8,10 +8,10 @@
 ) @node
 
 (for_in_statement
-  kind: (_) @kind
+  kind: _ @kind
   left: (_) @pattern
   ;; value: (_) @has_default
-  operator: (_) @type ;; in / of
+  operator: _ @type ;; in / of
   right: (_) @expression
   body: (statement) @body
 ) @node
