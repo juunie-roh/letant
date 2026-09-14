@@ -50,7 +50,7 @@ workspace "Letant" {
         l = softwareSystem "Letant" {
             !docs README.md
             !decisions ./architecture/decisions
-            description "A structural code comprehension assistance."
+            description "A structural code acquisition tool: answers where a name was bound, from syntax alone."
 
             letant = container "letant" {
                 description "A core engine that manages tree construction."
