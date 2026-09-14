@@ -4,17 +4,25 @@ L'étant is a short for _les étant_, meaning "The Beings" in French.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?logo=opensourceinitiative&logoColor=fff)](https://opensource.org/licenses/MIT)
 
-Provide a clear provenance map, trimming out noises for comprehension.
+Answer where a name came from, mechanically, from syntax alone.
 
 ## About
 
-A structural code comprehension tool. letant parses source files using Tree-Sitter, extracts every scope boundary and name binding, construct a queryable definition graph, provide provenance map of given position.
+A structural code acquisition tool. letant parses source files using Tree-Sitter, extracts every scope boundary and name binding into a containment tree, and answers, for any position, where the name there was bound.
 
 ### A Different Question
 
 Every other tool in this space asks "where is this symbol and who uses it?" — a cartographic question that requires mapping everything. L'étant asks "where did this come from?" — a genealogical question that requires only following the lineage of what you're looking at.
 
-This follows the natural direction of code comprehension. When you read code, you encounter a symbol and look up where it came from. L'étant only traces forward: from usage to origin.
+This follows the natural direction of reading code. When you read code, you encounter a symbol and look up where it came from. L'étant only traces forward: from usage to origin.
+
+### Acquisition, Not Interpretation
+
+Reading code is two activities: **acquisition** — locating where a name was bound — and **interpretation** — working out what the code means. The usual way of reading (grep, triage the hits, judge enclosure by indentation) performs acquisition through interpretation, and its mistakes go unnoticed.
+
+Programming languages make the two separable. Under lexical scoping, what a name refers to is fixed by where it is written, before the program runs. L'étant extracts that scope/binding model from syntax and resolves names on it the way the language itself does: no ranking, no guessing, no reading meaning into the code. Interpretation stays with the reader, human or AI; L'étant hands them the exact position to read.
+
+The same mechanism sets the boundary. Anything decided only while the program runs — a call-site receiver, the value of an object whose members are accessed, scope created at run time, a module path computed from values — is not in the source text, so L'étant does not resolve it. See ADR 0005.
 
 ## Architecture
 
@@ -79,4 +87,4 @@ pnpm test
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/juunie-roh/letant/blob/main/LICENSE)
