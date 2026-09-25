@@ -16,7 +16,7 @@ const whileHandler: ConvertHandler<"while"> = (
       path,
       type: "anonymous",
       kind: "while",
-      at: getRange(node),
+      at: getRange(body),
       blockStartIndex: body.startIndex,
       props: {
         condition: condition.text,

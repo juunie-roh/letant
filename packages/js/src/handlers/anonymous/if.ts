@@ -16,7 +16,7 @@ const ifHandler: ConvertHandler<"if"> = (
       path,
       type: "anonymous",
       kind: "if",
-      at: getRange(node),
+      at: getRange(body),
       blockStartIndex: body.startIndex,
       props: {
         condition: condition.text,

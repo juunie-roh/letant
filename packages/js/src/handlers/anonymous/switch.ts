@@ -16,7 +16,7 @@ const switchHandler: ConvertHandler<"switch"> = (
       path,
       type: "anonymous",
       kind: "switch",
-      at: getRange(node),
+      at: getRange(body),
       blockStartIndex: body.startIndex,
       props: {
         condition: condition.text,
