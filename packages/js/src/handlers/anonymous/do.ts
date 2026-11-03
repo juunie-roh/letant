@@ -16,7 +16,7 @@ const doHandler: ConvertHandler<"do"> = (
       path,
       type: "anonymous",
       kind: "do",
-      at: getRange(node),
+      at: getRange(body),
       blockStartIndex: body.startIndex,
       props: {
         condition: condition.text,

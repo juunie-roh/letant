@@ -16,7 +16,7 @@ const iifeHandler: ConvertHandler<"iife.anonymous"> = (
       path,
       type: "anonymous",
       kind: "iife",
-      at: getRange(node),
+      at: getRange(body),
       blockStartIndex: body.startIndex,
     });
 
