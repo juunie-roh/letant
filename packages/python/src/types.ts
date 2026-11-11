@@ -1,48 +1,31 @@
 import type * as letant from "letant";
 
 export type QueryConfig = {
-  // binding queries
-  "module.binding": {
-    required: "source";
-    optional: "alias" | "name";
-  };
-  variable: {
-    required: "node" | "name";
-    optional: never;
-  };
-  // scope queries
-  class: {
-    required: "node" | "name" | "body";
-    optional: "extends";
-  };
-  function: {
-    required: "node" | "name" | "body";
+  program: {
+    required: "node";
     optional: never;
   };
 };
 
+export type ScopingQueryKey = "scope" | "binding";
+
 export type UtilityQueryKey = "reference";
 
-export type NodeKind = letant.Head<keyof QueryConfig> | "parameter";
+export type NodeKind =
+  | "class"
+  | "comprehension"
+  | "function"
+  | "generic"
+  | "module"
+  | "parameter"
+  | "type"
+  | "variable";
 
 export type Node = letant.Node<NodeKind>;
 
-export type CaptureConfig = letant.CaptureConfig<QueryConfig>;
-
-export type SingleCaptureResult<K extends keyof QueryConfig> =
-  letant.SingleCaptureResult<QueryConfig[K]>;
-
-export type FullCaptureResult = letant.FullCaptureResult<QueryConfig>;
-
-export type ConvertConfig = letant.ConvertConfig<QueryConfig, Node>;
-
-export type ConvertContext = letant.ConvertContext<QueryConfig, Node>;
-
-export type ConvertResult = letant.ConvertResult<Node>;
-
-export type ConvertHandler<K extends keyof QueryConfig> = letant.ConvertHandler<
+export type ConvertHandler = letant.ConvertHandler<
   QueryConfig,
-  QueryConfig[K],
+  QueryConfig["program"],
   Node
 >;
 

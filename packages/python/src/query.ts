@@ -2,26 +2,25 @@ import { QueryMap } from "letant/query";
 import type Parser from "tree-sitter";
 import Python from "tree-sitter-python";
 
-// binding
-import moduleBindingQueryString from "@/queries/binding/module.scm";
-import variableQueryString from "@/queries/binding/variable.scm";
-// scope
-import classQueryString from "@/queries/scope/class.scm";
-import functionQueryString from "@/queries/scope/function.scm";
+// scoping
+import bindingQueryString from "@/queries/scoping/binding.scm";
+import programQueryString from "@/queries/scoping/program.scm";
+import scopeQueryString from "@/queries/scoping/scope.scm";
 // utility
 import referenceQueryString from "@/queries/utility/reference.scm";
 
-import { QueryConfig, UtilityQueryKey } from "./types";
+import { QueryConfig, ScopingQueryKey, UtilityQueryKey } from "./types";
 
 export const language = Python as Parser.Language;
 
-export const query = new QueryMap<keyof QueryConfig>(language)
-  // binding
-  .set("module.binding", moduleBindingQueryString)
-  .set("variable", variableQueryString)
-  // scope
-  .set("class", classQueryString)
-  .set("function", functionQueryString);
+export const query = new QueryMap<keyof QueryConfig>(language).set(
+  "program",
+  programQueryString,
+);
+
+export const scoping = new QueryMap<ScopingQueryKey>(language)
+  .set("scope", scopeQueryString)
+  .set("binding", bindingQueryString);
 
 export const utility = new QueryMap<UtilityQueryKey>(language).set(
   "reference",

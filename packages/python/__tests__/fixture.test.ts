@@ -110,7 +110,11 @@ describe("Workspace (python)", () => {
       );
 
       expect(result).toBeInstanceOf(TreeCursor);
-      expect((result as TreeCursor).path).toEqual(["main.py", "greet", "name"]);
+      expect((result as TreeCursor).path).toEqual([
+        "main.py",
+        `greet@${source.indexOf("def greet")}`,
+        "name",
+      ]);
     });
   });
 });
