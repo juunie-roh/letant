@@ -30,37 +30,47 @@ The same mechanism sets the boundary. Anything decided only while the program ru
 
 All output is a single type:
 
-- **Node** — a code entity identified by its `path`, the chain of scope names from the file down to the entity (e.g. `["src/parse.js", "parseDate", "input"]`). A `kind` classifies the entity, a `type` role classifies its scope behavior, and `at` locates it: a source range, or — for an import binding — the module it came from.
+- **Node** — a scope or a name, identified by its `path`: the chain of segments from the file down to it (e.g. `["src/parse.js", "parseDate@120", "input"]`). A `kind` classifies it, a `type` gives its role, and `at` locates it: a source range, or — for an import binding — the module it came from.
 
 There is no edge type. Containment is derived from paths — a node's parent is its path without the last segment — so the nodes of a file form a single-parent containment tree (ADR 0003). Inside a tree each path is interned to an integer `NodeId`; nothing is hashed (ADR 0002). Relations such as references are not stored: they are enacted by positional queries (ADR 0004).
 
 ### Node Roles
 
-Every node has a `type` field with one of three values:
+A scope is a region of source where names live; a binding is a name. They are separate nodes, so a scope is never found as a name (ADR 0006).
 
-| `type` | Description | Example `kind` values |
-| ------ | ----------- | --------------------- |
-| `"scope"` | A named scope — introduces names and is itself introduced into a parent scope | `function`, `class`, `method`, ... |
-| `"anonymous"` | An unnamed scope — introduces names but has no binding identity of its own | `iife`, `if`, `for`, `while`, ... |
-| `"binding"` | A pure binding — is introduced into a scope, does not introduce names | `variable`, `member`, `module` (import), `parameter`, ... |
+| `type` | Description | Path segment | `at` |
+| ------ | ----------- | ------------ | ---- |
+| `"anonymous"` | A scope: a function, class, block, loop, ... | `<label>@<start>`, never equal to an identifier | the region where its names are visible |
+| `"binding"` | A name: a variable, parameter, declared function or class, import, ... | the name itself | the declaring identifier, or the module an import came from |
+| `"scope"` | The file root | the file path | the file |
+
+`@letant/ts` and `@letant/python` have not moved to this model yet: they still emit named scopes of type `"scope"`, where one node is both the region and the name.
+
+### Scoping Rules
+
+Each plugin takes its rules from the language specification and records them beside its source (see [`packages/js/SCOPING.md`](packages/js/SCOPING.md)). There are four kinds (ADR 0006):
+
+- **Boundaries** — which syntax opens a scope.
+- **Binding forms** — which syntax introduces a name.
+- **Attachment** — which scope a name goes into, where that is not the nearest boundary (`var` hoisting, a declaration's own name).
+- **References** — which positions name a binding at all. A property after a dot, a label, or the inside of a string does not.
 
 ### Queries
 
 Questions are pointed: one position in, one answer out (ADR 0004). `Workspace` answers two of them:
 
-- `origin(file, offset)` — where was the name at this position bound? Answers with the declaration's position, following imports into files already opened in the workspace. When the trail leads into a file not yet opened, it stops at that module's path (or its original specifier, when it does not resolve to a file in the workspace); when the name cannot be resolved from syntax, it answers `undefined`.
-- `at(file, offset)` — the innermost scope containing a position. Its children are the names that scope introduces.
+- `origin(file, offset)` — where was the name at this position bound? Answers with the declaration's position, following imports into files already opened in the workspace. When the trail leads into a file not yet opened, it stops at that module's path (or its original specifier, when it does not resolve to a file in the workspace). When the position is not a reference, or the name cannot be resolved from syntax, it answers `undefined`.
+- `at(file, offset)` — the innermost scope containing a position. Its children are the names and scopes directly inside it.
+
+Files outside the configured `rootDir` are out of bounds: opening one, or following an import into one, is an error.
 
 ### Responsibilities
 
 L'étant separates concerns across two layers:
 
-**Language plugin** — interprets the raw Tree-Sitter AST for a specific language and maps it to the common node schema. The language's scoping rules live here. Two phases:
+**Language plugin** — holds the language's scoping rules. It runs tree-sitter queries over the whole file to collect every boundary and every binding form, attaches each name to its scope, and emits the nodes. It also tells core which positions are references.
 
-- `capture` — runs tree-sitter queries against AST nodes and returns typed match results. Decides **what entity** to capture from the source.
-- `convert` — transforms captures into nodes. Decides **which scope each name is bound in**, which fixes its path.
-
-**Core** — builds the containment tree from the plugin's nodes, resolves names on it, and answers positional queries through `Workspace`.
+**Core** — builds the containment tree from the plugin's nodes, resolves names on it by walking outward through enclosing scopes, and answers positional queries through `Workspace`. It knows no language.
 
 ## Prerequisites
 
