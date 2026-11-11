@@ -14,6 +14,8 @@ const dispatcher: Record<Parser.BaseNode["type"], typeof flatPattern> = {
   shorthand_property_identifier_pattern: (node, has_default) => [
     { name: node.text, node, has_default },
   ],
+  // `undefined` has its own node type, but it is an ordinary, shadowable name
+  undefined: (node, has_default) => [{ name: node.text, node, has_default }],
   // Recurse over single element
   rest_pattern: (node, has_default) =>
     flatPattern(node.firstNamedChild!, has_default),
