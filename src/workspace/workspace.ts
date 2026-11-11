@@ -109,7 +109,7 @@ class Workspace {
    * @returns A {@link TreeCursor} at the declaration (its `at` is a local
    * range, possibly in another file — see `cursor.root`), the
    * {@link NodeSource} of the next file to open (frontier), or `undefined`
-   * when the name cannot be resolved.
+   * when the position is not a reference or the name cannot be resolved.
    * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0004-output-interface.md ADR-0004}
    */
   @NormalizePath
@@ -118,12 +118,19 @@ class Workspace {
     filePath: string,
     offset: Offset,
   ): TreeCursor | NodeSource | undefined {
-    const { tree: graph, tsTree: tree } = this.get(filePath);
+    const { tree: graph, tsTree: tree, ext } = this.get(filePath);
 
     const target =
       typeof offset === "number"
         ? tree.rootNode.descendantForIndex(offset)
         : tree.rootNode.descendantForPosition(offset);
+
+    // which positions name a binding is the language's call: a property, a
+    // label or the inside of a string shares its text with a name, not its role
+    const isReference = this._handler
+      .references(target, ext)
+      .some((node) => node.id === target.id);
+    if (!isReference) return undefined;
 
     let resolved = TreeCursor.at(graph, offset).resolve(target.text);
 
