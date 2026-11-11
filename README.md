@@ -44,7 +44,7 @@ A scope is a region of source where names live; a binding is a name. They are se
 | `"binding"` | A name: a variable, parameter, declared function or class, import, ... | the name itself | the declaring identifier, or the module an import came from |
 | `"scope"` | The file root | the file path | the file |
 
-`@letant/ts` and `@letant/python` have not moved to this model yet: they still emit named scopes of type `"scope"`, where one node is both the region and the name.
+`@letant/ts` has not moved to this model yet: it still emits named scopes of type `"scope"`, where one node is both the region and the name.
 
 ### Scoping Rules
 

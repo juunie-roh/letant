@@ -169,7 +169,7 @@ Two facts the rest of this document relies on:
 Single-file cases from the earlier list are now in `__tests__/resolution.test.ts`. These remain:
 
 | Source | Name at | Expected | Why it fails |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | lib: `const x = 1; export { x as y }`; main: `import { y } from "./lib.js"` | `y` | lib `const x` | exports are not modeled (D7) |
 | lib: `export default 42`; main: `import v from "./lib.js"` | `v` | lib's `export default 42` | D7 |
 | lib: `const hidden = 1`; main: `import { hidden } from "./lib.js"` | `hidden` | unresolved | D7 |
