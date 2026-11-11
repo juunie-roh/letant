@@ -17,7 +17,7 @@ export function normalizePath(rootDir: string, filePath: string): string {
   if (relative.startsWith("..")) {
     throw new LetantError(
       "CORE_INVALID_ACCESS",
-      `Access outside root is not allowed: "${relative}"`,
+      `Access outside root(${rootDir}) is not allowed: "${relative}"`,
     );
   }
 

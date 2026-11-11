@@ -67,7 +67,6 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
         "main.js",
         "fs",
       ],
-      "props": undefined,
       "type": "binding",
     },
     {
@@ -96,14 +95,14 @@ exports[`Workspace > parses a source file into a stable serialized graph 1`] = `
     },
     {
       "at": {
-        "endIndex": 224,
+        "endIndex": 196,
         "endPosition": {
-          "column": 42,
+          "column": 14,
           "row": 9,
         },
-        "startIndex": 189,
+        "startIndex": 195,
         "startPosition": {
-          "column": 7,
+          "column": 13,
           "row": 9,
         },
       },

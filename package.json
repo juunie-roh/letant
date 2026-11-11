@@ -5,7 +5,7 @@
   "keywords": [],
   "author": "Juun",
   "license": "MIT",
-  "packageManager": "pnpm@12.4.1",
+  "packageManager": "pnpm@12.18.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/juunie-roh/letant.git"

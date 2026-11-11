@@ -70,9 +70,13 @@ one-level default. A bypass supplements them:
   Same path deduplicates (a `scope` replaces a non-`scope`; otherwise first
   wins). Emission order is free — children may precede parents.
 - **Never emit the root module node** (path length 1); core appends it.
-- **Scope nodes**: `at: getRange(node)` (full construct), `blockStartIndex`
-  pointing at the inner block's start — position queries begin reading
-  there.
+- **Scope nodes**: `at` is the interval position lookup descends through, so
+  it must cover exactly where the scope's names are visible — the body, not
+  the full construct, whenever a head or tail is evaluated outside it (an
+  `if` / `while` condition, a `switch` discriminant, an IIFE's arguments).
+  A `for` head is the exception: it belongs to the loop scope.
+  `blockStartIndex` points at the inner block's start — position queries
+  begin reading there.
 - **Anonymous nodes are only for constructs that truly create scopes** in
   your language. Emitting them for non-scoping blocks breaks resolution:
   bindings inside become invisible to their actual scope. (This is why
