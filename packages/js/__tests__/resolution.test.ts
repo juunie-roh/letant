@@ -42,6 +42,7 @@ async function origin(source: string, offset: number) {
 
   const resolved = workspace.origin("scope.js", offset);
   if (resolved === undefined || typeof resolved === "string") return resolved;
+  if ("unsupported" in resolved) return resolved;
 
   const { at } = resolved.node;
   return typeof at === "string" ? at : at.startIndex;

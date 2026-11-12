@@ -134,6 +134,22 @@ class PluginHandler {
   }
 
   /**
+   * @returns The name the reference at `node` looks up: its text, unless the
+   * plugin says otherwise.
+   */
+  nameOf(node: Parser.SyntaxNode, ext: string): string {
+    return this.plugins.get(ext)?.nameOf(node) ?? node.text;
+  }
+
+  /**
+   * @returns The plugin's reason for declining the reference at `node`, or
+   * `undefined` when the tree resolves it.
+   */
+  unsupported(node: Parser.SyntaxNode, ext: string): string | undefined {
+    return this.plugins.get(ext)?.unsupported(node);
+  }
+
+  /**
    * Cleans up all registered language resources.
    */
   destroy(): void {

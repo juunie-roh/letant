@@ -147,7 +147,7 @@ Two facts the rest of this document relies on:
 
 ## 7. Modeling decisions for the user
 
-**Taken (2026-11-11):** D1 B, D2 A, D3 A, D4 A, D5 B, D8 A, D11 A. D6 is settled in the plugin without a core change: public elements get `name@start` segments (a variant of B). **Open:** D7, D9, D10, D12.
+**Taken (2026-11-11):** D1 B, D2 A, D3 A, D4 A, D5 B, D8 A, D11 A. D6 is settled in the plugin without a core change: public elements get `name@start` segments (a variant of B). Core has since gained a mechanism of the kind option A describes (ADR 0007, lookup barriers, for Python's class bodies); this plugin does not use it. **Open:** D7, D9, D10, D12.
 
 | # | Decision | Options | Recommendation |
 | --- | --- | --- | --- |

@@ -1,7 +1,7 @@
 export interface Config {
   /**
    * The base directory for the workspace. All file paths emitted into the
-   * scope graph are resolved relative to this.
+   * scope tree are resolved relative to this.
    *
    * @default process.cwd()
    */

@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 
 // Scoping rules are specified in packages/python/SCOPING.md. Each source marks
 // the position to resolve with ‹name› and the identifier it must land on with
-// «name»; a source without «» must resolve to nothing. Requires
+// «name»; a source without «» must resolve to nothing. Requires `letant` and
 // `@letant/python` to be built.
 const config: Config = {
   rootDir: "packages/python/__mocks__/fixture",
@@ -53,6 +53,7 @@ async function origin(source: string, offset: number) {
 
   const resolved = workspace.origin("scope.py", offset);
   if (resolved === undefined || typeof resolved === "string") return resolved;
+  if ("unsupported" in resolved) return resolved;
 
   const { at } = resolved.node;
   return typeof at === "string" ? at : at.startIndex;
@@ -66,6 +67,14 @@ async function expectOrigin(marked: string) {
 async function expectFrontier(marked: string, specifier: string) {
   const { source, reference } = parseMarks(marked);
   expect(await origin(source, reference)).toBe(specifier);
+}
+
+/** The plugin declines the position, naming a rule that contains `rule`. */
+async function expectUnsupported(marked: string, rule: string) {
+  const { source, reference } = parseMarks(marked);
+  expect(await origin(source, reference)).toEqual({
+    unsupported: expect.stringContaining(rule),
+  });
 }
 
 describe("compound statements open no scope", () => {
@@ -445,6 +454,124 @@ describe("classes", () => {
       class A:
           class «Nested»: pass
           field: ‹Nested›
+    `));
+
+  it("hides a class-level name from a method", () =>
+    expectOrigin(`
+      «open» = "outer"
+      class File:
+          def open(self): pass
+          def read(self):
+              return ‹open›(self.path)
+    `));
+
+  it("hides a class-level name from a method when nothing outside binds it", () =>
+    expectOrigin(`
+      class A:
+          x = 1
+          def m(self):
+              return ‹x›
+    `));
+
+  it("hides a class-level name from a comprehension in the class body", () =>
+    expectOrigin(`
+      «scale» = "outer"
+      class A:
+          scale = 2
+          values = [x * ‹scale› for x in range(3)]
+    `));
+
+  it.each([
+    ["a set comprehension", "{x * ‹scale› for x in range(3)}"],
+    ["a dictionary comprehension", "{x: ‹scale› for x in range(3)}"],
+    ["a generator expression", "tuple(x * ‹scale› for x in range(3))"],
+  ])("hides a class-level name from %s in the class body", (_, values) =>
+    expectOrigin(`
+      «scale» = "outer"
+      class A:
+          scale = 2
+          values = ${values}
+    `),
+  );
+
+  it("hides a class-level name from a lambda in the class body", () =>
+    expectOrigin(`
+      «key» = "outer"
+      class A:
+          key = 1
+          order = lambda self: ‹key›
+    `));
+
+  it("hides an outer class's names from a nested class", () =>
+    expectOrigin(`
+      «x» = "outer"
+      class A:
+          x = 1
+          class B:
+              y = ‹x›
+    `));
+
+  it("hides a class between a function and the function around it", () =>
+    expectOrigin(`
+      def outer():
+          «x» = "enclosing"
+          class A:
+              x = 1
+              def m(self):
+                  return ‹x›
+    `));
+
+  it("resolves a nonlocal name past a class that binds it", () =>
+    expectOrigin(`
+      def outer():
+          «x» = 0
+          class A:
+              x = 1
+              def m(self):
+                  nonlocal x
+                  x = 2
+                  return ‹x›
+    `));
+
+  it("resolves a method's default value against the class", () =>
+    expectOrigin(`
+      limit = "outer"
+      class A:
+          «limit» = 10
+          def m(self, n=‹limit›): pass
+    `));
+
+  it("hides a class-level name from a lambda used as a default value", () =>
+    expectOrigin(`
+      «limit» = "outer"
+      class A:
+          limit = 10
+          def m(self, f=lambda: ‹limit›): pass
+    `));
+
+  it("shows a class-level name to a method's type parameter scope", () =>
+    expectOrigin(`
+      Bound = "outer"
+      class A:
+          class «Bound»: pass
+          def m[T: ‹Bound›](self, a: T): pass
+    `));
+
+  it("hides a class-level name from the body of a generic method", () =>
+    expectOrigin(`
+      «x» = "outer"
+      class A:
+          x = 1
+          def m[T](self, a: T):
+              return ‹x›
+    `));
+
+  it("shows a generic class's type parameter to its methods", () =>
+    expectOrigin(`
+      T = "outer"
+      class A[«T»]:
+          def m(self) -> ‹T›:
+              pass
     `));
 });
 
@@ -847,38 +974,282 @@ describe("positions that are not references", () => {
 
 // What follows is decided by syntax, but the core model cannot express it
 // yet: SCOPING.md §7. Each case fails today and must pass once it can.
+describe("names that are not the text at the position", () => {
+  it("looks up a private name in a class in its mangled form", () =>
+    expectOrigin(`
+      __secret = "module"
+      class A:
+          def m(self):
+              return ‹__secret›
+    `));
+
+  it("resolves a private parameter inside its class", () =>
+    expectOrigin(`
+      class A:
+          def m(self, «__key»):
+              return ‹__key›
+    `));
+
+  it("resolves a private class-level name from the class body", () =>
+    expectOrigin(`
+      class A:
+          «__slots» = ()
+          names = ‹__slots›
+    `));
+
+  it("resolves the mangled form written out to the private binding", () =>
+    expectOrigin(`
+      class A:
+          def m(self):
+              global __count
+              «__count» = 0
+      use(‹_A__count›)
+    `));
+
+  it("mangles with the innermost class, underscores of its name dropped", () =>
+    expectOrigin(`
+      class A:
+          class _B:
+              def m(self):
+                  global __x
+                  «__x» = 0
+      use(‹_B__x›)
+    `));
+
+  it("mangles a private name in a nonlocal statement", () =>
+    expectOrigin(`
+      class A:
+          def m(self):
+              «__x» = 0
+              def g():
+                  nonlocal __x
+                  __x = 1
+                  return ‹__x›
+    `));
+
+  it("mangles a private name imported in a class", () =>
+    expectFrontier(
+      `
+      class A:
+          import __impl
+          use(‹__impl›)
+    `,
+      "__impl",
+    ));
+
+  it("mangles a class's type parameter", () =>
+    expectOrigin(`
+      class A[«__T»]:
+          def m(self) -> ‹__T›:
+              pass
+    `));
+
+  it("does not mangle a name in a class's bases", () =>
+    expectOrigin(`
+      «__Base» = object
+      class A(‹__Base›): pass
+    `));
+
+  it("does not mangle a name that ends with two underscores", () =>
+    expectOrigin(`
+      «__all__» = []
+      class A:
+          names = ‹__all__›
+    `));
+
+  it("does not mangle in a class named with underscores only", () =>
+    expectOrigin(`
+      «__x» = 1
+      class __:
+          y = ‹__x›
+    `));
+
+  it("resolves a name written in another Unicode form of the binding", () =>
+    expectOrigin(`
+      «width» = 1
+      use(‹ｗｉｄｔｈ›)
+    `));
+
+  it("binds a name under its normal form", () =>
+    expectOrigin(`
+      «ｗｉｄｔｈ» = 1
+      use(‹width›)
+    `));
+});
+
+describe("references the plugin declines", () => {
+  const FIRST_ITERABLE = "first iterable";
+  const GLOBAL = "global name";
+  const DEFAULT = "default value";
+
+  it("declines a first iterable's name that is also a target", () =>
+    expectUnsupported(
+      `
+      x = load()
+      [x for x in ‹x›]
+    `,
+      FIRST_ITERABLE,
+    ));
+
+  it("declines a target's name in a scope inside the first iterable", () =>
+    expectUnsupported(
+      `
+      x = load()
+      [x for x in filter(lambda v: v != ‹x›, items)]
+    `,
+      FIRST_ITERABLE,
+    ));
+
+  it("declines the first iterable of a comprehension in a class body", () =>
+    expectUnsupported(
+      `
+      class A:
+          names = ("a", "b")
+          upper = [n.upper() for n in ‹names›]
+    `,
+      FIRST_ITERABLE,
+    ));
+
+  it("declines through first iterables nested in each other", () =>
+    expectUnsupported(
+      `
+      class A:
+          rows = ()
+          cells = [c for c in [r for r in ‹rows›]]
+    `,
+      FIRST_ITERABLE,
+    ));
+
+  it("resolves a first iterable outside a class when no target has the name", () =>
+    expectOrigin(`
+      «items» = load()
+      [x for x in ‹items›]
+    `));
+
+  it("resolves a first iterable in a function", () =>
+    expectOrigin(`
+      def f():
+          «items» = load()
+          return [x for x in ‹items›]
+    `));
+
+  it("resolves a comprehension's target at its declaration", () =>
+    expectOrigin(`
+      [x for «‹x›» in items]
+    `));
+
+  it("resolves a later iterable against the comprehension", () =>
+    expectOrigin(`
+      [y for «x» in rows for y in ‹x›]
+    `));
+
+  it("resolves a later iterable of a comprehension in a class body", () =>
+    expectOrigin(`
+      «rows» = "outer"
+      class A:
+          rows = ()
+          cells = [c for r in () for c in ‹rows›]
+    `));
+
+  it("resolves a first iterable inside a comprehension's element", () =>
+    expectOrigin(`
+      «rows» = "outer"
+      class A:
+          rows = ()
+          cells = [[c for c in ‹rows›] for r in ()]
+    `));
+
+  it("resolves a lambda inside a class-body comprehension's first iterable", () =>
+    expectOrigin(`
+      «names» = "outer"
+      class A:
+          names = ()
+          upper = [n for n in map(lambda v: ‹names›, ())]
+    `));
+
+  it("declines a global name declared inside a nested function", () =>
+    expectUnsupported(
+      `
+      x = "module"
+      def f():
+          x = "enclosing"
+          def g():
+              global x
+              return ‹x›
+    `,
+      GLOBAL,
+    ));
+
+  it("declines a global name used below its declaring function", () =>
+    expectUnsupported(
+      `
+      def f():
+          x = "enclosing"
+          def g():
+              global x
+              return lambda: ‹x›
+    `,
+      GLOBAL,
+    ));
+
+  it("resolves another name beside a nested global declaration", () =>
+    expectOrigin(`
+      def f():
+          «y» = "enclosing"
+          def g():
+              global x
+              return ‹y›
+    `));
+
+  it("resolves a global name declared in a method", () =>
+    expectOrigin(`
+      «count» = 0
+      class A:
+          def m(self):
+              global count
+              return ‹count›
+    `));
+
+  it("resolves a default value beside the function's global declaration", () =>
+    expectOrigin(`
+      def f():
+          «x» = "enclosing"
+          def g(a=‹x›):
+              global x
+    `));
+
+  it("does not take a nested function's global declaration for its parent's", () =>
+    expectOrigin(`
+      def f():
+          «x» = "enclosing"
+          def g():
+              def h():
+                  global x
+              return ‹x›
+    `));
+
+  it("declines a type parameter's name in a default value", () =>
+    expectUnsupported(
+      `
+      T = "outer"
+      def f[T](a=‹T›):
+          pass
+    `,
+      DEFAULT,
+    ));
+
+  it("resolves another name in a generic function's default value", () =>
+    expectOrigin(`
+      «limit» = 1
+      def f[T](a=‹limit›):
+          pass
+    `));
+});
+
+// The right answer is known and the tree cannot give it. Where a wrong
+// answer was possible the plugin declines the position (see above); these
+// pin the answer itself, and must pass once core can express the rule.
 describe("rules the core model cannot express yet", () => {
-  it.fails("M1: a method does not see a class-level name", () =>
-    expectOrigin(`
-      «open» = "outer"
-      class File:
-          def open(self): pass
-          def read(self):
-              return ‹open›(self.path)
-    `),
-  );
-
-  it.fails(
-    "M1: a comprehension in a class body does not see a class-level name",
-    () =>
-      expectOrigin(`
-      «scale» = "outer"
-      class A:
-          scale = 2
-          values = [x * ‹scale› for x in range(3)]
-    `),
-  );
-
-  it.fails("M1: a nested class does not see the outer class's names", () =>
-    expectOrigin(`
-      «x» = "outer"
-      class A:
-          x = 1
-          class B:
-              y = ‹x›
-    `),
-  );
-
   it("M2: does not answer a parameter's declaration with an outer binding", () =>
     expectOrigin(`
       a = "outer"
@@ -918,6 +1289,16 @@ describe("rules the core model cannot express yet", () => {
     `),
   );
 
+  it.fails(
+    "M2: the first iterable of a class-body comprehension sees the class",
+    () =>
+      expectOrigin(`
+      class A:
+          «names» = ("a", "b")
+          upper = [n.upper() for n in ‹names›]
+    `),
+  );
+
   it.fails("M3: a global name skips an enclosing function's binding", () =>
     expectOrigin(`
       «x» = "module"
@@ -926,15 +1307,6 @@ describe("rules the core model cannot express yet", () => {
           def g():
               global x
               return ‹x›
-    `),
-  );
-
-  it.fails("M4: a private name in a class is looked up mangled", () =>
-    expectOrigin(`
-      __secret = "module"
-      class A:
-          def m(self):
-              return ‹__secret›
     `),
   );
 });

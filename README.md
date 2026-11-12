@@ -59,7 +59,7 @@ Each plugin takes its rules from the language specification and records them bes
 
 Questions are pointed: one position in, one answer out (ADR 0004). `Workspace` answers two of them:
 
-- `origin(file, offset)` — where was the name at this position bound? Answers with the declaration's position, following imports into files already opened in the workspace. When the trail leads into a file not yet opened, it stops at that module's path (or its original specifier, when it does not resolve to a file in the workspace). When the position is not a reference, or the name cannot be resolved from syntax, it answers `undefined`.
+- `origin(file, offset)` — where was the name at this position bound? Answers with the declaration's position, following imports into files already opened in the workspace. When the trail leads into a file not yet opened, it stops at that module's path (or its original specifier, when it does not resolve to a file in the workspace). When the position is a reference that the tree would resolve incorrectly, because the language has a rule the model does not express, the plugin declines it and the answer is `{ unsupported: <the rule> }` (ADR 0007). When the position is not a reference, or the name cannot be resolved from syntax, it answers `undefined`.
 - `at(file, offset)` — the innermost scope containing a position. Its children are the names and scopes directly inside it.
 
 Files outside the configured `rootDir` are out of bounds: opening one, or following an import into one, is an error.
@@ -70,7 +70,7 @@ L'étant separates concerns across two layers:
 
 **Language plugin** — holds the language's scoping rules. It runs tree-sitter queries over the whole file to collect every boundary and every binding form, attaches each name to its scope, and emits the nodes. It also tells core which positions are references.
 
-**Core** — builds the containment tree from the plugin's nodes, resolves names on it by walking outward through enclosing scopes, and answers positional queries through `Workspace`. It knows no language.
+**Core** — builds the containment tree from the plugin's nodes, resolves names on it by walking outward through enclosing scopes, and answers positional queries through `Workspace`. It knows no language: where a language hides some names from nested code (a Python class's names from its methods), the plugin marks the scopes and bindings concerned and the walk passes over them (ADR 0007).
 
 ## Prerequisites
 

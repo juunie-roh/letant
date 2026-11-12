@@ -10,27 +10,27 @@ import type Tree from "./tree";
  * A lightweight immutable cursor instance.
  */
 class TreeCursor {
-  private readonly _graph: Tree;
+  private readonly _tree: Tree;
   private readonly _path: NodePath;
 
-  constructor(graph: Tree, path: NodePath) {
-    this._graph = graph;
+  constructor(tree: Tree, path: NodePath) {
+    this._tree = tree;
     this._path = path;
   }
 
   /**
-   * Get graph cursor instance at given {@link Offset | offset}.
+   * Get tree cursor instance at given {@link Offset | offset}.
    *
    * Descends over scope-bearing nodes only: a binding offers no space to
    * traverse or resolve within, so the entry is always the innermost
    * enclosing scope.
    *
-   * @param graph A graph where to find cursor instance.
-   * @param offset An offset to locate cursor within the given graph.
+   * @param tree A tree where to find cursor instance.
+   * @param offset An offset to locate cursor within the given tree.
    * @returns The innermost scope cursor containing the given offset.
    */
-  static at(graph: Tree, offset: Offset): TreeCursor {
-    let cursor = graph.walk();
+  static at(tree: Tree, offset: Offset): TreeCursor {
+    let cursor = tree.walk();
     let next: TreeCursor | undefined;
     while (
       (next = cursor
@@ -78,7 +78,7 @@ class TreeCursor {
   }
 
   get node(): Node {
-    const n = this._graph.getNode(this._path);
+    const n = this._tree.getNode(this._path);
     defined(
       n,
       new TreeError(
@@ -94,7 +94,7 @@ class TreeCursor {
   }
 
   get depth(): number {
-    return this._graph.depth(this._path);
+    return this._tree.depth(this._path);
   }
 
   get name(): string {
@@ -102,12 +102,12 @@ class TreeCursor {
   }
 
   get root(): string {
-    return this._graph.root;
+    return this._tree.root;
   }
 
   parent(): TreeCursor | undefined {
-    const parentPath = this._graph.parent(this._path);
-    return parentPath ? new TreeCursor(this._graph, parentPath) : undefined;
+    const parentPath = this._tree.parent(this._path);
+    return parentPath ? new TreeCursor(this._tree, parentPath) : undefined;
   }
 
   /**
@@ -117,8 +117,8 @@ class TreeCursor {
   children(type?: Node["type"]): TreeCursor[] {
     const cursors: TreeCursor[] = [];
 
-    for (const childPath of this._graph.children(this._path)) {
-      const cursor = new TreeCursor(this._graph, childPath);
+    for (const childPath of this._tree.children(this._path)) {
+      const cursor = new TreeCursor(this._tree, childPath);
       if (type && cursor.node.type !== type) continue;
       cursors.push(cursor);
     }
@@ -142,13 +142,30 @@ class TreeCursor {
 
   /**
    * Find the closest node from ancestors of the current node having the given symbol as its name.
+   *
+   * Once the walk has left a {@link Node.barrier | barrier} scope, a binding
+   * of `"local"` {@link Node.visibility | visibility} is passed over.
+   * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0007-lookup-barriers-and-unsupported-references.md ADR-0007}
    */
   resolve(symbol: string): TreeCursor | undefined {
-    const scope = this.closest((c) =>
-      c.children().some((child) => child.name === symbol),
-    );
-    // scope is the parent — you probably want the child
-    return scope?.children().find((child) => child.name === symbol);
+    let scope: TreeCursor | undefined = this;
+    let crossed = false;
+
+    while (scope) {
+      const found = scope
+        .children()
+        .find(
+          (child) =>
+            child.name === symbol &&
+            !(crossed && child.node.visibility === "local"),
+        );
+      if (found) return found;
+
+      crossed ||= scope.node.barrier === true;
+      scope = scope.parent();
+    }
+
+    return undefined;
   }
 
   toString(): string {

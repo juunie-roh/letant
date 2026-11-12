@@ -21,6 +21,17 @@ declare namespace Plugin {
     captureConfig: CaptureConfig<Q>;
     convertConfig: ConvertConfig<Q, N>;
     references: (node: Parser.SyntaxNode) => Parser.SyntaxNode[];
+    /**
+     * The name a reference looks up, where it is not the text at its
+     * position (a language that rewrites or normalizes names). Asked for a
+     * node `references` returned (ADR 0007).
+     */
+    nameOf?: (node: Parser.SyntaxNode) => string;
+    /**
+     * Declines a reference the tree would resolve incorrectly, with the rule
+     * that makes it so. Asked for a node `references` returned (ADR 0007).
+     */
+    unsupported?: (node: Parser.SyntaxNode) => string | undefined;
   }
 }
 
@@ -131,6 +142,14 @@ class Plugin {
 
   references(node: Parser.SyntaxNode): Parser.SyntaxNode[] {
     return this._module.references(node);
+  }
+
+  nameOf(node: Parser.SyntaxNode): string {
+    return this._module.nameOf?.(node) ?? node.text;
+  }
+
+  unsupported(node: Parser.SyntaxNode): string | undefined {
+    return this._module.unsupported?.(node);
   }
 
   @Trace({ label: "Plugin.extract" })

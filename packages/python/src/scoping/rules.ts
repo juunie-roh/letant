@@ -2,28 +2,47 @@ import type { SyntaxNode } from "tree-sitter";
 
 import type { NodeKind } from "@/types";
 
-import parameterName from "./utility/parameter";
+import parameterName, { typeParameterName } from "./utility/parameter";
+import flatPattern from "./utility/pattern";
 
 type ScopeRule = {
   kind: NodeKind;
   /** Segment label used when the scope has no name of its own. */
   label: string;
+  /**
+   * Whether a lookup that leaves the scope stops seeing class-level names:
+   * they are visible in the class body only (SCOPING.md §4).
+   */
+  barrier?: true;
 };
 
 /** Implicitly nested function scopes (SCOPING.md §1). */
 const COMPREHENSIONS: Record<string, ScopeRule> = {
-  list_comprehension: { kind: "comprehension", label: "listcomp" },
-  dictionary_comprehension: { kind: "comprehension", label: "dictcomp" },
-  set_comprehension: { kind: "comprehension", label: "setcomp" },
-  generator_expression: { kind: "comprehension", label: "genexpr" },
+  list_comprehension: {
+    kind: "comprehension",
+    label: "listcomp",
+    barrier: true,
+  },
+  dictionary_comprehension: {
+    kind: "comprehension",
+    label: "dictcomp",
+    barrier: true,
+  },
+  set_comprehension: { kind: "comprehension", label: "setcomp", barrier: true },
+  generator_expression: {
+    kind: "comprehension",
+    label: "genexpr",
+    barrier: true,
+  },
 };
 
 export const SCOPES: Record<string, ScopeRule> = {
-  function_definition: { kind: "function", label: "function" },
-  lambda: { kind: "function", label: "lambda" },
-  class_definition: { kind: "class", label: "class" },
+  function_definition: { kind: "function", label: "function", barrier: true },
+  lambda: { kind: "function", label: "lambda", barrier: true },
+  class_definition: { kind: "class", label: "class", barrier: true },
   ...COMPREHENSIONS,
-  // the annotation scope a type parameter list opens around its definition
+  // the annotation scope a type parameter list opens around its definition;
+  // directly inside a class it sees the class's names, so it is no barrier
   type_parameter: { kind: "generic", label: "generic" },
 };
 
@@ -147,4 +166,144 @@ export function isReference(node: SyntaxNode): boolean {
     default:
       return true;
   }
+}
+
+/**
+ * The name an identifier stands for (SCOPING.md §4): its NFKC normal form,
+ * and inside a class `__name` is `_Class__name`. A class's body and type
+ * parameters are inside it; its decorators and bases are not.
+ */
+export function nameOf(node: SyntaxNode): string {
+  const name = node.text.normalize("NFKC");
+  if (!name.startsWith("__") || name.endsWith("__")) return name;
+
+  let child = node;
+  for (
+    let parent = node.parent;
+    parent;
+    child = parent, parent = parent.parent
+  ) {
+    if (
+      parent.type === "class_definition" &&
+      (isField(parent, "body", child) ||
+        isField(parent, "type_parameters", child))
+    ) {
+      const owner = nameOf(parent.childForFieldName("name")!).replace(
+        /^_+/,
+        "",
+      );
+      // a class named with underscores only mangles nothing
+      return owner ? `_${owner}${name}` : name;
+    }
+  }
+  return name;
+}
+
+/** Whether a function or class has `global name` in its own block. */
+function declaresGlobal(scope: SyntaxNode, name: string): boolean {
+  const search = (node: SyntaxNode): boolean =>
+    node.namedChildren.some((child) => {
+      if (child.type === "global_statement") {
+        return child.namedChildren.some((id) => nameOf(id) === name);
+      }
+      // statements only: an expression cannot hold one, a nested block is
+      // another scope
+      return !(child.type in DECLARATIONS) && search(child);
+    });
+  return search(scope.childForFieldName("body")!);
+}
+
+const FIRST_ITERABLE =
+  "the first iterable of a comprehension is evaluated outside it";
+const GLOBAL = "a global name skips the functions around its declaration";
+const GENERIC_DEFAULT =
+  "a default value is evaluated outside the type parameter scope";
+
+/**
+ * The rule that keeps the tree from resolving a reference correctly, if any
+ * (SCOPING.md §7). Each test reads syntax alone and errs towards declining:
+ * it does not ask whether another scope binds the name first.
+ */
+export function unsupported(node: SyntaxNode): string | undefined {
+  const name = nameOf(node);
+  // functions and classes left so far, innermost first
+  const blocks: SyntaxNode[] = [];
+  // whether the node is evaluated in the scope the walk has reached: so far
+  // it has only left comprehensions, through their first iterable
+  let direct = true;
+  let iterable: SyntaxNode | undefined;
+
+  let child = node;
+  for (
+    let parent = node.parent;
+    parent;
+    child = parent, parent = parent.parent
+  ) {
+    switch (parent.type) {
+      case "for_in_clause": {
+        // only the first `for` clause's iterable is evaluated outside
+        const first = parent.parent!.namedChildren.find(
+          (c) => c.type === "for_in_clause",
+        )!;
+        if (first.id === parent.id && isField(parent, "right", child)) {
+          iterable = parent;
+        }
+        break;
+      }
+      case "default_parameter":
+      case "typed_default_parameter": {
+        const owner = parent.parent!.parent!;
+        const generic =
+          isField(parent, "value", child) && typeParameters(owner);
+        if (
+          generic &&
+          generic.namedChildren.some(
+            (p) => nameOf(typeParameterName(p)) === name,
+          )
+        ) {
+          return GENERIC_DEFAULT;
+        }
+        break;
+      }
+      case "lambda":
+        if (isField(parent, "body", child)) direct = false;
+        break;
+      case "function_definition":
+      case "class_definition":
+        if (isOutsideOf(parent, child)) break;
+        // a class-level name is visible from the first iterable of a
+        // comprehension in the class body, which the tree places inside
+        // the comprehension, behind its barrier
+        if (parent.type === "class_definition" && direct && iterable) {
+          return FIRST_ITERABLE;
+        }
+        direct = false;
+        blocks.push(parent);
+        break;
+      default:
+        if (!isComprehension(parent)) break;
+        if (iterable?.id !== child.id) {
+          direct = false;
+          break;
+        }
+        // the tree finds the comprehension's own target first
+        if (
+          parent.namedChildren
+            .filter((c) => c.type === "for_in_clause")
+            .flatMap((c) => flatPattern(c.childForFieldName("left")!))
+            .some((id) => nameOf(id) === name)
+        ) {
+          return FIRST_ITERABLE;
+        }
+    }
+  }
+
+  // bindings under `global` sit in the module, and the walk towards it
+  // passes the functions in between
+  const declared = blocks.some(
+    (block, i) =>
+      blocks.slice(i + 1).some((b) => b.type === "function_definition") &&
+      declaresGlobal(block, name),
+  );
+  return declared ? GLOBAL : undefined;
 }
