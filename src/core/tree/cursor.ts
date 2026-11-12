@@ -13,24 +13,24 @@ class TreeCursor {
   private readonly _tree: Tree;
   private readonly _path: NodePath;
 
-  constructor(graph: Tree, path: NodePath) {
-    this._tree = graph;
+  constructor(tree: Tree, path: NodePath) {
+    this._tree = tree;
     this._path = path;
   }
 
   /**
-   * Get graph cursor instance at given {@link Offset | offset}.
+   * Get tree cursor instance at given {@link Offset | offset}.
    *
    * Descends over scope-bearing nodes only: a binding offers no space to
    * traverse or resolve within, so the entry is always the innermost
    * enclosing scope.
    *
-   * @param graph A graph where to find cursor instance.
-   * @param offset An offset to locate cursor within the given graph.
+   * @param tree A tree where to find cursor instance.
+   * @param offset An offset to locate cursor within the given tree.
    * @returns The innermost scope cursor containing the given offset.
    */
-  static at(graph: Tree, offset: Offset): TreeCursor {
-    let cursor = graph.walk();
+  static at(tree: Tree, offset: Offset): TreeCursor {
+    let cursor = tree.walk();
     let next: TreeCursor | undefined;
     while (
       (next = cursor

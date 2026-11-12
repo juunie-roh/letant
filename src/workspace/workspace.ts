@@ -81,8 +81,8 @@ class Workspace {
    */
   topLevelNames(): Map<string, string[]> {
     const result = new Map<string, string[]>();
-    for (const [filePath, { tree: graph }] of this._files) {
-      result.set(filePath, graph.topLevelNames());
+    for (const [filePath, { tree }] of this._files) {
+      result.set(filePath, tree.topLevelNames());
     }
     return result;
   }
@@ -95,8 +95,8 @@ class Workspace {
    */
   @NormalizePath
   at(filePath: string, offset: Offset): TreeCursor {
-    const { tree: graph } = this.get(filePath);
-    return TreeCursor.at(graph, offset);
+    const { tree } = this.get(filePath);
+    return TreeCursor.at(tree, offset);
   }
 
   /**
@@ -118,12 +118,12 @@ class Workspace {
     filePath: string,
     offset: Offset,
   ): TreeCursor | NodeSource | undefined {
-    const { tree: graph, tsTree: tree, ext } = this.get(filePath);
+    const { tree, tsTree, ext } = this.get(filePath);
 
     const target =
       typeof offset === "number"
-        ? tree.rootNode.descendantForIndex(offset)
-        : tree.rootNode.descendantForPosition(offset);
+        ? tsTree.rootNode.descendantForIndex(offset)
+        : tsTree.rootNode.descendantForPosition(offset);
 
     // which positions name a binding is the language's call: a property, a
     // label or the inside of a string shares its text with a name, not its role
@@ -132,7 +132,7 @@ class Workspace {
       .some((node) => node.id === target.id);
     if (!isReference) return undefined;
 
-    let resolved = TreeCursor.at(graph, offset).resolve(target.text);
+    let resolved = TreeCursor.at(tree, offset).resolve(target.text);
 
     const visited = new Set<string>([filePath]);
 
@@ -220,13 +220,14 @@ class Workspace {
     cursor: TreeCursor;
     node: Parser.SyntaxNode;
   } {
-    const { tree: graph, tsTree: tree, ext } = this.get(filePath);
-    const cursor = TreeCursor.at(graph, offset);
+    const { tree, tsTree, ext } = this.get(filePath);
+    const cursor = TreeCursor.at(tree, offset);
 
     // the cursor always lands on a scope — start at its inner block
     const o = cursor.node.blockStartIndex ?? 0;
 
-    const node = tree.rootNode.descendantForIndex(o).parent ?? tree.rootNode;
+    const node =
+      tsTree.rootNode.descendantForIndex(o).parent ?? tsTree.rootNode;
 
     return {
       ext,
