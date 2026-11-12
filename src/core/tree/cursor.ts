@@ -10,11 +10,11 @@ import type Tree from "./tree";
  * A lightweight immutable cursor instance.
  */
 class TreeCursor {
-  private readonly _graph: Tree;
+  private readonly _tree: Tree;
   private readonly _path: NodePath;
 
   constructor(graph: Tree, path: NodePath) {
-    this._graph = graph;
+    this._tree = graph;
     this._path = path;
   }
 
@@ -78,7 +78,7 @@ class TreeCursor {
   }
 
   get node(): Node {
-    const n = this._graph.getNode(this._path);
+    const n = this._tree.getNode(this._path);
     defined(
       n,
       new TreeError(
@@ -94,7 +94,7 @@ class TreeCursor {
   }
 
   get depth(): number {
-    return this._graph.depth(this._path);
+    return this._tree.depth(this._path);
   }
 
   get name(): string {
@@ -102,12 +102,12 @@ class TreeCursor {
   }
 
   get root(): string {
-    return this._graph.root;
+    return this._tree.root;
   }
 
   parent(): TreeCursor | undefined {
-    const parentPath = this._graph.parent(this._path);
-    return parentPath ? new TreeCursor(this._graph, parentPath) : undefined;
+    const parentPath = this._tree.parent(this._path);
+    return parentPath ? new TreeCursor(this._tree, parentPath) : undefined;
   }
 
   /**
@@ -117,8 +117,8 @@ class TreeCursor {
   children(type?: Node["type"]): TreeCursor[] {
     const cursors: TreeCursor[] = [];
 
-    for (const childPath of this._graph.children(this._path)) {
-      const cursor = new TreeCursor(this._graph, childPath);
+    for (const childPath of this._tree.children(this._path)) {
+      const cursor = new TreeCursor(this._tree, childPath);
       if (type && cursor.node.type !== type) continue;
       cursors.push(cursor);
     }
