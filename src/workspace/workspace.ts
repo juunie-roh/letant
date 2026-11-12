@@ -7,7 +7,7 @@ import Parser from "tree-sitter";
 import { isNodeSource, NodePath, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
 import { PluginHandler, TreeCursor } from "@/core";
-import type { Config, Offset } from "@/models";
+import type { Config, Offset, Unsupported } from "@/models";
 
 import { NormalizePath } from "./decorators";
 import WorkspaceError from "./error";
@@ -108,16 +108,19 @@ class Workspace {
    *
    * @returns A {@link TreeCursor} at the declaration (its `at` is a local
    * range, possibly in another file — see `cursor.root`), the
-   * {@link NodeSource} of the next file to open (frontier), or `undefined`
-   * when the position is not a reference or the name cannot be resolved.
+   * {@link NodeSource} of the next file to open (frontier),
+   * {@link Unsupported} when the position is a reference the plugin declines
+   * because the tree would resolve it incorrectly, or `undefined` when the
+   * position is not a reference or the name cannot be resolved.
    * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0004-output-interface.md ADR-0004}
+   * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0007-lookup-barriers-and-unsupported-references.md ADR-0007}
    */
   @NormalizePath
   @Trace({ label: "Workspace.origin" })
   origin(
     filePath: string,
     offset: Offset,
-  ): TreeCursor | NodeSource | undefined {
+  ): TreeCursor | NodeSource | Unsupported | undefined {
     const { tree, tsTree, ext } = this.get(filePath);
 
     const target =
@@ -132,7 +135,14 @@ class Workspace {
       .some((node) => node.id === target.id);
     if (!isReference) return undefined;
 
-    let resolved = TreeCursor.at(tree, offset).resolve(target.text);
+    // a wrong answer is worse than none: where the tree cannot express the
+    // language's rule for this reference, the plugin says so
+    const unsupported = this._handler.unsupported(target, ext);
+    if (unsupported !== undefined) return { unsupported };
+
+    let resolved = TreeCursor.at(tree, offset).resolve(
+      this._handler.nameOf(target, ext),
+    );
 
     const visited = new Set<string>([filePath]);
 
@@ -166,15 +176,30 @@ class Workspace {
 
     const resolved = new Map<
       string,
-      { cursor: TreeCursor | undefined; refs: Set<Parser.SyntaxNode> }
+      {
+        cursor: TreeCursor | undefined;
+        unsupported?: string;
+        refs: Set<Parser.SyntaxNode>;
+      }
     >();
 
     for (const ref of references) {
-      const resolvedCursor = cursor.resolve(ref.text);
-      const key = resolvedCursor?.toString() ?? "";
+      const unsupported = this._handler.unsupported(ref, ext);
+      const resolvedCursor =
+        unsupported === undefined
+          ? cursor.resolve(this._handler.nameOf(ref, ext))
+          : undefined;
+      const key =
+        unsupported === undefined
+          ? (resolvedCursor?.toString() ?? "")
+          : `unsupported: ${unsupported}`;
 
       if (!resolved.has(key)) {
-        resolved.set(key, { cursor: resolvedCursor, refs: new Set() });
+        resolved.set(key, {
+          cursor: resolvedCursor,
+          unsupported,
+          refs: new Set(),
+        });
       }
 
       resolved.get(key)!.refs.add(ref);
@@ -182,8 +207,10 @@ class Workspace {
 
     console.log("total:", references.size, "references");
 
-    resolved.forEach(({ cursor: c, refs }) => {
-      if (!c) {
+    resolved.forEach(({ cursor: c, unsupported, refs }) => {
+      if (unsupported !== undefined) {
+        console.log("unsupported:", unsupported);
+      } else if (!c) {
         console.log("unresolved");
       } else {
         console.log(`(${c.node.kind})`, c.name, c.toString());

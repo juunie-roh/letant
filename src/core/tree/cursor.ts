@@ -142,13 +142,30 @@ class TreeCursor {
 
   /**
    * Find the closest node from ancestors of the current node having the given symbol as its name.
+   *
+   * Once the walk has left a {@link Node.barrier | barrier} scope, a binding
+   * of `"local"` {@link Node.visibility | visibility} is passed over.
+   * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0007-lookup-barriers-and-unsupported-references.md ADR-0007}
    */
   resolve(symbol: string): TreeCursor | undefined {
-    const scope = this.closest((c) =>
-      c.children().some((child) => child.name === symbol),
-    );
-    // scope is the parent — you probably want the child
-    return scope?.children().find((child) => child.name === symbol);
+    let scope: TreeCursor | undefined = this;
+    let crossed = false;
+
+    while (scope) {
+      const found = scope
+        .children()
+        .find(
+          (child) =>
+            child.name === symbol &&
+            !(crossed && child.node.visibility === "local"),
+        );
+      if (found) return found;
+
+      crossed ||= scope.node.barrier === true;
+      scope = scope.parent();
+    }
+
+    return undefined;
   }
 
   toString(): string {

@@ -193,6 +193,96 @@ describe("Tree Cursor", () => {
     });
   });
 
+  // ADR 0007: `outer` and `inner` are barriers, `block` is not; `held` holds
+  // the local bindings
+  describe("resolve() — barriers", () => {
+    const scope = (path: string[], barrier?: boolean) => ({
+      path: NodePath(path),
+      kind: "scope",
+      type: "anonymous" as const,
+      blockStartIndex: 0,
+      at: makeRange(0, 100),
+      barrier,
+    });
+    const binding = (path: string[], visibility?: "local") => ({
+      path: NodePath(path),
+      kind: "variable",
+      type: "binding" as const,
+      at: makeRange(0, 1),
+      visibility,
+    });
+
+    const held = ["f", "outer@0", "held@1"];
+    const barriers = new Tree(
+      [
+        {
+          path: NodePath(["f"]),
+          kind: "module",
+          type: "scope",
+          blockStartIndex: 0,
+          at: NodeSource("f"),
+        },
+        binding(["f", "x"]),
+        binding(["f", "y"]),
+        scope(["f", "outer@0"], true),
+        binding(["f", "outer@0", "z"]),
+        scope(held, true),
+        binding([...held, "x"], "local"),
+        binding([...held, "open"]),
+        scope([...held, "inner@2"], true),
+        binding([...held, "inner@2", "y"], "local"),
+        scope([...held, "block@3"]),
+        scope([...held, "block@3", "inner@4"], true),
+      ],
+      "f",
+    );
+    const at = (...path: string[]) =>
+      new TreeCursor(barriers, NodePath(["f", ...path]));
+
+    it("sees a local binding from the scope that holds it", () => {
+      expect(at(...held.slice(1)).resolve("x")?.path).toEqual([...held, "x"]);
+    });
+
+    it("sees a local binding of its own scope when that scope is a barrier", () => {
+      const inner = [...held.slice(1), "inner@2"];
+      expect(at(...inner).resolve("y")?.path).toEqual(["f", ...inner, "y"]);
+    });
+
+    it("passes over a local binding once a barrier has been left", () => {
+      const inner = [...held.slice(1), "inner@2"];
+      expect(at(...inner).resolve("x")?.path).toEqual(["f", "x"]);
+    });
+
+    it("sees a local binding through a scope that is not a barrier", () => {
+      const block = [...held.slice(1), "block@3"];
+      expect(at(...block).resolve("x")?.path).toEqual([...held, "x"]);
+    });
+
+    it("keeps passing over local bindings after a later scope that is not a barrier", () => {
+      const inner = [...held.slice(1), "block@3", "inner@4"];
+      expect(at(...inner).resolve("x")?.path).toEqual(["f", "x"]);
+    });
+
+    it("sees a binding that is not local past a barrier", () => {
+      const inner = [...held.slice(1), "inner@2"];
+      expect(at(...inner).resolve("open")?.path).toEqual([...held, "open"]);
+      expect(at(...inner).resolve("z")?.path).toEqual(["f", "outer@0", "z"]);
+    });
+
+    it("returns undefined when only a passed-over binding has the name", () => {
+      const lone = new Tree(
+        [
+          scope(["g", "held@0"], true),
+          binding(["g", "held@0", "x"], "local"),
+          scope(["g", "held@0", "inner@1"], true),
+        ],
+        "g",
+      );
+      const inner = new TreeCursor(lone, NodePath(["g", "held@0", "inner@1"]));
+      expect(inner.resolve("x")).toBeUndefined();
+    });
+  });
+
   describe("name", () => {
     it("returns the last path segment", () => {
       expect(cursor.name).toBe("file.ts");
