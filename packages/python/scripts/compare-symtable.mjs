@@ -1,7 +1,9 @@
 // Acceptance check for the scoping rules (ADR 0006): every name CPython's own
 // symbol table resolves must resolve, through letant, to a binding in the same
 // scope — and an attribute or a keyword argument's name must resolve to
-// nothing. The reference side is scripts/symtable_reference.py.
+// nothing. A reference the plugin declines (ADR 0007) is counted apart, with
+// whether the tree would have answered it correctly. The reference side is
+// scripts/symtable_reference.py.
 //
 // Usage: pnpm --filter @letant/python compare [paths...] [--files <n>] [--seed <n>] [--python <exe>] [--verbose]
 //   paths     files or directories to compare (default: the interpreter's
@@ -76,9 +78,7 @@ function scopeOf(cursor, tsTree) {
 }
 
 /** Which rule of SCOPING.md §7 a disagreement falls under, if any. */
-function classify({ context, expected, got, node, name }) {
-  if (node.text !== name) return "M4: the name is not in NFKC normal form";
-  if (context === "private") return "M4: private name mangling";
+function classify({ context, expected, got, node }) {
   if (node.type === "type") {
     return "grammar: `type(x).attr = …` parses as a type alias";
   }
@@ -113,10 +113,17 @@ const total = {
   agreed: 0,
   // a parameter's declaration lies outside its scope's region (SCOPING.md M2)
   notOffered: 0,
+  // declined by the plugin (SCOPING.md §7), and how many of those the tree
+  // would have answered correctly
+  unsupported: 0,
+  unsupportedButRight: 0,
   disagreed: 0,
 };
 const categories = {};
+const declined = {};
 const disagreements = [];
+
+const { nameOf } = (await import(plugin)).default;
 
 const python = spawn(options.python, [reference], {
   stdio: ["pipe", "pipe", "inherit"],
@@ -152,12 +159,20 @@ for await (const line of createInterface({ input: python.stdout })) {
 
     // `origin` answers nothing for a position that is not a reference, and
     // with a module path for an import: that binding is read off the tree
-    const origin =
-      node.text === name ? workspace.origin(relative, offset) : undefined;
-    const cursor =
-      typeof origin === "string"
-        ? TreeCursor.at(parsed.tree, offset).resolve(name)
-        : origin;
+    const origin = workspace.origin(relative, offset);
+    const onTree = () =>
+      TreeCursor.at(parsed.tree, offset).resolve(nameOf(node));
+
+    if (typeof origin === "object" && "unsupported" in origin) {
+      total.unsupported++;
+      declined[origin.unsupported] = (declined[origin.unsupported] ?? 0) + 1;
+      const cursor = onTree();
+      const id = cursor ? scopeOf(cursor, parsed.tsTree).id : null;
+      if (id === expected) total.unsupportedButRight++;
+      continue;
+    }
+
+    const cursor = typeof origin === "string" ? onTree() : origin;
     const got = cursor ? scopeOf(cursor, parsed.tsTree) : { id: null };
 
     if (got.id === (expected === "!" ? null : expected)) {
@@ -171,7 +186,7 @@ for await (const line of createInterface({ input: python.stdout })) {
     }
 
     total.disagreed++;
-    const category = classify({ context, expected, got, node, name });
+    const category = classify({ context, expected, got, node });
     categories[category] = (categories[category] ?? 0) + 1;
     const { row, column } = node.startPosition;
     disagreements.push(
@@ -186,7 +201,7 @@ for await (const line of createInterface({ input: python.stdout })) {
 
 process.stderr.write(`\r${files.length}/${files.length} files\n`);
 console.log(total);
-console.log(categories);
+console.log({ declined, disagreements: categories });
 
 const shown = options.verbose ? disagreements : disagreements.slice(0, 20);
 for (const line of shown) console.log(line);

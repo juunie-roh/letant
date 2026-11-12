@@ -1,5 +1,6 @@
 import { language, query } from "./query";
 import programHandler from "./scoping/extract";
+import { nameOf, unsupported } from "./scoping/rules";
 import referenceHandler from "./scoping/utility/reference";
 import type { Descriptor } from "./types";
 
@@ -10,6 +11,8 @@ export const descriptor: Descriptor = {
   captureConfig: {},
   convertConfig: { program: programHandler },
   references: referenceHandler,
+  nameOf,
+  unsupported,
 };
 
 export default descriptor;

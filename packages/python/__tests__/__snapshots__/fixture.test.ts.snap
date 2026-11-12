@@ -106,6 +106,7 @@ exports[`Workspace (python) > parses a source file into a stable serialized tree
           "row": 9,
         },
       },
+      "barrier": true,
       "blockStartIndex": 145,
       "children": [
         6,
@@ -233,6 +234,7 @@ exports[`Workspace (python) > parses a source file into a stable serialized tree
           "row": 13,
         },
       },
+      "barrier": true,
       "blockStartIndex": 207,
       "children": [
         11,
@@ -272,6 +274,7 @@ exports[`Workspace (python) > parses a source file into a stable serialized tree
         "default",
       ],
       "type": "binding",
+      "visibility": "local",
     },
     {
       "at": {
@@ -295,6 +298,7 @@ exports[`Workspace (python) > parses a source file into a stable serialized tree
         "method",
       ],
       "type": "binding",
+      "visibility": "local",
     },
     {
       "at": {
@@ -309,6 +313,7 @@ exports[`Workspace (python) > parses a source file into a stable serialized tree
           "row": 16,
         },
       },
+      "barrier": true,
       "blockStartIndex": 256,
       "children": [
         14,

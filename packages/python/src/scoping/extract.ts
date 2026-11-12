@@ -15,6 +15,7 @@ import {
   DECLARATIONS,
   isComprehension,
   isOutsideOf,
+  nameOf,
   regionOf,
   SCOPES,
   typeParameters,
@@ -124,7 +125,8 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
   };
 
   // one node per name per scope: the first binding in the source
-  const declare = (scope: Scope, name: string, binding: Binding) => {
+  const declare = (scope: Scope, id: SyntaxNode, binding: Binding) => {
+    const name = nameOf(id);
     if (scope.nonlocal.has(name)) return;
     const target = scope.global.has(name) ? moduleScope : scope;
     if (target.bindings.has(name)) return;
@@ -132,6 +134,8 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
       ...binding,
       path: createChildPath(pathOf(target), name),
       type: "binding",
+      // a class's names are visible in the class body only
+      ...(target.node.type === "class_definition" && { visibility: "local" }),
     } as Node);
   };
 
@@ -151,14 +155,14 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
         // `import a.b` binds `a`; `import a.b as c` binds `c` to `a.b`
         const bound = alias ?? name.firstNamedChild!;
         const at = NodeSource(alias ? name.text : bound.text);
-        declare(scope, bound.text, { kind: "module", at, props });
+        declare(scope, bound, { kind: "module", at, props });
         continue;
       }
 
       let path = toModulePath(from);
       // `from . import sibling` — the imported name is itself a submodule
       if (path.endsWith("/")) path += name.text;
-      declare(scope, (alias ?? name).text, {
+      declare(scope, alias ?? name, {
         kind: "module",
         at: NodeSource(path),
         props,
@@ -171,8 +175,8 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
 
   // `global` and `nonlocal` apply to their whole scope, so they come first
   for (const { name, node } of captures) {
-    if (name === "binding.global") enclosing(node).global.add(node.text);
-    if (name === "binding.nonlocal") enclosing(node).nonlocal.add(node.text);
+    if (name === "binding.global") enclosing(node).global.add(nameOf(node));
+    if (name === "binding.nonlocal") enclosing(node).nonlocal.add(nameOf(node));
   }
 
   for (const { name, node } of captures) {
@@ -185,7 +189,7 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
           while (isComprehension(scope.node)) scope = scope.parent!;
         }
         for (const id of flatPattern(node)) {
-          declare(scope, id.text, { kind: "variable", at: getRange(id) });
+          declare(scope, id, { kind: "variable", at: getRange(id) });
         }
         break;
       }
@@ -193,7 +197,7 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
         const list = node.parent!;
         if (list.type === "type_parameter") {
           const id = typeParameterName(node);
-          declare(scopes.get(list.id)!, id.text, {
+          declare(scopes.get(list.id)!, id, {
             kind: "type",
             at: getRange(id),
           });
@@ -201,7 +205,7 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
         }
         const parameter = parameterName(node);
         if (parameter) {
-          declare(scopes.get(list.parent!.id)!, parameter.node.text, {
+          declare(scopes.get(list.parent!.id)!, parameter.node, {
             kind: "parameter",
             at: getRange(parameter.node),
             props: { has_default: parameter.has_default },
@@ -212,7 +216,7 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
       case "binding.declaration": {
         let owner = node.parent!;
         while (!(owner.type in DECLARATIONS)) owner = owner.parent!;
-        declare(enclosing(owner), node.text, {
+        declare(enclosing(owner), node, {
           kind: DECLARATIONS[owner.type],
           at: getRange(node),
         });
@@ -234,6 +238,7 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
         at: region(scope.node),
         blockStartIndex: (scope.node.childForFieldName("body") ?? scope.node)
           .startIndex,
+        barrier: SCOPES[scope.node.type].barrier,
         props: scopeProps(scope.node),
       });
     }
