@@ -20,6 +20,10 @@ const syntax = [
   { id: 3, text: "local", reference: false },
   { id: 4, text: "local", reference: true, unsupported: "a rule" },
   { id: 5, text: "written", reference: true, name: "local" },
+  { id: 6, text: "Shape", reference: true, spaces: ["type"] },
+  { id: 7, text: "Shape", reference: true },
+  { id: 8, text: "Renamed", reference: true, spaces: ["type"] },
+  { id: 9, text: "Renamed", reference: true },
 ];
 
 const tree = new Tree(
@@ -43,19 +47,63 @@ const tree = new Tree(
       type: "binding",
       at: NodeSource("b.x"),
     },
+    {
+      path: NodePath(["a.x", "Shape"]),
+      kind: "interface",
+      type: "binding",
+      space: "type",
+      at: range(20, 25),
+    },
+    {
+      path: NodePath(["a.x", "Shape"]),
+      kind: "variable",
+      type: "binding",
+      at: range(30, 35),
+    },
+    {
+      path: NodePath(["a.x", "Renamed"]),
+      kind: "module",
+      type: "binding",
+      space: "alias",
+      at: NodeSource("c.x"),
+      props: { alias_of: "Shape" },
+    },
   ],
   "a.x",
 );
 
+// c.x declares `Shape` as a type only
+const exporting = new Tree(
+  [
+    {
+      path: NodePath(["c.x"]),
+      kind: "module",
+      type: "scope",
+      blockStartIndex: 0,
+      at: NodeSource("c.x"),
+    },
+    {
+      path: NodePath(["c.x", "Shape"]),
+      kind: "interface",
+      type: "binding",
+      space: "type",
+      at: range(0, 5),
+    },
+  ],
+  "c.x",
+);
+
 const handler = {
-  parse: () => ({
-    tree,
-    tsTree: { rootNode: { descendantForIndex: (o: number) => syntax[o] } },
+  parse: (filePath: string) => ({
+    tree: filePath === "c.x" ? exporting : tree,
+    tsTree: { rootNode: { namedDescendantForIndex: (o: number) => syntax[o] } },
     ext: ".x",
   }),
   references: (node: (typeof syntax)[number]) => (node.reference ? [node] : []),
   nameOf: (node: (typeof syntax)[number]) => node.name ?? node.text,
   unsupported: (node: (typeof syntax)[number]) => node.unsupported,
+  spacesOf: (node: (typeof syntax)[number]) =>
+    node.spaces && [...node.spaces, "alias"],
 };
 
 describe("Workspace.origin()", () => {
@@ -94,5 +142,24 @@ describe("Workspace.origin()", () => {
 
   it("answers unsupported, with the plugin's reason, instead of resolving", () => {
     expect(workspace.origin("a.x", 4)).toEqual({ unsupported: "a rule" });
+  });
+
+  it("looks the name up in the spaces the plugin gives for the reference", () => {
+    const type = workspace.origin("a.x", 6) as TreeCursor;
+    expect(type.node.at).toEqual(range(20, 25));
+    const value = workspace.origin("a.x", 7) as TreeCursor;
+    expect(value.node.at).toEqual(range(30, 35));
+  });
+
+  it("follows an import into the same spaces of the file it names", () => {
+    workspace.openSource("c.x", "");
+    const result = workspace.origin("a.x", 8) as TreeCursor;
+    expect(result.path).toEqual(["c.x", "Shape"]);
+    expect(result.node.space).toBe("type");
+  });
+
+  it("answers nothing for a value reference to an import bound in another space", () => {
+    workspace.openSource("c.x", "");
+    expect(workspace.origin("a.x", 9)).toBeUndefined();
   });
 });

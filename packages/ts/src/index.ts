@@ -1,7 +1,7 @@
-import { captureConfig } from "./capture";
-import { convertConfig } from "./convert";
-import referenceHandler from "./handlers/utility/reference";
 import { language, query } from "./query";
+import programHandler from "./scoping/extract";
+import { spacesOf, unsupported } from "./scoping/rules";
+import referenceHandler from "./scoping/utility/reference";
 import type { Descriptor } from "./types";
 
 export const descriptor: Descriptor = {
@@ -22,9 +22,11 @@ export const descriptor: Descriptor = {
     "/index.jsx",
   ],
   query,
-  captureConfig,
-  convertConfig,
+  captureConfig: {},
+  convertConfig: { program: programHandler },
   references: referenceHandler,
+  spacesOf,
+  unsupported,
 };
 
 export default descriptor;

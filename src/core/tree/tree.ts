@@ -44,15 +44,17 @@ class Tree {
    * @returns The intra-tree id for the path, or `undefined` if the path
    * is not registered. Ephemeral — never persist or compare across trees.
    */
-  id(path: NodePath): NodeId | undefined {
-    return this._ids.get(Tree.encode(path));
+  id(path: NodePath, space?: string): NodeId | undefined {
+    return this._ids.get(Tree.encode(path, space));
   }
 
   /**
-   * @returns The node at the given path, or `undefined` if not found.
+   * @returns The node at the given path, in the given
+   * {@link Node.space | space} for a binding that is not a value, or
+   * `undefined` if not found.
    */
-  getNode(path: NodePath): Node | undefined {
-    const id = this.id(path);
+  getNode(path: NodePath, space?: string): Node | undefined {
+    const id = this.id(path, space);
     return id === undefined ? undefined : this._nodes.get(id);
   }
 
@@ -63,14 +65,14 @@ class Tree {
    * Node order is free: a child added before its parent interns the parent
    * id ahead of the parent node's arrival.
    *
-   * Deduplicates by `path`: when two nodes share the same path, a `scope` node
+   * Deduplicates by `path` and `space`: when two nodes share both, a `scope` node
    * replaces a non-`scope` node; otherwise the first-added node is kept.
    * The id and the parent attachment are stable across replacement.
    *
    * @returns `this` for chaining.
    */
   addNode(node: Node): this {
-    const id = this._intern(Tree.encode(node.path));
+    const id = this._intern(Tree.encode(node.path, node.space));
 
     const existing = this._nodes.get(id);
     if (!existing && node.path.length > 1) {
@@ -101,7 +103,7 @@ class Tree {
    * @returns `this` for chaining.
    */
   removeNode(node: Node): this {
-    const key = Tree.encode(node.path);
+    const key = Tree.encode(node.path, node.space);
     const id = this._ids.get(key);
     if (id === undefined) return this;
 
@@ -132,11 +134,19 @@ class Tree {
    * insertion order. Empty for a leaf or an unregistered path.
    */
   children(path: NodePath): readonly NodePath[] {
+    return this.childNodes(path).map((node) => node.path);
+  }
+
+  /**
+   * @returns The direct children of the given path, in insertion order: a
+   * name bound in several {@link Node.space | spaces} is one node in each.
+   */
+  childNodes(path: NodePath): readonly Node[] {
     const id = this.id(path);
     const childIds = id === undefined ? undefined : this._children.get(id);
     if (!childIds) return [];
 
-    return childIds.map((childId) => this._pathOf(childId));
+    return childIds.map((childId) => this._nodeOf(childId));
   }
 
   /**
@@ -160,13 +170,14 @@ class Tree {
    * across files. Sorted, since extraction order is not guaranteed.
    */
   topLevelNames(): string[] {
-    const names: string[] = [];
+    // a name bound in several spaces is one name to refer to
+    const names = new Set<string>();
     for (const node of this._nodes.values()) {
       if (node.path.length === 2 && node.type !== "anonymous") {
-        names.push(node.path[1]);
+        names.add(node.path[1]);
       }
     }
-    return names.sort();
+    return [...names].sort();
   }
 
   walk(): TreeCursor {
@@ -213,7 +224,7 @@ class Tree {
     return id;
   }
 
-  private _pathOf(id: NodeId): NodePath {
+  private _nodeOf(id: NodeId): Node {
     const node = this._nodes.get(id);
     defined(
       node,
@@ -222,18 +233,21 @@ class Tree {
         `No node registered for id: ${id}`,
       ),
     );
-    return node.path;
+    return node;
   }
 }
 
 namespace Tree {
   /**
-   * Interning key for a path, used only inside the tree boundary and
-   * never decoded. JSON keeps the encoding bijective for any segment
-   * content; node paths are recovered from stored nodes, not from keys.
+   * Interning key for a path and, for a binding that is not a value, its
+   * space. Used only inside the tree boundary and never decoded. JSON keeps
+   * the encoding bijective for any segment content; node paths are recovered
+   * from stored nodes, not from keys.
    */
-  export function encode(path: NodePath): string {
-    return JSON.stringify(path);
+  export function encode(path: NodePath, space: string = "value"): string {
+    return JSON.stringify(
+      space === undefined || space === "value" ? path : [path, space],
+    );
   }
 }
 

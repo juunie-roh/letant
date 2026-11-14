@@ -25,6 +25,7 @@
     "attw:quiet": "attw --pack --quiet --ignore-rules 'no-resolution'",
     "build": "tsup",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
+    "compare": "node scripts/compare-tsc.mjs",
     "dev": "tsup --watch",
     "dev:query": "node ../cli/dist/letant.js query --grammar tree-sitter-typescript"
   },

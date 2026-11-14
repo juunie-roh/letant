@@ -28,6 +28,12 @@ declare namespace Plugin {
      */
     nameOf?: (node: Parser.SyntaxNode) => string;
     /**
+     * The {@link Node.space | spaces} a reference's name may be bound in,
+     * where the language has more than values. Asked for a node `references`
+     * returned.
+     */
+    spacesOf?: (node: Parser.SyntaxNode) => readonly string[] | undefined;
+    /**
      * Declines a reference the tree would resolve incorrectly, with the rule
      * that makes it so. Asked for a node `references` returned (ADR 0007).
      */
@@ -150,6 +156,10 @@ class Plugin {
 
   unsupported(node: Parser.SyntaxNode): string | undefined {
     return this._module.unsupported?.(node);
+  }
+
+  spacesOf(node: Parser.SyntaxNode): readonly string[] | undefined {
+    return this._module.spacesOf?.(node);
   }
 
   @Trace({ label: "Plugin.extract" })

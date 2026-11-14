@@ -132,6 +132,27 @@ describe("Tree", () => {
         ["f.ts", "Foo", "y"],
       ]);
     });
+
+    it("keeps two bindings of one name apart by their space", () => {
+      const path = NodePath(["file.ts", "x"]);
+      tree.addNode({
+        path,
+        kind: "interface",
+        type: "binding",
+        at: makeRange(10, 20),
+        space: "type",
+      });
+
+      expect(tree.getNode(path)?.kind).toBe("variable");
+      expect(tree.getNode(path, "type")?.kind).toBe("interface");
+      expect(tree.id(path, "type")).not.toBe(tree.id(path));
+      expect(tree.childNodes(NodePath(["file.ts"]))).toHaveLength(4);
+    });
+
+    it("takes a binding without a space for a value", () => {
+      const path = NodePath(["file.ts", "x"]);
+      expect(tree.getNode(path, "value")).toBe(tree.getNode(path));
+    });
   });
 
   describe("children()", () => {
@@ -192,6 +213,17 @@ describe("Tree", () => {
 
     it("excludes nested nodes", () => {
       expect(tree.topLevelNames()).not.toContain("y");
+    });
+
+    it("lists a name bound in several spaces once", () => {
+      tree.addNode({
+        path: NodePath(["file.ts", "x"]),
+        kind: "interface",
+        type: "binding",
+        at: makeRange(10, 20),
+        space: "type",
+      });
+      expect(tree.topLevelNames()).toEqual(["Foo", "x"]);
     });
   });
 
