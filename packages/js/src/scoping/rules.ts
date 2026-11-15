@@ -1,14 +1,9 @@
+import { isField } from "letant/utils";
 import type { SyntaxNode } from "tree-sitter";
 
-import type { NodeKind } from "@/types";
+import type { ScopeRule } from "@/types";
 
 import { getParameters } from "./utility/node";
-
-type ScopeRule = {
-  kind: NodeKind;
-  /** Segment label used when the scope has no name of its own. */
-  label: string;
-};
 
 /** Function-like boundaries (SCOPING.md §1). */
 const FUNCTIONS: Record<string, ScopeRule> = {
@@ -125,7 +120,7 @@ export function isReference(node: SyntaxNode): boolean {
     case "export_specifier":
       return (
         !parent.parent!.parent!.childForFieldName("source") &&
-        parent.childForFieldName("name")!.id === node.id
+        isField(parent, "name", node)
       );
     default:
       return true;

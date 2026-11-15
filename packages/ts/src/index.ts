@@ -1,7 +1,8 @@
-import { captureConfig } from "./capture";
-import { convertConfig } from "./convert";
-import referenceHandler from "./handlers/utility/reference";
-import { language, query } from "./query";
+import { createReferences } from "letant/utils";
+
+import { language, utility } from "./query";
+import extract from "./scoping/extract";
+import { isReference, spacesOf, unsupported } from "./scoping/rules";
 import type { Descriptor } from "./types";
 
 export const descriptor: Descriptor = {
@@ -21,10 +22,10 @@ export const descriptor: Descriptor = {
     "/index.js",
     "/index.jsx",
   ],
-  query,
-  captureConfig,
-  convertConfig,
-  references: referenceHandler,
+  extract,
+  references: createReferences(utility.get("reference"), isReference),
+  spacesOf,
+  unsupported,
 };
 
 export default descriptor;

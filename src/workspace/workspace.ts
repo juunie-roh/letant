@@ -4,7 +4,7 @@ import { cwd } from "node:process";
 
 import Parser from "tree-sitter";
 
-import { isNodeSource, NodePath, NodeSource } from "@/common/branded-types";
+import { isNodeSource, NodeSource } from "@/common/branded-types";
 import { Trace } from "@/common/decorators";
 import { PluginHandler, TreeCursor } from "@/core";
 import type { Config, Offset, Unsupported } from "@/models";
@@ -123,10 +123,11 @@ class Workspace {
   ): TreeCursor | NodeSource | Unsupported | undefined {
     const { tree, tsTree, ext } = this.get(filePath);
 
+    // the named node: a grammar may wrap the token of a name in an alias
     const target =
       typeof offset === "number"
-        ? tsTree.rootNode.descendantForIndex(offset)
-        : tsTree.rootNode.descendantForPosition(offset);
+        ? tsTree.rootNode.namedDescendantForIndex(offset)
+        : tsTree.rootNode.namedDescendantForPosition(offset);
 
     // which positions name a binding is the language's call: a property, a
     // label or the inside of a string shares its text with a name, not its role
@@ -140,9 +141,10 @@ class Workspace {
     const unsupported = this._handler.unsupported(target, ext);
     if (unsupported !== undefined) return { unsupported };
 
-    let resolved = TreeCursor.at(tree, offset).resolve(
-      this._handler.nameOf(target, ext),
-    );
+    let name = this._handler.nameOf(target, ext);
+    const spaces = this._handler.spacesOf(target, ext);
+
+    let resolved = TreeCursor.at(tree, offset).resolve(name, spaces);
 
     const visited = new Set<string>([filePath]);
 
@@ -156,12 +158,11 @@ class Workspace {
       if (visited.has(at)) return undefined;
       visited.add(at);
 
-      const name =
-        typeof props?.alias_of === "string" ? props.alias_of : resolved.name;
+      if (typeof props?.alias_of === "string") name = props.alias_of;
       const { tree: next } = this.get(at);
-      const path = NodePath([at, name]);
 
-      resolved = next.getNode(path) ? new TreeCursor(next, path) : undefined;
+      // the file's top level only: its root has no scope further out
+      resolved = next.walk().resolve(name, spaces);
     }
 
     return undefined;
@@ -187,7 +188,10 @@ class Workspace {
       const unsupported = this._handler.unsupported(ref, ext);
       const resolvedCursor =
         unsupported === undefined
-          ? cursor.resolve(this._handler.nameOf(ref, ext))
+          ? cursor.resolve(
+              this._handler.nameOf(ref, ext),
+              this._handler.spacesOf(ref, ext),
+            )
           : undefined;
       const key =
         unsupported === undefined

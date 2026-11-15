@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PluginConfig } from "@/models";
-import { QueryMap } from "@/utils/query";
 
 import CoreError from "./error";
 import Plugin from "./plugin";
@@ -42,17 +41,11 @@ const validLangShape = {
   nodeTypeInfo: [],
 } as unknown as import("tree-sitter").Language;
 
-function mockQueryMap(): QueryMap<string> {
-  return new QueryMap<string>(validLangShape);
-}
-
 function mockDescriptor() {
   return {
     language: validLangShape,
     extensions: [".js", ".jsx"],
-    query: mockQueryMap(),
-    captureConfig: {},
-    convertConfig: {},
+    extract: vi.fn(() => []),
     references: vi.fn(),
   };
 }
@@ -91,9 +84,7 @@ describe("Plugin.load()", () => {
 
       const descriptor = await Plugin.load(VALID_PLUGIN_CONFIG.name);
 
-      expect(descriptor.query).toBeInstanceOf(QueryMap);
-      expect(descriptor.captureConfig).toBeDefined();
-      expect(descriptor.convertConfig).toBeDefined();
+      expect(descriptor.extract).toBeDefined();
       expect(descriptor.language).toMatchObject({ name: expect.any(String) });
       expect(descriptor.references).toBeDefined();
     });
@@ -162,11 +153,21 @@ describe("Plugin", () => {
   });
 
   describe("extract()", () => {
-    it("returns a nodes array for a parsed source", () => {
-      const tree = plugin.parse("export function greet() {}");
-      const result = plugin.extract("greet.ts", tree.rootNode);
+    it("passes the file root and its path to _module.extract and adds the root node", async () => {
+      const descriptor = mockDescriptor();
+      vi.spyOn(Plugin, "load").mockResolvedValue(
+        descriptor as Plugin.Descriptor,
+      );
+      const p = await Plugin.create(VALID_PLUGIN_CONFIG);
+      const tree = p.parse("export function greet() {}");
+      const result = p.extract("greet.ts", tree.rootNode);
 
-      expect(Array.isArray(result.nodes)).toBe(true);
+      expect(descriptor.extract).toHaveBeenCalledWith(tree.rootNode, [
+        "greet.ts",
+      ]);
+      expect(result.nodes).toEqual([
+        expect.objectContaining({ path: ["greet.ts"], type: "scope" }),
+      ]);
     });
   });
 });

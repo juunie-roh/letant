@@ -150,6 +150,17 @@ class PluginHandler {
   }
 
   /**
+   * @returns The spaces the reference at `node` is looked up in, or
+   * `undefined` for the value space alone.
+   */
+  spacesOf(
+    node: Parser.SyntaxNode,
+    ext: string,
+  ): readonly string[] | undefined {
+    return this.plugins.get(ext)?.spacesOf(node);
+  }
+
+  /**
    * Cleans up all registered language resources.
    */
   destroy(): void {

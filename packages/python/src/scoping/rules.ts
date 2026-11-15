@@ -1,20 +1,10 @@
+import { ancestors, isField } from "letant/utils";
 import type { SyntaxNode } from "tree-sitter";
 
-import type { NodeKind } from "@/types";
+import type { NodeKind, ScopeRule } from "@/types";
 
 import parameterName, { typeParameterName } from "./utility/parameter";
 import flatPattern from "./utility/pattern";
-
-type ScopeRule = {
-  kind: NodeKind;
-  /** Segment label used when the scope has no name of its own. */
-  label: string;
-  /**
-   * Whether a lookup that leaves the scope stops seeing class-level names:
-   * they are visible in the class body only (SCOPING.md §4).
-   */
-  barrier?: true;
-};
 
 /** Implicitly nested function scopes (SCOPING.md §1). */
 const COMPREHENSIONS: Record<string, ScopeRule> = {
@@ -36,6 +26,10 @@ const COMPREHENSIONS: Record<string, ScopeRule> = {
   },
 };
 
+/**
+ * A lookup that leaves a `barrier` scope stops seeing class-level names:
+ * they are visible in the class body only (SCOPING.md §4).
+ */
 export const SCOPES: Record<string, ScopeRule> = {
   function_definition: { kind: "function", label: "function", barrier: true },
   lambda: { kind: "function", label: "lambda", barrier: true },
@@ -61,10 +55,6 @@ export const DECLARATIONS: Record<string, NodeKind> = {
   class_definition: "class",
   type_alias_statement: "type",
 };
-
-function isField(parent: SyntaxNode, field: string, child: SyntaxNode) {
-  return parent.childForFieldName(field)?.id === child.id;
-}
 
 export function isComprehension(node: SyntaxNode): boolean {
   return node.type in COMPREHENSIONS;
@@ -177,12 +167,7 @@ export function nameOf(node: SyntaxNode): string {
   const name = node.text.normalize("NFKC");
   if (!name.startsWith("__") || name.endsWith("__")) return name;
 
-  let child = node;
-  for (
-    let parent = node.parent;
-    parent;
-    child = parent, parent = parent.parent
-  ) {
+  for (const [parent, child] of ancestors(node)) {
     if (
       parent.type === "class_definition" &&
       (isField(parent, "body", child) ||
@@ -233,12 +218,7 @@ export function unsupported(node: SyntaxNode): string | undefined {
   let direct = true;
   let iterable: SyntaxNode | undefined;
 
-  let child = node;
-  for (
-    let parent = node.parent;
-    parent;
-    child = parent, parent = parent.parent
-  ) {
+  for (const [parent, child] of ancestors(node)) {
     switch (parent.type) {
       case "for_in_clause": {
         // only the first `for` clause's iterable is evaluated outside

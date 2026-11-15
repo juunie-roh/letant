@@ -76,11 +76,5 @@ export function assertPluginDescriptor(
   if (!Array.isArray(mod.extensions) || mod.extensions.length === 0)
     fail("missing or invalid 'extensions'");
 
-  if (!mod.query) fail("missing or invalid 'query'");
-
-  if (typeof mod.captureConfig !== "object" || mod.captureConfig === null)
-    fail("missing or invalid 'captureConfig'");
-
-  if (typeof mod.convertConfig !== "object" || mod.convertConfig === null)
-    fail("missing or invalid 'convertConfig'");
+  if (typeof mod.extract !== "function") fail("missing or invalid 'extract'");
 }

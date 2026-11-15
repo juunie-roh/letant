@@ -1,6 +1,6 @@
 import {
+  ancestors,
   createChildPath,
-  createConvertResult,
   getRange,
   type NodePath,
   NodeSource,
@@ -9,7 +9,7 @@ import type Parser from "tree-sitter";
 import type { SyntaxNode } from "tree-sitter";
 
 import { scoping } from "@/query";
-import type { ConvertHandler, Node } from "@/types";
+import type { Node } from "@/types";
 
 import {
   isFunction,
@@ -46,11 +46,7 @@ function segment(node: SyntaxNode, label: string): string {
 }
 
 function region(node: SyntaxNode): Parser.Range {
-  const range = getRange(node);
-  if (!startsAtParameters(node)) return range;
-
-  const { startIndex, startPosition } = getParameters(node)!;
-  return { ...range, startIndex, startPosition };
+  return getRange(startsAtParameters(node) ? getParameters(node)! : node, node);
 }
 
 function scopeProps(node: SyntaxNode): Node["props"] {
@@ -85,13 +81,9 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
   }
 
   const enclosing = (node: SyntaxNode): Scope => {
-    let child = node;
-    let parent = node.parent;
-    while (parent) {
+    for (const [parent, child] of ancestors(node)) {
       const scope = scopes.get(parent.id);
       if (scope && !isOutsideOf(parent, child)) return scope;
-      child = parent;
-      parent = parent.parent;
     }
     return scopes.get(root.id)!;
   };
@@ -302,14 +294,4 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
   return nodes;
 }
 
-const programHandler: ConvertHandler = (captures, parent) => {
-  const result = createConvertResult<Node>();
-
-  for (const { node } of captures) {
-    result.nodes.push(...extract(node, parent));
-  }
-
-  return result;
-};
-
-export default programHandler;
+export default extract;

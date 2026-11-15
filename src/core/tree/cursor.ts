@@ -12,10 +12,16 @@ import type Tree from "./tree";
 class TreeCursor {
   private readonly _tree: Tree;
   private readonly _path: NodePath;
+  private readonly _space?: string;
 
-  constructor(tree: Tree, path: NodePath) {
+  /**
+   * @param space The {@link Node.space | space} of the binding at the path,
+   * for a binding that is not a value.
+   */
+  constructor(tree: Tree, path: NodePath, space?: string) {
     this._tree = tree;
     this._path = path;
+    this._space = space;
   }
 
   /**
@@ -78,7 +84,7 @@ class TreeCursor {
   }
 
   get node(): Node {
-    const n = this._tree.getNode(this._path);
+    const n = this._tree.getNode(this._path, this._space);
     defined(
       n,
       new TreeError(
@@ -89,8 +95,8 @@ class TreeCursor {
     return n;
   }
 
-  get path(): NodePath {
-    return this._path;
+  get path(): readonly string[] {
+    return [...this._path];
   }
 
   get depth(): number {
@@ -117,10 +123,9 @@ class TreeCursor {
   children(type?: Node["type"]): TreeCursor[] {
     const cursors: TreeCursor[] = [];
 
-    for (const childPath of this._tree.children(this._path)) {
-      const cursor = new TreeCursor(this._tree, childPath);
-      if (type && cursor.node.type !== type) continue;
-      cursors.push(cursor);
+    for (const child of this._tree.childNodes(this._path)) {
+      if (type && child.type !== type) continue;
+      cursors.push(new TreeCursor(this._tree, child.path, child.space));
     }
 
     return cursors;
@@ -143,23 +148,36 @@ class TreeCursor {
   /**
    * Find the closest node from ancestors of the current node having the given symbol as its name.
    *
+   * The name is looked up in the given {@link Node.space | spaces}: a scope
+   * answers with its binding in the earliest listed one, and a scope that
+   * binds the name in none of them is passed. Without spaces, the name is a
+   * value.
+   *
    * Once the walk has left a {@link Node.barrier | barrier} scope, a binding
    * of `"local"` {@link Node.visibility | visibility} is passed over.
    * @see {@link https://github.com/juunie-roh/letant/blob/main/docs/architecture/decisions/0007-lookup-barriers-and-unsupported-references.md ADR-0007}
    */
-  resolve(symbol: string): TreeCursor | undefined {
+  resolve(
+    symbol: string,
+    spaces: readonly string[] = ["value"],
+  ): TreeCursor | undefined {
     let scope: TreeCursor | undefined = this;
     let crossed = false;
 
     while (scope) {
-      const found = scope
+      const named = scope
         .children()
-        .find(
+        .filter(
           (child) =>
             child.name === symbol &&
             !(crossed && child.node.visibility === "local"),
         );
-      if (found) return found;
+      for (const space of spaces) {
+        const found = named.find(
+          (child) => (child.node.space ?? "value") === space,
+        );
+        if (found) return found;
+      }
 
       crossed ||= scope.node.barrier === true;
       scope = scope.parent();

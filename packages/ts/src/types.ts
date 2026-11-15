@@ -1,80 +1,29 @@
 import type * as letant from "letant";
 
-export type QueryConfig = {
-  if: {
-    required: "node" | "body" | "condition";
-    optional: "else" | "else_body";
-  };
-  "iife.anonymous": {
-    required: "node" | "body";
-    optional: never;
-  };
-  "module.anonymous": {
-    required: "node" | "source";
-    optional: never;
-  };
-  while: {
-    required: "node" | "body" | "condition";
-    optional: never;
-  };
-  "module.binding": {
-    required: "source" | "name";
-    optional: "alias";
-  };
-  member: {
-    required: "node" | "name";
-    optional: never;
-  };
-  variable: {
-    required: "node" | "name" | "kind";
-    optional: never;
-  };
-  class: {
-    required: "node" | "name" | "body";
-    optional: "extends";
-  };
-  function: {
-    required: "node" | "name" | "definition.function";
-    optional: never;
-  };
-  "iife.scope": {
-    required: "kind" | "name" | "body";
-    optional: never;
-  };
-  method: {
-    required: "node" | "name" | "body" | "params";
-    optional: never;
-  };
-};
-
-export type BypassQueryKey = "export";
+export type ScopingQueryKey = "scope" | "binding";
 
 export type UtilityQueryKey = "reference";
 
 export type NodeKind =
-  letant.Head<keyof QueryConfig> | "parameter" | "component" | "else";
+  | "block"
+  | "catch"
+  | "class"
+  | "enum"
+  | "for"
+  | "function"
+  | "interface"
+  | "member"
+  | "method"
+  | "module"
+  | "namespace"
+  | "parameter"
+  | "static"
+  | "switch"
+  | "type"
+  | "variable";
 
 export type Node = letant.Node<NodeKind>;
 
-export type EdgeKind = "defines" | "extends" | "contains" | "imports";
+export type ScopeRule = letant.ScopeRule<NodeKind>;
 
-export type CaptureConfig = letant.CaptureConfig<QueryConfig>;
-
-export type SingleCaptureResult<K extends keyof QueryConfig> =
-  letant.SingleCaptureResult<QueryConfig[K]>;
-
-export type FullCaptureResult = letant.FullCaptureResult<QueryConfig>;
-
-export type ConvertConfig = letant.ConvertConfig<QueryConfig, Node>;
-
-export type ConvertContext = letant.ConvertContext<QueryConfig, Node>;
-
-export type ConvertResult = letant.ConvertResult<Node>;
-
-export type ConvertHandler<K extends keyof QueryConfig> = letant.ConvertHandler<
-  QueryConfig,
-  QueryConfig[K],
-  Node
->;
-
-export type Descriptor = letant.Plugin.Descriptor<QueryConfig, Node>;
+export type Descriptor = letant.Plugin.Descriptor<Node>;

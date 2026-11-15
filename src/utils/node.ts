@@ -1,29 +1,45 @@
 import type Parser from "tree-sitter";
 
-export function getRange(node: Parser.SyntaxNode): Parser.Range {
+/**
+ * @param first The node the range starts at.
+ * @param last The node the range ends at, where that is another node: a
+ * scope's region often runs from one child to the end of its node.
+ */
+export function getRange(
+  first: Parser.SyntaxNode,
+  last: Parser.SyntaxNode = first,
+): Parser.Range {
   return {
-    startIndex: node.startIndex,
-    endIndex: node.endIndex,
-    startPosition: node.startPosition,
-    endPosition: node.endPosition,
+    startIndex: first.startIndex,
+    endIndex: last.endIndex,
+    startPosition: first.startPosition,
+    endPosition: last.endPosition,
   } satisfies Parser.Range;
 }
 
 /**
- *
- * @param type A node-type string.
- * @param node A node to start searching for.
+ * Walks from a node to the root. Each step gives a parent together with the
+ * child the walk came from, which is what tells apart the parts of a parent
+ * (its body, its parameters, a default value).
  */
-export function getInnerMostParent(
-  type: string,
+export function* ancestors(
   node: Parser.SyntaxNode,
-): Parser.SyntaxNode | undefined {
-  let cur = node.parent;
-
-  while (cur) {
-    if (cur.type === type) return cur;
-    cur = cur.parent;
+): Generator<[parent: Parser.SyntaxNode, child: Parser.SyntaxNode]> {
+  let child = node;
+  for (
+    let parent = node.parent;
+    parent;
+    child = parent, parent = parent.parent
+  ) {
+    yield [parent, child];
   }
+}
 
-  return;
+/** Whether `child` is the node in the given field of `parent`. */
+export function isField(
+  parent: Parser.SyntaxNode,
+  field: string,
+  child: Parser.SyntaxNode,
+): boolean {
+  return parent.childForFieldName(field)?.id === child.id;
 }

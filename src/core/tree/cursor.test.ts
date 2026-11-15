@@ -283,6 +283,128 @@ describe("Tree Cursor", () => {
     });
   });
 
+  // A binding outside the value space carries its `space`. The spaces here
+  // are TypeScript's, as a plugin could name them:
+  //
+  //   type X = string; const X = 1; const M = 1;
+  //   class C {}
+  //   namespace Outer {
+  //     interface X {}                        // a type only
+  //     namespace M { export type T = 1 }     // a namespace only
+  //   }
+  describe("resolve() — spaces", () => {
+    const scope = (path: string[]) => ({
+      path: NodePath(path),
+      kind: "scope",
+      type: "anonymous" as const,
+      blockStartIndex: 0,
+      at: makeRange(0, 100),
+    });
+    const binding = (path: string[], space?: string, visibility?: "local") => ({
+      path: NodePath(path),
+      kind: "variable",
+      type: "binding" as const,
+      at: makeRange(0, 1),
+      space,
+      visibility,
+    });
+    const found = (cursor?: TreeCursor) =>
+      cursor && [...cursor.path, cursor.node.space ?? "value"];
+
+    const spaced = new Tree(
+      [
+        {
+          path: NodePath(["f"]),
+          kind: "module",
+          type: "scope",
+          blockStartIndex: 0,
+          at: NodeSource("f"),
+        },
+        binding(["f", "X"], "type"),
+        binding(["f", "X"]),
+        binding(["f", "M"]),
+        binding(["f", "C"], "class"),
+        scope(["f", "Outer@0"]),
+        binding(["f", "Outer@0", "X"], "type"),
+        binding(["f", "Outer@0", "M"], "namespace"),
+      ],
+      "f",
+    );
+    const inner = new TreeCursor(spaced, NodePath(["f", "Outer@0"]));
+
+    const value = ["value", "class"];
+    const type = ["type", "class"];
+
+    it("looks a name up in the value space when no space is given", () => {
+      expect(found(inner.resolve("X"))).toEqual(["f", "X", "value"]);
+      expect(inner.resolve("C")).toBeUndefined();
+    });
+
+    it("passes over a nearer binding of the name in another space", () => {
+      expect(found(inner.resolve("X", value))).toEqual(["f", "X", "value"]);
+      expect(found(inner.resolve("M", value))).toEqual(["f", "M", "value"]);
+    });
+
+    it("takes the nearest binding in the space asked for", () => {
+      expect(found(inner.resolve("X", type))).toEqual([
+        "f",
+        "Outer@0",
+        "X",
+        "type",
+      ]);
+      expect(found(inner.resolve("M", ["namespace"]))).toEqual([
+        "f",
+        "Outer@0",
+        "M",
+        "namespace",
+      ]);
+    });
+
+    it("tells apart two bindings of one name in one scope", () => {
+      const root = spaced.walk();
+      expect(found(root.resolve("X", value))).toEqual(["f", "X", "value"]);
+      expect(found(root.resolve("X", type))).toEqual(["f", "X", "type"]);
+    });
+
+    it("lands on one node from every space its declaration is in", () => {
+      expect(found(inner.resolve("C", value))).toEqual(["f", "C", "class"]);
+      expect(found(inner.resolve("C", type))).toEqual(["f", "C", "class"]);
+    });
+
+    it("takes the earliest listed space when one scope binds the name in several", () => {
+      const root = spaced.walk();
+      expect(found(root.resolve("X", ["type", "value"]))).toEqual([
+        "f",
+        "X",
+        "type",
+      ]);
+      expect(found(root.resolve("X", ["value", "type"]))).toEqual([
+        "f",
+        "X",
+        "value",
+      ]);
+    });
+
+    it("answers nothing when no scope binds the name in the space", () => {
+      expect(inner.resolve("M", type)).toBeUndefined();
+    });
+
+    it("passes over a local binding of any space once a barrier has been left", () => {
+      const barred = new Tree(
+        [
+          scope(["g"]),
+          binding(["g", "T"], "type"),
+          { ...scope(["g", "held@0"]), barrier: true },
+          binding(["g", "held@0", "T"], "type", "local"),
+          { ...scope(["g", "held@0", "inner@1"]), barrier: true },
+        ],
+        "g",
+      );
+      const from = new TreeCursor(barred, NodePath(["g", "held@0", "inner@1"]));
+      expect(found(from.resolve("T", type))).toEqual(["g", "T", "type"]);
+    });
+  });
+
   describe("name", () => {
     it("returns the last path segment", () => {
       expect(cursor.name).toBe("file.ts");

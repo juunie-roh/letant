@@ -1,15 +1,14 @@
 import {
+  ancestors,
   createChildPath,
-  createConvertResult,
   getRange,
   type NodePath,
   NodeSource,
 } from "letant/utils";
-import type Parser from "tree-sitter";
 import type { SyntaxNode } from "tree-sitter";
 
 import { scoping } from "@/query";
-import type { ConvertHandler, Node } from "@/types";
+import type { Node } from "@/types";
 
 import {
   DECLARATIONS,
@@ -43,16 +42,6 @@ function segment(node: SyntaxNode): string {
   return `${name?.text ?? SCOPES[node.type].label}@${node.startIndex}`;
 }
 
-function region(node: SyntaxNode): Parser.Range {
-  const [first, last] = regionOf(node);
-  return {
-    startIndex: first.startIndex,
-    startPosition: first.startPosition,
-    endIndex: last.endIndex,
-    endPosition: last.endPosition,
-  };
-}
-
 function scopeProps(node: SyntaxNode): Node["props"] {
   if (node.type === "function_definition") {
     return { is_async: node.children.some((c) => c.type === "async") };
@@ -80,13 +69,9 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
   const moduleScope = scopes.get(root.id)!;
 
   const enclosing = (node: SyntaxNode): Scope => {
-    let child = node;
-    let parent = node.parent;
-    while (parent) {
+    for (const [parent, child] of ancestors(node)) {
       const scope = scopes.get(parent.id);
       if (scope && !isOutsideOf(parent, child)) return scope;
-      child = parent;
-      parent = parent.parent;
     }
     return moduleScope;
   };
@@ -235,7 +220,7 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
         path: pathOf(scope),
         type: "anonymous",
         kind: SCOPES[scope.node.type].kind,
-        at: region(scope.node),
+        at: getRange(...regionOf(scope.node)),
         blockStartIndex: (scope.node.childForFieldName("body") ?? scope.node)
           .startIndex,
         barrier: SCOPES[scope.node.type].barrier,
@@ -248,14 +233,4 @@ function extract(root: SyntaxNode, rootPath: NodePath): Node[] {
   return nodes;
 }
 
-const programHandler: ConvertHandler = (captures, parent) => {
-  const result = createConvertResult<Node>();
-
-  for (const { node } of captures) {
-    result.nodes.push(...extract(node, parent));
-  }
-
-  return result;
-};
-
-export default programHandler;
+export default extract;
