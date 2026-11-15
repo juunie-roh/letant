@@ -1,18 +1,12 @@
-import { getRange } from "letant/utils";
+import { ancestors, getRange, isField } from "letant/utils";
 import type Parser from "tree-sitter";
 import type { SyntaxNode } from "tree-sitter";
 
-import type { NodeKind } from "@/types";
+import type { NodeKind, ScopeRule } from "@/types";
 
 import { getParameters } from "./utility/node";
 import flatPattern from "./utility/pattern";
 import { isStatic } from "./utility/property";
-
-type ScopeRule = {
-  kind: NodeKind;
-  /** Segment label used when the scope has no name of its own. */
-  label: string;
-};
 
 /** Function-like boundaries (SCOPING.md §1): the last seven have no body. */
 const FUNCTIONS: Record<string, ScopeRule> = {
@@ -260,15 +254,11 @@ export function region(node: SyntaxNode): Parser.Range {
     return getRange(node.childForFieldName("consequence")!);
   }
 
-  const range = getRange(node);
-  if (!REGION_AFTER_NAME.has(node.type)) return range;
+  if (!REGION_AFTER_NAME.has(node.type)) return getRange(node);
 
   const start =
     node.childForFieldName("type_parameters") ?? getParameters(node);
-  if (!start) return range;
-
-  const { startIndex, startPosition } = start;
-  return { ...range, startIndex, startPosition };
+  return getRange(start ?? node, node);
 }
 
 /**
@@ -293,7 +283,7 @@ export function inferOwner(infer: SyntaxNode): SyntaxNode {
   let parent = infer.parent!;
   while (
     parent.type !== "conditional_type" ||
-    parent.childForFieldName("right")!.id !== child.id
+    !isField(parent, "right", child)
   ) {
     child = parent;
     parent = parent.parent!;
@@ -309,7 +299,7 @@ function qualifiedName(node: SyntaxNode): SyntaxNode {
     const qualified =
       parent.type === "nested_identifier" ||
       parent.type === "member_expression";
-    if (!qualified || parent.childForFieldName("object")?.id !== top.id) {
+    if (!qualified || !isField(parent, "object", top)) {
       return top;
     }
     top = parent;
@@ -342,21 +332,21 @@ export function isReference(node: SyntaxNode): boolean {
     case "export_specifier":
       return (
         !parent.parent!.parent!.childForFieldName("source") &&
-        parent.childForFieldName("name")!.id === node.id
+        isField(parent, "name", node)
       );
     // `export as namespace X` declares a global name outside the file
     case "export_statement":
       return !parent.children.some((child) => child.type === "namespace");
     // `A.B` in a type: `B` is a member of `A`, not a name in scope
     case "nested_type_identifier":
-      return parent.childForFieldName("module")!.id === node.id;
+      return isField(parent, "module", node);
     // the name `infer` declares lies outside the branch it is visible in
     case "infer_type":
       return parent.firstNamedChild!.id !== node.id;
     // a tuple member's name is a label
     case "required_parameter":
     case "optional_parameter":
-      return parent.childForFieldName("name")?.id !== node.id;
+      return !isField(parent, "name", node);
     // `undefined` as a type is a keyword
     case "literal_type":
       return false;
@@ -551,12 +541,7 @@ export function unsupported(node: SyntaxNode): string | undefined {
   // whether a generic the walk has left declares the name as its own
   let shadowed = false;
 
-  let child = node;
-  for (
-    let parent = node.parent;
-    parent;
-    child = parent, parent = parent.parent
-  ) {
+  for (const [parent, child] of ancestors(node)) {
     const declares =
       node.type === "type_identifier" &&
       !isOutsideOf(parent, child) &&

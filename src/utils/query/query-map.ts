@@ -1,7 +1,5 @@
 import Parser from "tree-sitter";
 
-import type { CaptureConfigOptions } from "@/models/capture";
-
 import QueryError from "./error";
 
 class QueryMap<K extends string> extends Map<K, Parser.Query> {
@@ -60,37 +58,6 @@ class QueryMap<K extends string> extends Map<K, Parser.Query> {
     }
 
     return super.get(key)!;
-  }
-
-  /**
-   * Returns 1-depth query match result on node.
-   * @param key
-   * @param node
-   * @param options See {@link CaptureConfigOptions}.
-   */
-  match(
-    key: K,
-    node: Parser.SyntaxNode,
-    options?: CaptureConfigOptions,
-  ): Parser.QueryMatch[] {
-    const bypass = options?.bypass;
-    const maxStartDepth = options?.maxStartDepth ?? 1;
-
-    const matches = this.get(key).matches(node, {
-      startIndex: node.startIndex,
-      endIndex: node.endIndex,
-      maxStartDepth,
-    });
-
-    if (bypass) {
-      matches.push(...bypass(node));
-    }
-
-    return matches;
-  }
-
-  create(value: string) {
-    return new Parser.Query(this._language, value);
   }
 }
 
