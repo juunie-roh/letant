@@ -1,0 +1,593 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Workspace (go) > parses a source file into a stable serialized tree 1`] = `
+{
+  "nodes": [
+    {
+      "at": "main.go",
+      "blockStartIndex": 0,
+      "children": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        12,
+        13,
+        23,
+        24,
+      ],
+      "id": 0,
+      "kind": "module",
+      "path": [
+        "main.go",
+      ],
+      "type": "scope",
+    },
+    {
+      "at": {
+        "endIndex": 198,
+        "endPosition": {
+          "column": 1,
+          "row": 15,
+        },
+        "startIndex": 114,
+        "startPosition": {
+          "column": 0,
+          "row": 13,
+        },
+      },
+      "blockStartIndex": 158,
+      "children": [
+        2,
+        3,
+      ],
+      "id": 1,
+      "kind": "method",
+      "path": [
+        "main.go",
+        "Greet@114",
+      ],
+      "props": {
+        "name": "Greet",
+      },
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 121,
+        "endPosition": {
+          "column": 7,
+          "row": 13,
+        },
+        "startIndex": 120,
+        "startPosition": {
+          "column": 6,
+          "row": 13,
+        },
+      },
+      "children": [],
+      "id": 2,
+      "kind": "parameter",
+      "path": [
+        "main.go",
+        "Greet@114",
+        "g",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 142,
+        "endPosition": {
+          "column": 28,
+          "row": 13,
+        },
+        "startIndex": 138,
+        "startPosition": {
+          "column": 24,
+          "row": 13,
+        },
+      },
+      "children": [],
+      "id": 3,
+      "kind": "parameter",
+      "path": [
+        "main.go",
+        "Greet@114",
+        "name",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 86,
+        "endPosition": {
+          "column": 12,
+          "row": 9,
+        },
+        "startIndex": 79,
+        "startPosition": {
+          "column": 5,
+          "row": 9,
+        },
+      },
+      "children": [],
+      "id": 4,
+      "kind": "type",
+      "path": [
+        "main.go",
+        "Greeter",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 62,
+        "endPosition": {
+          "column": 14,
+          "row": 7,
+        },
+        "startIndex": 54,
+        "startPosition": {
+          "column": 6,
+          "row": 7,
+        },
+      },
+      "children": [],
+      "id": 5,
+      "kind": "constant",
+      "path": [
+        "main.go",
+        "greeting",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 355,
+        "endPosition": {
+          "column": 9,
+          "row": 25,
+        },
+        "startIndex": 351,
+        "startPosition": {
+          "column": 5,
+          "row": 25,
+        },
+      },
+      "children": [],
+      "id": 6,
+      "kind": "function",
+      "path": [
+        "main.go",
+        "main",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 466,
+        "endPosition": {
+          "column": 1,
+          "row": 30,
+        },
+        "startIndex": 355,
+        "startPosition": {
+          "column": 9,
+          "row": 25,
+        },
+      },
+      "blockStartIndex": 358,
+      "children": [
+        8,
+        9,
+      ],
+      "id": 7,
+      "kind": "function",
+      "path": [
+        "main.go",
+        "main@346",
+      ],
+      "props": undefined,
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 362,
+        "endPosition": {
+          "column": 2,
+          "row": 26,
+        },
+        "startIndex": 361,
+        "startPosition": {
+          "column": 1,
+          "row": 26,
+        },
+      },
+      "children": [],
+      "id": 8,
+      "kind": "variable",
+      "path": [
+        "main.go",
+        "main@346",
+        "g",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 464,
+        "endPosition": {
+          "column": 2,
+          "row": 29,
+        },
+        "startIndex": 394,
+        "startPosition": {
+          "column": 1,
+          "row": 27,
+        },
+      },
+      "blockStartIndex": 394,
+      "children": [
+        10,
+        11,
+      ],
+      "id": 9,
+      "kind": "if",
+      "path": [
+        "main.go",
+        "main@346",
+        "if@394",
+      ],
+      "props": undefined,
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 464,
+        "endPosition": {
+          "column": 2,
+          "row": 29,
+        },
+        "startIndex": 432,
+        "startPosition": {
+          "column": 39,
+          "row": 27,
+        },
+      },
+      "blockStartIndex": 432,
+      "children": [],
+      "id": 10,
+      "kind": "block",
+      "path": [
+        "main.go",
+        "main@346",
+        "if@394",
+        "block@432",
+      ],
+      "props": undefined,
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 400,
+        "endPosition": {
+          "column": 7,
+          "row": 27,
+        },
+        "startIndex": 397,
+        "startPosition": {
+          "column": 4,
+          "row": 27,
+        },
+      },
+      "children": [],
+      "id": 11,
+      "kind": "variable",
+      "path": [
+        "main.go",
+        "main@346",
+        "if@394",
+        "msg",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 208,
+        "endPosition": {
+          "column": 8,
+          "row": 17,
+        },
+        "startIndex": 205,
+        "startPosition": {
+          "column": 5,
+          "row": 17,
+        },
+      },
+      "children": [],
+      "id": 12,
+      "kind": "function",
+      "path": [
+        "main.go",
+        "Map",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 344,
+        "endPosition": {
+          "column": 1,
+          "row": 23,
+        },
+        "startIndex": 208,
+        "startPosition": {
+          "column": 8,
+          "row": 17,
+        },
+      },
+      "blockStartIndex": 245,
+      "children": [
+        14,
+        15,
+        18,
+        19,
+        20,
+        21,
+        22,
+      ],
+      "id": 13,
+      "kind": "function",
+      "path": [
+        "main.go",
+        "Map@200",
+      ],
+      "props": undefined,
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 229,
+        "endPosition": {
+          "column": 29,
+          "row": 17,
+        },
+        "startIndex": 227,
+        "startPosition": {
+          "column": 27,
+          "row": 17,
+        },
+      },
+      "children": [],
+      "id": 14,
+      "kind": "parameter",
+      "path": [
+        "main.go",
+        "Map@200",
+        "fn",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 330,
+        "endPosition": {
+          "column": 2,
+          "row": 21,
+        },
+        "startIndex": 278,
+        "startPosition": {
+          "column": 1,
+          "row": 19,
+        },
+      },
+      "blockStartIndex": 299,
+      "children": [
+        16,
+        17,
+      ],
+      "id": 15,
+      "kind": "for",
+      "path": [
+        "main.go",
+        "Map@200",
+        "for@278",
+      ],
+      "props": undefined,
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 330,
+        "endPosition": {
+          "column": 2,
+          "row": 21,
+        },
+        "startIndex": 299,
+        "startPosition": {
+          "column": 22,
+          "row": 19,
+        },
+      },
+      "blockStartIndex": 299,
+      "children": [],
+      "id": 16,
+      "kind": "block",
+      "path": [
+        "main.go",
+        "Map@200",
+        "for@278",
+        "block@299",
+      ],
+      "props": undefined,
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 286,
+        "endPosition": {
+          "column": 9,
+          "row": 19,
+        },
+        "startIndex": 285,
+        "startPosition": {
+          "column": 8,
+          "row": 19,
+        },
+      },
+      "children": [],
+      "id": 17,
+      "kind": "variable",
+      "path": [
+        "main.go",
+        "Map@200",
+        "for@278",
+        "x",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 239,
+        "endPosition": {
+          "column": 39,
+          "row": 17,
+        },
+        "startIndex": 230,
+        "startPosition": {
+          "column": 30,
+          "row": 17,
+        },
+      },
+      "blockStartIndex": 230,
+      "children": [],
+      "id": 18,
+      "kind": "signature",
+      "path": [
+        "main.go",
+        "Map@200",
+        "func@230",
+      ],
+      "props": undefined,
+      "type": "anonymous",
+    },
+    {
+      "at": {
+        "endIndex": 251,
+        "endPosition": {
+          "column": 4,
+          "row": 18,
+        },
+        "startIndex": 248,
+        "startPosition": {
+          "column": 1,
+          "row": 18,
+        },
+      },
+      "children": [],
+      "id": 19,
+      "kind": "variable",
+      "path": [
+        "main.go",
+        "Map@200",
+        "out",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 210,
+        "endPosition": {
+          "column": 10,
+          "row": 17,
+        },
+        "startIndex": 209,
+        "startPosition": {
+          "column": 9,
+          "row": 17,
+        },
+      },
+      "children": [],
+      "id": 20,
+      "kind": "type",
+      "path": [
+        "main.go",
+        "Map@200",
+        "T",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 213,
+        "endPosition": {
+          "column": 13,
+          "row": 17,
+        },
+        "startIndex": 212,
+        "startPosition": {
+          "column": 12,
+          "row": 17,
+        },
+      },
+      "children": [],
+      "id": 21,
+      "kind": "type",
+      "path": [
+        "main.go",
+        "Map@200",
+        "U",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": {
+        "endIndex": 221,
+        "endPosition": {
+          "column": 21,
+          "row": 17,
+        },
+        "startIndex": 219,
+        "startPosition": {
+          "column": 19,
+          "row": 17,
+        },
+      },
+      "children": [],
+      "id": 22,
+      "kind": "parameter",
+      "path": [
+        "main.go",
+        "Map@200",
+        "xs",
+      ],
+      "type": "binding",
+    },
+    {
+      "at": "fmt",
+      "blockStartIndex": 24,
+      "children": [],
+      "id": 23,
+      "kind": "module",
+      "path": [
+        "main.go",
+        "module@24",
+      ],
+      "type": "anonymous",
+    },
+    {
+      "at": "strings",
+      "children": [],
+      "id": 24,
+      "kind": "module",
+      "path": [
+        "main.go",
+        "str",
+      ],
+      "type": "binding",
+    },
+  ],
+}
+`;

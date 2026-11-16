@@ -5,7 +5,7 @@
   "keywords": [],
   "author": "Juun",
   "license": "MIT",
-  "packageManager": "pnpm@12.18.0",
+  "packageManager": "pnpm@12.21.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/juunie-roh/letant.git"
@@ -88,6 +88,7 @@
     "js": "pnpm --filter @letant/js",
     "ts": "pnpm --filter @letant/ts",
     "python": "pnpm --filter @letant/python",
+    "go": "pnpm --filter @letant/go",
     "cli": "pnpm --filter @letant/cli"
   },
   "dependencies": {
@@ -108,8 +109,8 @@
     "@vitest/coverage-v8": "4.1.10",
     "commitizen": "^4.3.2",
     "esbuild": "^0.28.1",
-    "eslint": "^10.14.0",
-    "eslint-plugin-jsdoc": "^65.4.5",
+    "eslint": "^10.15.0",
+    "eslint-plugin-jsdoc": "^65.4.7",
     "eslint-plugin-prettier": "^5.5.7",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "eslint-plugin-unused-imports": "^4.4.1",
