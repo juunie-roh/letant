@@ -226,13 +226,13 @@ class Tree {
 
   private _nodeOf(id: NodeId): Node {
     const node = this._nodes.get(id);
-    defined(
-      node,
-      new TreeError(
+
+    if (node === undefined) {
+      throw new TreeError(
         "TREE_UNDEFINED_INSTANCE",
         `No node registered for id: ${id}`,
-      ),
-    );
+      );
+    }
     return node;
   }
 }

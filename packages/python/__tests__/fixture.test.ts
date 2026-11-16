@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { cwd } from "node:process";
 
 import type { Config } from "letant";
 import { TreeCursor } from "letant";
@@ -13,22 +12,19 @@ import { describe, expect, it } from "vitest";
 // the enclosing scope), methods are plain function definitions, and import
 // specifiers are dotted module references, not file paths.
 // Requires `@letant/python` to be built (`pnpm build:all`).
-const FIXTURE_ROOT = "packages/python/__mocks__/fixture";
+const FIXTURE_ROOT = path.resolve(__dirname, "../__mocks__/fixture");
 
 const config: Config = {
   rootDir: FIXTURE_ROOT,
   plugins: [
     {
-      name: path.resolve(cwd(), "packages/python/dist/index.mjs"),
+      name: path.resolve(__dirname, "../dist/index.mjs"),
       extensions: [".py"],
     },
   ],
 };
 
-const source = readFileSync(
-  path.resolve(cwd(), FIXTURE_ROOT, "main.py"),
-  "utf-8",
-);
+const source = readFileSync(path.resolve(FIXTURE_ROOT, "main.py"), "utf-8");
 
 const open = async () => {
   const workspace = await Workspace.create(config);

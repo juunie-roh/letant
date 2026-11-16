@@ -1,6 +1,5 @@
 import type { NodePath } from "@/common/branded-types";
 import { isNodeSource } from "@/common/branded-types";
-import { defined } from "@/common/defined";
 import type { Node, Offset } from "@/models";
 
 import TreeError from "./error";
@@ -85,13 +84,13 @@ class TreeCursor {
 
   get node(): Node {
     const n = this._tree.getNode(this._path, this._space);
-    defined(
-      n,
-      new TreeError(
+
+    if (n === undefined) {
+      throw new TreeError(
         "TREE_NO_NODE",
         `Failed to get node at path: ${this._path}`,
-      ),
-    );
+      );
+    }
     return n;
   }
 

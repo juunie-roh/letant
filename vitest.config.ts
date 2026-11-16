@@ -9,16 +9,23 @@ export default defineConfig({
     },
   },
   test: {
-    setupFiles: ["src/__mocks__/setup.ts"],
-    include: [
-      "src/**/*.(test|spec).*",
-      "packages/cli/**/*.(test|spec).*",
-      "packages/js/**/*.(test|spec).*",
-      "packages/python/**/*.(test|spec).*",
-      "packages/ts/**/*.(test|spec).*",
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "core",
+          setupFiles: ["src/__mocks__/setup.ts"],
+          include: [
+            "src/**/*.(test|spec).*",
+            "packages/cli/**/*.(test|spec).*",
+          ],
+          exclude: ["**/node_modules/**", "**/__snapshots__/**"],
+          environment: "node",
+        },
+      },
+      // each plugin owns its test environment
+      "packages/*/vitest.config.ts",
     ],
-    exclude: ["**/node_modules/**", "**/__snapshots__/**"],
-    environment: "node",
     coverage: {
       include: ["src/**"],
       exclude: [

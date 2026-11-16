@@ -1,5 +1,4 @@
 import path from "node:path";
-import { cwd } from "node:process";
 
 import type { Config } from "letant";
 import { Workspace } from "letant";
@@ -10,10 +9,10 @@ import { describe, expect, it } from "vitest";
 // «name»; a source without «» must resolve to nothing. Requires `@letant/js` to
 // be built.
 const config: Config = {
-  rootDir: "packages/js/__mocks__/fixture",
+  rootDir: path.resolve(__dirname, "../__mocks__/fixture"),
   plugins: [
     {
-      name: path.resolve(cwd(), "packages/js/dist/index.mjs"),
+      name: path.resolve(__dirname, "../dist/index.mjs"),
       extensions: [".js"],
     },
   ],

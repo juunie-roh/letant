@@ -27,7 +27,8 @@
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "compare": "node scripts/compare-tsc.mjs",
     "dev": "tsup --watch",
-    "dev:query": "node ../cli/dist/letant.js query --grammar tree-sitter-typescript"
+    "dev:query": "node ../cli/dist/letant.js query --grammar tree-sitter-typescript",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "Juun",
@@ -48,6 +49,7 @@
     "letant": "workspace:^",
     "tree-sitter-typescript": "^0.23.2",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.12"
   }
 }

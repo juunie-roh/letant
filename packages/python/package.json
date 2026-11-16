@@ -27,7 +27,8 @@
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "compare": "node scripts/compare-symtable.mjs",
     "dev": "tsup --watch",
-    "dev:query": "pnpm letant query --grammar tree-sitter-python"
+    "dev:query": "pnpm letant query --grammar tree-sitter-python",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "Juun",
@@ -48,6 +49,7 @@
     "letant": "workspace:*",
     "tree-sitter-python": "^0.25.0",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.12"
   }
 }
