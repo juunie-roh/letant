@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { cwd } from "node:process";
 
 import type { Config } from "letant";
 import { Workspace } from "letant";
@@ -13,13 +12,13 @@ import { describe, expect, it } from "vitest";
 // The fixture covers every import specifier kind: relative (with and
 // without extension), matched alias, unmatched alias, escaping the root,
 // and bare. Requires `@letant/js` to be built (`pnpm build:all`).
-const FIXTURE_ROOT = "packages/js/__mocks__/fixture";
+const FIXTURE_ROOT = path.resolve(__dirname, "../__mocks__/fixture");
 
 const config: Config = {
   rootDir: FIXTURE_ROOT,
   plugins: [
     {
-      name: path.resolve(cwd(), "packages/js/dist/index.mjs"),
+      name: path.resolve(__dirname, "../dist/index.mjs"),
       extensions: [".js", ".mjs"],
       paths: {
         "@u/*": ["./lib/*"],
@@ -32,10 +31,7 @@ const config: Config = {
 describe("Workspace", () => {
   it("parses a source file into a stable serialized graph", async () => {
     const workspace = await Workspace.create(config);
-    const source = readFileSync(
-      path.resolve(cwd(), FIXTURE_ROOT, "main.js"),
-      "utf-8",
-    );
+    const source = readFileSync(path.resolve(FIXTURE_ROOT, "main.js"), "utf-8");
 
     const { tree: graph, ext } = workspace.openSource("main.js", source);
 
@@ -60,10 +56,7 @@ describe("Workspace", () => {
   });
 
   describe("origin()", () => {
-    const source = readFileSync(
-      path.resolve(cwd(), FIXTURE_ROOT, "main.js"),
-      "utf-8",
-    );
+    const source = readFileSync(path.resolve(FIXTURE_ROOT, "main.js"), "utf-8");
 
     const open = async () => {
       const workspace = await Workspace.create(config);
@@ -117,7 +110,7 @@ describe("Workspace", () => {
     it("returns the innermost scope containing the offset", async () => {
       const workspace = await Workspace.create(config);
       const source = readFileSync(
-        path.resolve(cwd(), FIXTURE_ROOT, "main.js"),
+        path.resolve(FIXTURE_ROOT, "main.js"),
         "utf-8",
       );
       workspace.openSource("main.js", source);
@@ -135,10 +128,7 @@ describe("Workspace", () => {
 
   it("lists top-level names for each opened file", async () => {
     const workspace = await Workspace.create(config);
-    const source = readFileSync(
-      path.resolve(cwd(), FIXTURE_ROOT, "main.js"),
-      "utf-8",
-    );
+    const source = readFileSync(path.resolve(FIXTURE_ROOT, "main.js"), "utf-8");
     workspace.openSource("main.js", source);
 
     expect(workspace.topLevelNames()).toEqual(

@@ -1,5 +1,4 @@
 import path from "node:path";
-import { cwd } from "node:process";
 
 import type { Config } from "letant";
 import { Workspace } from "letant";
@@ -11,10 +10,10 @@ import { describe, expect, it } from "vitest";
 // packages/js/SCOPING.md and is covered there; the cases here are the rules
 // TypeScript adds. Requires `@letant/ts` to be built.
 const config: Config = {
-  rootDir: "packages/ts",
+  rootDir: path.resolve(__dirname, ".."),
   plugins: [
     {
-      name: path.resolve(cwd(), "packages/ts/dist/index.mjs"),
+      name: path.resolve(__dirname, "../dist/index.mjs"),
       extensions: [".ts", ".tsx"],
     },
   ],
