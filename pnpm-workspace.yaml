@@ -12,12 +12,14 @@ overrides:
 allowBuilds:
   esbuild: true
   tree-sitter: true
+  tree-sitter-go: true
   tree-sitter-javascript: true
   tree-sitter-python: true
   tree-sitter-typescript: true
 
 onlyBuiltDependencies:
   - tree-sitter
+  - tree-sitter-go
   - tree-sitter-javascript
   - tree-sitter-python
   - tree-sitter-typescript

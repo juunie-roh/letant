@@ -1,0 +1,9 @@
+# All files
+*
+
+!dist/
+
+!LICENSE
+!README.md
+!CHANGELOG.md
+!package.json
